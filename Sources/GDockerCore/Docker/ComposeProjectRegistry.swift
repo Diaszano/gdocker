@@ -179,6 +179,6 @@ public actor ComposeProjectRegistry {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
         guard let list = try? decoder.decode([ComposeProjectRecord].self, from: data) else { return [:] }
-        return Dictionary(uniqueKeysWithValues: list.map { ($0.name, $0) })
+        return Dictionary(list.map { ($0.name, $0) }, uniquingKeysWith: { _, new in new })
     }
 }
