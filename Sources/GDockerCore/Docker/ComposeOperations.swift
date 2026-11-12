@@ -120,15 +120,9 @@ public final class CLIComposeRunner: ComposeOperations, Sendable {
     }
 
     private var candidateBinaryPaths: [String] {
-        let home = FileManager.default.homeDirectoryForCurrentUser.path
-        let expandedTilde = (home as NSString).appendingPathComponent(".docker/cli-plugins/docker-compose")
-        return [
-            "/usr/local/bin/docker",
-            "/opt/homebrew/bin/docker",
-            "~/.docker/cli-plugins/docker-compose",
-            expandedTilde,
-            "/usr/bin/docker",
-        ]
+        let home = NSHomeDirectory()
+        // The standalone plugin is a last resort; buildArguments drops the `compose` subcommand for it.
+        return DockerCLI.candidatePaths(home: home) + ["\(home)/.docker/cli-plugins/docker-compose"]
     }
 
     private func resolveBinaryPath() -> String? {
@@ -220,11 +214,7 @@ public final class CLIComposeRunner: ComposeOperations, Sendable {
     }
 
     private func execute(binary: String, arguments: [String], workingDir: String) async throws -> String {
-        var env = environment
-        if let socket = resolveSocketPath() {
-            let host = socket.hasPrefix("unix://") ? socket : "unix://\(socket)"
-            env["DOCKER_HOST"] = host
-        }
+        let env = DockerCLI.environment(base: environment, socketPath: resolveSocketPath())
 
         let result: (exitCode: Int32, output: String)
         if let processLauncher {

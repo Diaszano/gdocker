@@ -261,6 +261,42 @@ struct ComposeRunnerTests {
         }
     }
 
+    @Test func composeFallsBackToPluginWhenNoDocker() async throws {
+        final class Captured: @unchecked Sendable { var binary: String?; var args: [String] = [] }
+        let captured = Captured()
+        let plugin = NSHomeDirectory() + "/.docker/cli-plugins/docker-compose"
+        let runner = CLIComposeRunner(
+            fileExists: { $0 == plugin || $0 == "/workspace" },
+            processLauncher: { binary, args, _, _ in
+                captured.binary = binary
+                captured.args = args
+                return (0, "")
+            }
+        )
+        #expect(await runner.isComposeAvailable())
+        _ = try await runner.composeUp(project: "p", workingDir: "/workspace", configFiles: [])
+        #expect(captured.binary == plugin)
+        #expect(captured.args.first != "compose")
+    }
+
+    @Test func composeFindsOrbStackDocker() async throws {
+        final class Captured: @unchecked Sendable { var binary: String?; var args: [String] = [] }
+        let captured = Captured()
+        let orbstack = NSHomeDirectory() + "/.orbstack/bin/docker"
+        let runner = CLIComposeRunner(
+            fileExists: { $0 == orbstack || $0 == "/workspace" },
+            processLauncher: { binary, args, _, _ in
+                captured.binary = binary
+                captured.args = args
+                return (0, "")
+            }
+        )
+        #expect(await runner.isComposeAvailable())
+        _ = try await runner.composeUp(project: "p", workingDir: "/workspace", configFiles: [])
+        #expect(captured.binary == orbstack)
+        #expect(captured.args.first == "compose")
+    }
+
     @Test func composeErrorDescriptions() {
         let binaryErr = ComposeError.binaryNotFound
         #expect(binaryErr.errorDescription?.contains("not found") == true)
