@@ -3,11 +3,20 @@ import SwiftUI
 
 struct MenuBarContent: View {
     @Environment(ContainersStore.self) private var store
+    @Environment(McpController.self) private var mcp
     @Environment(\.openWindow) private var openWindow
 
     var body: some View {
         Group {
             store.connected ? Text("Docker connected", bundle: .l10n) : Text("Docker disconnected", bundle: .l10n)
+        }
+        Group {
+            switch mcp.state {
+            case .running: Text("MCP: running", bundle: .l10n)
+            case .starting: Text("MCP: starting", bundle: .l10n)
+            case .stopped: Text("MCP: stopped", bundle: .l10n)
+            case .failed: Text("MCP: error", bundle: .l10n)
+            }
         }
         Divider()
         ForEach(store.all.filter { $0.statusKind == .running }) { container in

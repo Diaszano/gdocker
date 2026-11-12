@@ -4,6 +4,11 @@ import SwiftUI
 enum SettingsKey {
     static let theme = "theme"
     static let keepInMenuBar = "keepInMenuBar"
+    static let mcpPort = "mcpPort"
+    static let mcpAutoStart = "mcpAutoStart"
+
+    static let defaultMcpPort = 7391
+    static let mcpPortRange = 1024...65535
 }
 
 enum Theme: String, CaseIterable {

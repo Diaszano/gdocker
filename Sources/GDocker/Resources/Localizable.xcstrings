@@ -1,6 +1,75 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "AI" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "AI" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "IA" } } } },
+    "MCP server" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "MCP server" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Servidor MCP" } } } },
+    "Stopped" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Stopped" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Parado" } } } },
+    "Starting…" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Starting…" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Iniciando…" } } } },
+    "localhost:%@ · clients: %@" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "localhost:%@ · clients: %@" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "localhost:%@ · clientes: %@" } } } },
+    "MCP: running" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "MCP: running" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "MCP: ativo" } } } },
+    "MCP: starting" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "MCP: starting" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "MCP: iniciando" } } } },
+    "MCP: stopped" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "MCP: stopped" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "MCP: parado" } } } },
+    "MCP: error" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "MCP: error" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "MCP: erro" } } } },
+    "Port %@ is already in use" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Port %@ is already in use" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "A porta %@ já está em uso" } } } },
+    "MCP port" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "MCP port" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Porta do MCP" } } } },
+    "Start the MCP server when the app opens" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Start the MCP server when the app opens" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Iniciar o servidor MCP ao abrir o app" } } } },
+    "Choose a port between 1024 and 65535" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Choose a port between 1024 and 65535" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Escolha uma porta entre 1024 e 65535" } } } },
+    "List containers and status" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "List containers and status" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Listar containers e status" } } } },
+    "Inspect a container" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Inspect a container" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Inspecionar um container" } } } },
+    "Read logs" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Read logs" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Ler logs" } } } },
+    "View stats (CPU/memory)" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "View stats (CPU/memory)" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Ver stats (CPU/memória)" } } } },
+    "View environment variables" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "View environment variables" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Ver variáveis de ambiente" } } } },
+    "Start a container" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Start a container" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Iniciar um container" } } } },
+    "Restart a container" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Restart a container" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Reiniciar um container" } } } },
+    "Stop a container" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Stop a container" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Parar um container" } } } },
+    "Run a command inside a container" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Run a command inside a container" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Executar um comando dentro de um container" } } } },
+    "Remove a container" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Remove a container" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Remover um container" } } } },
     "Dark" : { "localizations" : {
       "en" : { "stringUnit" : { "state" : "translated", "value" : "Dark" } },
       "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Escuro" } } } },
