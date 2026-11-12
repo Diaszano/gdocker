@@ -8,6 +8,7 @@ struct GDockerApp: App {
     @State private var imagesStore: ImagesStore
     @State private var volumesStore: VolumesStore
     @State private var networksStore: NetworksStore
+    @State private var composeStore: ComposeStore
     @State private var mcp: McpController
     @AppStorage(SettingsKey.keepInMenuBar) private var keepInMenuBar = false
     @State private var confirmSystemPrune = false
@@ -15,11 +16,13 @@ struct GDockerApp: App {
 
     init() {
         let store = ContainersStore()
+        let mcp = McpController(store: store)
         _store = State(initialValue: store)
         _imagesStore = State(initialValue: ImagesStore(store: store))
         _volumesStore = State(initialValue: VolumesStore(store: store))
         _networksStore = State(initialValue: NetworksStore(store: store))
-        _mcp = State(initialValue: McpController(store: store))
+        _composeStore = State(initialValue: ComposeStore(store: store, registry: mcp.composeRegistry))
+        _mcp = State(initialValue: mcp)
     }
 
     var body: some Scene {
@@ -30,6 +33,7 @@ struct GDockerApp: App {
                 .environment(imagesStore)
                 .environment(volumesStore)
                 .environment(networksStore)
+                .environment(composeStore)
                 .environment(mcp)
                 .frame(minWidth: 1000, minHeight: 600)
                 .task {
@@ -86,5 +90,6 @@ struct GDockerApp: App {
         await imagesStore.refresh()
         await volumesStore.refresh()
         await networksStore.refresh()
+        await composeStore.refresh()
     }
 }
