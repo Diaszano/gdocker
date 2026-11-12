@@ -1,6 +1,6 @@
 import Foundation
 
-public enum StatusKind: Sendable { case running, transitioning, stopped, failed }
+public enum StatusKind: String, Codable, Sendable, Equatable { case running, transitioning, stopped, failed }
 
 public struct PortBinding: Decodable, Hashable, Sendable {
     public let ip: String?
