@@ -1,0 +1,26 @@
+[
+  {
+    "Id": "952f1e122d0167bd52fc0f8c6870881cfec1bbad75ec8e2c6cda593ec66dcaf5",
+    "Names": ["/myapp-api-1"],
+    "Image": "myapp-api:latest",
+    "State": "running",
+    "Status": "Up 2 hours (healthy)",
+    "Labels": {
+      "com.docker.compose.project": "myapp",
+      "com.docker.compose.project.working_dir": "/home/me/myapp"
+    },
+    "Ports": [
+      { "IP": "0.0.0.0", "PrivatePort": 80, "PublicPort": 8080, "Type": "tcp" },
+      { "PrivatePort": 9229, "Type": "tcp" }
+    ]
+  },
+  {
+    "Id": "1111e122d0167bd52fc0f8c6870881cfec1bbad75ec8e2c6cda593ec66dcaf5a",
+    "Names": ["/nginx"],
+    "Image": "nginx:1.27",
+    "State": "exited",
+    "Status": "Exited (0) 3 days ago",
+    "Labels": {},
+    "Ports": []
+  }
+]
