@@ -1,5 +1,6 @@
 .worktrees/
 .superpowers/
+.claude/
 .build/
 build/
 *.app
