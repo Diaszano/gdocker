@@ -1,6 +1,27 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "Dark" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Dark" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Escuro" } } } },
+    "Keep running in the menu bar when the window is closed" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Keep running in the menu bar when the window is closed" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Continuar rodando na barra de menu ao fechar a janela" } } } },
+    "Light" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Light" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Claro" } } } },
+    "Open window" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Open window" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Abrir janela" } } } },
+    "Quit" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Quit" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Encerrar" } } } },
+    "System" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "System" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Sistema" } } } },
+    "Theme" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Theme" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Tema" } } } },
     "CPU" : { "localizations" : {
       "en" : { "stringUnit" : { "state" : "translated", "value" : "CPU" } },
       "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "CPU" } } } },
