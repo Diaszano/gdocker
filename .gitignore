@@ -1,2 +1,5 @@
 .worktrees/
 .superpowers/
+.build/
+build/
+*.app

@@ -1,0 +1,18 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Containers" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Containers" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Containers" } }
+      }
+    },
+    "Docker disconnected" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Docker disconnected" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Docker desconectado" } }
+      }
+    }
+  },
+  "version" : "1.0"
+}
