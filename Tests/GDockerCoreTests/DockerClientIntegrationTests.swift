@@ -50,6 +50,21 @@ private func withClient<T: Sendable>(_ body: (DockerClient) async throws -> T) a
         if let sample { #expect(sample.memoryLimit > 0) }
     }
 
+    @Test(.enabled(if: ScratchContainer.available)) func recentLogsReturnsTail() async throws {
+        try await ScratchContainer.with { name in
+            try await Task.sleep(for: .seconds(1))
+            let lines = try await withClient { try await $0.recentLogs(name, tail: 2, timestamps: false) }
+            #expect(lines.map(\.text) == ["two", "three"])
+        }
+    }
+
+    @Test(.enabled(if: ScratchContainer.available)) func statsOnceReturnsSample() async throws {
+        try await ScratchContainer.with { name in
+            let sample = try await withClient { try await $0.statsOnce(name) }
+            #expect(sample.memoryLimit > 0)
+        }
+    }
+
     @Test func inspectMissingContainerIsNotFound() async throws {
         await #expect {
             try await withClient { _ = try await $0.inspect("gdocker-nope-\(UUID().uuidString)") }

@@ -15,6 +15,13 @@ public actor DockerClient {
         http = HTTPClient(eventLoopGroupProvider: .singleton)
     }
 
+    /// Container ids and names can come from an MCP client, so they must not be able to add `/`, `?` or `#` to a URL.
+    static func pathSegment(_ value: String) -> String {
+        var allowed = CharacterSet.urlPathAllowed
+        allowed.remove(charactersIn: "/?#")
+        return value.addingPercentEncoding(withAllowedCharacters: allowed) ?? value
+    }
+
     public static func connect() throws -> DockerClient {
         guard let path = DockerSocket.discover() else { throw DockerError.socketNotFound }
         return DockerClient(socketPath: path)
@@ -34,19 +41,37 @@ public actor DockerClient {
     }
 
     public func inspect(_ id: String) async throws -> (details: ContainerDetails, rawJSON: String) {
-        let data = try await send(.GET, "/containers/\(id)/json")
+        let data = try await send(.GET, "/containers/\(Self.pathSegment(id))/json")
         let details = try JSONDecoder().decode(ContainerDetails.self, from: data)
         let object = try JSONSerialization.jsonObject(with: data)
         let pretty = try JSONSerialization.data(withJSONObject: object, options: [.prettyPrinted, .sortedKeys])
         return (details, String(decoding: pretty, as: UTF8.self))
     }
 
-    public func start(_ id: String) async throws { _ = try await send(.POST, "/containers/\(id)/start") }
-    public func stop(_ id: String) async throws { _ = try await send(.POST, "/containers/\(id)/stop") }
-    public func restart(_ id: String) async throws { _ = try await send(.POST, "/containers/\(id)/restart") }
+    public func start(_ id: String) async throws { _ = try await send(.POST, "/containers/\(Self.pathSegment(id))/start") }
+    public func stop(_ id: String) async throws { _ = try await send(.POST, "/containers/\(Self.pathSegment(id))/stop") }
+    public func restart(_ id: String) async throws {
+        _ = try await send(.POST, "/containers/\(Self.pathSegment(id))/restart")
+    }
 
     public func remove(_ id: String, force: Bool) async throws {
-        _ = try await send(.DELETE, "/containers/\(id)?force=\(force)")
+        _ = try await send(.DELETE, "/containers/\(Self.pathSegment(id))?force=\(force)")
+    }
+
+    /// The last `tail` log lines, without following.
+    public func recentLogs(_ id: String, tail: Int, timestamps: Bool) async throws -> [LogLine] {
+        let tty = try await inspect(id).details.config.tty
+        var lines: [LogLine] = []
+        for try await batch in logs(id, tty: tty, follow: false, tail: tail, timestamps: timestamps) {
+            lines += batch
+        }
+        return lines
+    }
+
+    /// One stats sample. The stream's first sample has no previous CPU reading, so this waits for the second.
+    public func statsOnce(_ id: String) async throws -> StatsSample {
+        for try await sample in stats(id) { return sample }
+        throw DockerError.conflict("container is not running")
     }
 
     /// Streams log lines in batches. Cancelling the consumer cancels the HTTP request.
@@ -54,7 +79,7 @@ public actor DockerClient {
         _ id: String, tty: Bool, follow: Bool, tail: Int = 500, timestamps: Bool
     ) -> AsyncThrowingStream<[LogLine], Error> {
         let query = "stdout=1&stderr=1&follow=\(follow)&tail=\(tail)&timestamps=\(timestamps)"
-        let request = request(.GET, "/containers/\(id)/logs?\(query)")
+        let request = request(.GET, "/containers/\(Self.pathSegment(id))/logs?\(query)")
         return AsyncThrowingStream { continuation in
             let task = Task {
                 do {
@@ -79,7 +104,7 @@ public actor DockerClient {
 
     /// Streams stats samples, skipping the first one (no previous CPU reading yet).
     public func stats(_ id: String) -> AsyncThrowingStream<StatsSample, Error> {
-        let request = request(.GET, "/containers/\(id)/stats?stream=1")
+        let request = request(.GET, "/containers/\(Self.pathSegment(id))/stats?stream=1")
         return AsyncThrowingStream { continuation in
             let task = Task {
                 do {
