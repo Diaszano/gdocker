@@ -12,6 +12,8 @@ public struct ToolOutput: Sendable, Equatable {
 /// rule or the user allowed it.
 public actor ToolRouter {
     private let docker: @Sendable () async -> (any DockerOperations)?
+    private let compose: (@Sendable () async -> (any ComposeOperations)?)?
+    private let registry: ComposeProjectRegistry?
     private let permissions: PermissionStore
     private let prompter: any ApprovalPrompter
     private let activity: ActivityLog
@@ -19,10 +21,16 @@ public actor ToolRouter {
 
     public init(
         docker: @escaping @Sendable () async -> (any DockerOperations)?,
-        permissions: PermissionStore, prompter: any ApprovalPrompter, activity: ActivityLog,
+        compose: (@Sendable () async -> (any ComposeOperations)?)? = nil,
+        registry: ComposeProjectRegistry? = nil,
+        permissions: PermissionStore,
+        prompter: any ApprovalPrompter,
+        activity: ActivityLog,
         approvalTimeout: Duration = .seconds(120)
     ) {
         self.docker = docker
+        self.compose = compose
+        self.registry = registry
         self.permissions = permissions
         self.prompter = prompter
         self.activity = activity
@@ -78,8 +86,12 @@ public actor ToolRouter {
             return await done(outcome, try await run(tool, args, target, docker), isError: false)
         } catch let failure as ToolFailure {
             return await done(.error, failure.message, isError: true)
+        } catch let composeError as ComposeError {
+            return await done(.error, composeError.errorDescription ?? "\(composeError)", isError: true)
+        } catch let dockerError as DockerError {
+            return await done(.error, dockerError.errorDescription ?? "\(dockerError)", isError: true)
         } catch {
-            return await done(.error, (error as? DockerError)?.errorDescription ?? "\(error)", isError: true)
+            return await done(.error, (error as? LocalizedError)?.errorDescription ?? "\(error)", isError: true)
         }
     }
 
@@ -121,7 +133,13 @@ public actor ToolRouter {
                 }
             case .boolean:
                 if let flag = args.bool(parameter.name) {
-                    shown.append(ApprovalArgument(name: parameter.name, value: String(flag)))
+                    if parameter.name == "remove_volumes" {
+                        if flag {
+                            shown.append(ApprovalArgument(name: parameter.name, value: "true"))
+                        }
+                    } else {
+                        shown.append(ApprovalArgument(name: parameter.name, value: String(flag)))
+                    }
                 }
             }
         }
@@ -244,6 +262,55 @@ public actor ToolRouter {
             let volumes = args.bool("volumes") ?? false
             let report = try await docker.systemPrune(all: all, volumes: volumes)
             return Self.jsonText(Self.describe(report))
+        case "list_compose_projects", "compose_up", "compose_down":
+            guard let composeFactory = compose, let runner = await composeFactory(), await runner.isComposeAvailable() else {
+                throw ToolFailure("Docker Compose is not available. Ensure Docker Compose is installed.")
+            }
+            if let registry {
+                if let containers = try? await docker.listContainers() {
+                    await registry.ingest(containers)
+                }
+            }
+            switch tool {
+            case "list_compose_projects":
+                let containers = (try? await docker.listContainers()) ?? []
+                let projects = await registry?.projects(containers: containers) ?? []
+                return Self.jsonText(projects.map(Self.describe))
+            case "compose_up":
+                guard let projectName = args.string("project") else {
+                    throw ToolFailure("Missing required argument 'project'.")
+                }
+                let records = await registry?.records() ?? []
+                guard let record = records.first(where: { $0.name == projectName }) else {
+                    throw ToolFailure("Unknown compose project '\(projectName)'. Run list_compose_projects to see known projects.")
+                }
+                let output = try await runner.composeUp(
+                    project: record.name,
+                    workingDir: record.workingDir,
+                    configFiles: record.configFiles
+                )
+                let trimmed = output.trimmingCharacters(in: .whitespacesAndNewlines)
+                return trimmed.isEmpty ? "Started compose project \(projectName)" : output
+            case "compose_down":
+                guard let projectName = args.string("project") else {
+                    throw ToolFailure("Missing required argument 'project'.")
+                }
+                let removeVolumes = args.bool("remove_volumes") ?? false
+                let records = await registry?.records() ?? []
+                guard let record = records.first(where: { $0.name == projectName }) else {
+                    throw ToolFailure("Unknown compose project '\(projectName)'. Run list_compose_projects to see known projects.")
+                }
+                let output = try await runner.composeDown(
+                    project: record.name,
+                    workingDir: record.workingDir,
+                    configFiles: record.configFiles,
+                    removeVolumes: removeVolumes
+                )
+                let trimmed = output.trimmingCharacters(in: .whitespacesAndNewlines)
+                return trimmed.isEmpty ? "Stopped compose project \(projectName)" : output
+            default:
+                fatalError("Unreachable compose tool \(tool)")
+            }
         default:
             throw ToolFailure("Tool '\(tool)' is not implemented.")
         }
@@ -318,6 +385,24 @@ public actor ToolRouter {
             "networks_deleted": report.networksDeleted,
             "volumes_deleted": report.volumesDeleted,
             "space_reclaimed_bytes": report.spaceReclaimed,
+        ]
+    }
+
+    private static func describe(_ project: ComposeProject) -> [String: Any] {
+        let services: [[String: Any]] = project.services.map { service in
+            [
+                "name": service.name,
+                "container_id": service.containerID.map { String($0.prefix(12)) } ?? NSNull(),
+                "state": service.state ?? NSNull(),
+                "status": service.statusKind?.rawValue ?? NSNull(),
+            ]
+        }
+        return [
+            "name": project.name,
+            "status": project.status.rawValue,
+            "working_dir": project.workingDir,
+            "config_files": project.configFiles,
+            "services": services,
         ]
     }
 

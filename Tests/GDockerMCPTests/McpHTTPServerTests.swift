@@ -156,3 +156,22 @@ nonisolated(unsafe) private let initialize: [String: Any] = [
     await h.server.stop()
     await #expect(throws: (any Error).self) { try await h.client().post(initialize) }
 }
+
+@Test func callComposeToolOverWire() async throws {
+    let registryDir = FileManager.default.temporaryDirectory.appendingPathComponent("reg-\(UUID().uuidString)")
+    let registry = ComposeProjectRegistry(fileURL: registryDir.appendingPathComponent("compose_projects.json"))
+    let compose = FakeComposeRunner(cannedUp: "Started app stack")
+    let h = try await McpHarness.start(
+        decisions: [.allowOnce],
+        compose: compose,
+        registry: registry
+    )
+    let client = h.client()
+    #expect(try await client.initialize().status == 200)
+
+    let listResp = try await client.call("list_compose_projects")
+    let listResult = try unwrap(listResp.result)
+    #expect(listResult["isError"] as? Bool != true)
+
+    await h.server.stop()
+}

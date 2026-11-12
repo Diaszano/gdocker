@@ -51,13 +51,30 @@ struct McpHarness {
 
     var url: URL { URL(string: "http://127.0.0.1:\(port)/mcp")! }
 
-    static func start(decisions: [ApprovalDecision] = [], token: String = "test-token") async throws -> McpHarness {
+    static func start(
+        decisions: [ApprovalDecision] = [],
+        token: String = "test-token",
+        compose: (any ComposeOperations)? = nil,
+        registry: ComposeProjectRegistry? = nil
+    ) async throws -> McpHarness {
         let dir = FileManager.default.temporaryDirectory.appendingPathComponent("gdocker-mcp-\(UUID().uuidString)")
         let permissions = PermissionStore(fileURL: dir.appendingPathComponent("permissions.json"))
         let prompter = ScriptedPrompter(decisions)
+        let composeRunner = compose
+        let composeFactory: (@Sendable () async -> (any ComposeOperations)?)?
+        if let composeRunner {
+            composeFactory = { [composeRunner] in composeRunner }
+        } else {
+            composeFactory = nil
+        }
         let router = ToolRouter(
-            docker: { StubDocker() }, permissions: permissions, prompter: prompter,
-            activity: ActivityLog(fileURL: dir.appendingPathComponent("activity.jsonl")))
+            docker: { StubDocker() },
+            compose: composeFactory,
+            registry: registry,
+            permissions: permissions,
+            prompter: prompter,
+            activity: ActivityLog(fileURL: dir.appendingPathComponent("activity.jsonl"))
+        )
         let box = TokenBox(token)
         let server = McpHTTPServer(router: router, token: { await box.get() }, requestedPort: 0)
         let port = try await server.start()

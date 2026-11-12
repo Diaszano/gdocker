@@ -23,6 +23,7 @@ final class McpController {
     let activityModel: ActivityModel
     let approvals: ApprovalQueue
     let approvalModel: ApprovalModel
+    let composeRegistry: ComposeProjectRegistry
     @ObservationIgnored private var approvalPanel: ApprovalPanelController?
 
     private let tokenProvider = McpTokenProvider(store: KeychainSecretStore())
@@ -34,6 +35,8 @@ final class McpController {
         let directory = Self.supportDirectory
         let permissions = PermissionStore(fileURL: directory.appendingPathComponent("permissions.json"))
         let activity = ActivityLog(fileURL: directory.appendingPathComponent("activity.jsonl"))
+        let composeRegistry = ComposeProjectRegistry(fileURL: directory.appendingPathComponent("compose_projects.json"))
+        let composeRunner = CLIComposeRunner()
         let approvals = ApprovalQueue()
         // GDOCKER_APPROVAL_TIMEOUT (seconds) exists so a verification run does not wait two minutes for a prompt.
         let seconds = ProcessInfo.processInfo.environment["GDOCKER_APPROVAL_TIMEOUT"].flatMap(Double.init) ?? 120
@@ -41,11 +44,18 @@ final class McpController {
         permissionsModel = PermissionsModel(store: permissions)
         self.activity = activity
         activityModel = ActivityModel(log: activity)
+        self.composeRegistry = composeRegistry
         self.approvals = approvals
         approvalModel = ApprovalModel(queue: approvals)
         router = ToolRouter(
-            docker: { await store.client }, permissions: permissions, prompter: approvals, activity: activity,
-            approvalTimeout: .seconds(seconds))
+            docker: { await store.client },
+            compose: { composeRunner },
+            registry: composeRegistry,
+            permissions: permissions,
+            prompter: approvals,
+            activity: activity,
+            approvalTimeout: .seconds(seconds)
+        )
         // The prompt must be able to appear whatever windows are open, so the app owns it from the start.
         approvalPanel = ApprovalPanelController(model: approvalModel)
         approvalPanel?.start()

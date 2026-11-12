@@ -19,6 +19,9 @@ import Testing
     ("remove_volume", .destructive, .deny),
     ("remove_network", .destructive, .deny),
     ("system_prune", .destructive, .deny),
+    ("list_compose_projects", .read, .allow),
+    ("compose_up", .control, .ask),
+    ("compose_down", .control, .ask),
 ])
 func catalogHasSpecDefaults(name: String, group: ToolGroup, permission: Permission) throws {
     let spec = try #require(ToolCatalog.spec(named: name))
@@ -27,13 +30,13 @@ func catalogHasSpecDefaults(name: String, group: ToolGroup, permission: Permissi
 }
 
 @Test func catalogHasExactlyThePlannedTools() {
-    #expect(ToolCatalog.all.count == 17)
+    #expect(ToolCatalog.all.count == 20)
 }
 
-@Test func namesAreUniqueAndOnlyExecForbidsAlways() {
+@Test func namesAreUniqueAndOnlyExecAndComposeDownForbidAlways() {
     let names = ToolCatalog.all.map(\.name)
     #expect(Set(names).count == names.count)
-    #expect(ToolCatalog.all.filter { !$0.allowsAlways }.map(\.name) == ["exec_in_container"])
+    #expect(Set(ToolCatalog.all.filter { !$0.allowsAlways }.map(\.name)) == Set(["exec_in_container", "compose_down"]))
 }
 
 @Test func containerToolsRequireAContainerArgument() throws {
@@ -78,4 +81,19 @@ func catalogHasSpecDefaults(name: String, group: ToolGroup, permission: Permissi
         let spec = try #require(ToolCatalog.spec(named: listTool))
         #expect(spec.parameters.isEmpty)
     }
+}
+
+@Test func composeToolsDeclareExpectedParameters() throws {
+    let listCompose = try #require(ToolCatalog.spec(named: "list_compose_projects"))
+    #expect(listCompose.parameters.isEmpty)
+
+    let composeUp = try #require(ToolCatalog.spec(named: "compose_up"))
+    let projectParam = try #require(composeUp.parameters.first { $0.name == "project" })
+    #expect(projectParam.required && projectParam.kind == .string)
+
+    let composeDown = try #require(ToolCatalog.spec(named: "compose_down"))
+    let downProjectParam = try #require(composeDown.parameters.first { $0.name == "project" })
+    #expect(downProjectParam.required && downProjectParam.kind == .string)
+    let removeVolsParam = try #require(composeDown.parameters.first { $0.name == "remove_volumes" })
+    #expect(!removeVolsParam.required && removeVolsParam.kind == .boolean)
 }

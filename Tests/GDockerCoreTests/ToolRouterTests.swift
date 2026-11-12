@@ -5,26 +5,50 @@ import Testing
 private struct Harness {
     let router: ToolRouter
     let docker: FakeDocker
+    let compose: FakeComposeRunner?
+    let registry: ComposeProjectRegistry?
     let permissions: PermissionStore
     let activity: ActivityLog
     let scripted: ScriptedPrompter
 
     init(
-        decisions: [ApprovalDecision] = [], prompter: (any ApprovalPrompter)? = nil,
-        dockerAvailable: Bool = true, timeout: Duration = .seconds(5)
+        decisions: [ApprovalDecision] = [],
+        prompter: (any ApprovalPrompter)? = nil,
+        dockerAvailable: Bool = true,
+        composeAvailable: Bool = true,
+        compose: FakeComposeRunner? = nil,
+        registry: ComposeProjectRegistry? = nil,
+        timeout: Duration = .seconds(5)
     ) {
         let dir = FileManager.default.temporaryDirectory.appendingPathComponent("gdocker-\(UUID().uuidString)")
         let fake = FakeDocker()
+        let fakeCompose = compose ?? FakeComposeRunner()
+        let fakeRegistry = registry ?? ComposeProjectRegistry(fileURL: dir.appendingPathComponent("compose_projects.json"))
         let scripted = ScriptedPrompter(decisions)
         let permissions = PermissionStore(fileURL: dir.appendingPathComponent("permissions.json"))
         let activity = ActivityLog(fileURL: dir.appendingPathComponent("activity.jsonl"))
         self.docker = fake
+        self.compose = composeAvailable ? fakeCompose : nil
+        self.registry = fakeRegistry
         self.scripted = scripted
         self.permissions = permissions
         self.activity = activity
+        let composeRunner = composeAvailable ? fakeCompose : nil
+        let composeFactory: (@Sendable () async -> (any ComposeOperations)?)?
+        if let composeRunner {
+            composeFactory = { [composeRunner] in composeRunner }
+        } else {
+            composeFactory = nil
+        }
         self.router = ToolRouter(
-            docker: { dockerAvailable ? fake : nil }, permissions: permissions,
-            prompter: prompter ?? scripted, activity: activity, approvalTimeout: timeout)
+            docker: { dockerAvailable ? fake : nil },
+            compose: composeFactory,
+            registry: fakeRegistry,
+            permissions: permissions,
+            prompter: prompter ?? scripted,
+            activity: activity,
+            approvalTimeout: timeout
+        )
     }
 
     func call(_ tool: String, _ arguments: [String: JSONValue] = [:], client: String = "claude") async -> ToolOutput {
@@ -275,7 +299,7 @@ func wrongTypesAreErrorsWithoutDocker(tool: String, arguments: [String: JSONValu
     for spec in ToolCatalog.all {
         var arguments: [String: JSONValue] = ["reason": .string("because")]
         for parameter in spec.parameters where parameter.required {
-            arguments[parameter.name] = parameter.kind == .stringArray ? .array([.string("echo")]) : .string("web")
+            arguments[parameter.name] = parameter.kind == .stringArray ? .array([.string("echo")]) : (parameter.name == "project" ? .string("app") : .string("web"))
         }
         let out = await h.call(spec.name, arguments)
         #expect(!out.isError, "\(spec.name): \(out.text)")
@@ -400,4 +424,146 @@ func wrongTypesAreErrorsWithoutDocker(tool: String, arguments: [String: JSONValu
 
     _ = await h.call("system_prune")
     #expect(await h.docker.calls.contains("systemPrune:all=false:volumes=false"))
+}
+
+// MARK: - Compose Tools
+
+@Test func listComposeProjectsReturnsFormattedJSON() async throws {
+    let registryDir = FileManager.default.temporaryDirectory.appendingPathComponent("reg-\(UUID().uuidString)")
+    let registry = ComposeProjectRegistry(fileURL: registryDir.appendingPathComponent("compose_projects.json"))
+    let compose = FakeComposeRunner()
+    let h = Harness(compose: compose, registry: registry)
+
+    // Ingest a project with working dir and config files into registry
+    let containerWithLabels = ContainerSummary(
+        id: FakeDocker.id("bbb222"),
+        names: ["/db"],
+        image: "postgres:16",
+        state: "running",
+        status: "Up 2 hours",
+        labels: [
+            "com.docker.compose.project": "app",
+            "com.docker.compose.service": "db",
+            "com.docker.compose.project.working_dir": "/workspace",
+            "com.docker.compose.project.config_files": "docker-compose.yml"
+        ],
+        ports: []
+    )
+    await registry.ingest([containerWithLabels])
+
+    let out = await h.call("list_compose_projects")
+    #expect(!out.isError)
+    let list = try #require(try json(out.text) as? [[String: Any]])
+    #expect(!list.isEmpty)
+    let project = try #require(list.first { $0["name"] as? String == "app" })
+    #expect(project["name"] as? String == "app")
+    #expect(project["status"] as? String == "running")
+    #expect(project["working_dir"] as? String == "/workspace")
+    #expect(project["config_files"] as? [String] == ["docker-compose.yml"])
+    let services = try #require(project["services"] as? [[String: Any]])
+    #expect(services.count == 1)
+    #expect(services.first?["name"] as? String == "db")
+    #expect(services.first?["status"] as? String == "running")
+}
+
+@Test func composeUpExecutesWhenApproved() async throws {
+    let registryDir = FileManager.default.temporaryDirectory.appendingPathComponent("reg-\(UUID().uuidString)")
+    let registry = ComposeProjectRegistry(fileURL: registryDir.appendingPathComponent("compose_projects.json"))
+    let compose = FakeComposeRunner(cannedUp: "Stack started successfully")
+    let h = Harness(decisions: [.allowOnce], compose: compose, registry: registry)
+
+    let containerWithLabels = ContainerSummary(
+        id: FakeDocker.id("bbb222"),
+        names: ["/db"],
+        image: "postgres:16",
+        state: "running",
+        status: "Up 2 hours",
+        labels: [
+            "com.docker.compose.project": "app",
+            "com.docker.compose.service": "db",
+            "com.docker.compose.project.working_dir": "/workspace",
+            "com.docker.compose.project.config_files": "docker-compose.yml"
+        ],
+        ports: []
+    )
+    await registry.ingest([containerWithLabels])
+
+    let out = await h.call("compose_up", ["project": .string("app")])
+    #expect(!out.isError)
+    #expect(out.text.contains("Stack started successfully") || out.text.contains("Started"))
+
+    let calls = await compose.calls
+    #expect(calls == [.up(project: "app", workingDir: "/workspace", configFiles: ["docker-compose.yml"])])
+    #expect(await h.lastOutcome() == .approved)
+
+    let request = try #require(await h.scripted.requests.first)
+    #expect(request.tool == "compose_up")
+    #expect(request.allowsAlways == true)
+    #expect(request.arguments.contains(ApprovalArgument(name: "project", value: "app")))
+}
+
+@Test func composeDownExecutesAndForbidsAllowsAlways() async throws {
+    let registryDir = FileManager.default.temporaryDirectory.appendingPathComponent("reg-\(UUID().uuidString)")
+    let registry = ComposeProjectRegistry(fileURL: registryDir.appendingPathComponent("compose_projects.json"))
+    let compose = FakeComposeRunner(cannedDown: "Stack stopped")
+    let h = Harness(decisions: [.allowOnce], compose: compose, registry: registry)
+
+    let containerWithLabels = ContainerSummary(
+        id: FakeDocker.id("bbb222"),
+        names: ["/db"],
+        image: "postgres:16",
+        state: "running",
+        status: "Up 2 hours",
+        labels: [
+            "com.docker.compose.project": "app",
+            "com.docker.compose.service": "db",
+            "com.docker.compose.project.working_dir": "/workspace",
+            "com.docker.compose.project.config_files": "docker-compose.yml"
+        ],
+        ports: []
+    )
+    await registry.ingest([containerWithLabels])
+
+    let out = await h.call("compose_down", ["project": .string("app"), "remove_volumes": .bool(true)])
+    #expect(!out.isError)
+    #expect(out.text.contains("Stack stopped") || out.text.contains("Stopped"))
+
+    let calls = await compose.calls
+    #expect(calls == [.down(project: "app", workingDir: "/workspace", configFiles: ["docker-compose.yml"], removeVolumes: true)])
+    #expect(await h.lastOutcome() == .approved)
+
+    // Critical check: compose_down MUST forbid allowsAlways in the approval request!
+    let request = try #require(await h.scripted.requests.first)
+    #expect(request.tool == "compose_down")
+    #expect(request.allowsAlways == false)
+    #expect(request.arguments.contains(ApprovalArgument(name: "project", value: "app")))
+    #expect(request.arguments.contains(ApprovalArgument(name: "remove_volumes", value: "true")))
+}
+
+@Test func composeToolsErrorOnUnknownProject() async throws {
+    let compose = FakeComposeRunner()
+    let h = Harness(decisions: [.allowOnce, .allowOnce], compose: compose)
+
+    let upOut = await h.call("compose_up", ["project": .string("nonexistent")])
+    #expect(upOut.isError)
+    #expect(upOut.text.contains("Unknown compose project 'nonexistent'"))
+
+    let downOut = await h.call("compose_down", ["project": .string("nonexistent")])
+    #expect(downOut.isError)
+    #expect(downOut.text.contains("Unknown compose project 'nonexistent'"))
+}
+
+@Test func composeToolsErrorWhenRunnerUnavailable() async throws {
+    // When compose runner is nil
+    let hNil = Harness(composeAvailable: false)
+    let outNil = await hNil.call("list_compose_projects")
+    #expect(outNil.isError)
+    #expect(outNil.text.contains("Docker Compose is not available"))
+
+    // When compose runner reports isComposeAvailable == false
+    let fakeUnavailable = FakeComposeRunner(isAvailable: false)
+    let hUnavailable = Harness(compose: fakeUnavailable)
+    let outUnavail = await hUnavailable.call("list_compose_projects")
+    #expect(outUnavail.isError)
+    #expect(outUnavail.text.contains("Docker Compose is not available"))
 }

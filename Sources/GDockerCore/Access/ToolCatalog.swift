@@ -111,6 +111,27 @@ public enum ToolCatalog {
                 ToolParameter(name: "volumes", kind: .boolean, required: false,
                               summary: "Prune volumes in addition to other resources. Defaults to false."),
             ]),
+        ToolSpec(
+            name: "list_compose_projects", title: "List compose projects", group: .read, defaultPermission: .allow,
+            summary: "List known Docker Compose projects with their status, working directory, configuration files and services.",
+            parameters: []),
+        ToolSpec(
+            name: "compose_up", title: "Start a compose stack", group: .control, defaultPermission: .ask,
+            summary: "Start all services in a Docker Compose project in detached mode.",
+            parameters: [
+                ToolParameter(name: "project", kind: .string, required: true,
+                              summary: "Compose project name."),
+            ]),
+        ToolSpec(
+            name: "compose_down", title: "Stop a compose stack", group: .control, defaultPermission: .ask,
+            summary: "Stop and remove containers and networks for a Docker Compose project.",
+            parameters: [
+                ToolParameter(name: "project", kind: .string, required: true,
+                              summary: "Compose project name."),
+                ToolParameter(name: "remove_volumes", kind: .boolean, required: false,
+                              summary: "Remove named volumes declared in the compose file. Defaults to false."),
+            ],
+            allowsAlways: false),
     ]
 
     public static func spec(named name: String) -> ToolSpec? { all.first { $0.name == name } }
