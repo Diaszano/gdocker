@@ -1,6 +1,6 @@
 import SwiftUI
 
-enum SidebarItem: Hashable { case containers, permissions, activity }
+enum SidebarItem: Hashable { case containers, images, volumes, networks, permissions, activity }
 
 struct MainWindow: View {
     @Environment(ContainersStore.self) private var store
@@ -16,8 +16,33 @@ struct MainWindow: View {
         } detail: {
             switch section ?? .containers {
             case .containers: containers
+            case .images: ImagesView()
+            case .volumes: VolumesView()
+            case .networks: NetworksView()
             case .permissions: PermissionsView(mcp: mcp)
             case .activity: ActivityView(model: mcp.activityModel)
+            }
+        }
+        .task {
+            await imagesStore.refresh()
+            await volumesStore.refresh()
+            await networksStore.refresh()
+        }
+        .task(id: section) {
+            switch section {
+            case .images: await imagesStore.refresh()
+            case .volumes: await volumesStore.refresh()
+            case .networks: await networksStore.refresh()
+            default: break
+            }
+        }
+        .onChange(of: store.connected) { _, connected in
+            if connected {
+                Task {
+                    await imagesStore.refresh()
+                    await volumesStore.refresh()
+                    await networksStore.refresh()
+                }
             }
         }
         .alert(
@@ -34,11 +59,48 @@ struct MainWindow: View {
         List(selection: $section) {
             Section(header: Text(verbatim: "Docker")) {
                 HStack {
-                    Text("Containers", bundle: .l10n)
+                    Label {
+                        Text("Containers", bundle: .l10n)
+                    } icon: {
+                        Image(systemName: "shippingbox")
+                    }
                     Spacer()
                     Text(verbatim: "\(store.all.count)").foregroundStyle(.secondary)
                 }
                 .tag(SidebarItem.containers)
+
+                HStack {
+                    Label {
+                        Text("Images", bundle: .l10n)
+                    } icon: {
+                        Image(systemName: "square.stack.3d.up")
+                    }
+                    Spacer()
+                    Text(verbatim: "\(imagesStore.count)").foregroundStyle(.secondary)
+                }
+                .tag(SidebarItem.images)
+
+                HStack {
+                    Label {
+                        Text("Volumes", bundle: .l10n)
+                    } icon: {
+                        Image(systemName: "externaldrive")
+                    }
+                    Spacer()
+                    Text(verbatim: "\(volumesStore.count)").foregroundStyle(.secondary)
+                }
+                .tag(SidebarItem.volumes)
+
+                HStack {
+                    Label {
+                        Text("Networks", bundle: .l10n)
+                    } icon: {
+                        Image(systemName: "network")
+                    }
+                    Spacer()
+                    Text(verbatim: "\(networksStore.count)").foregroundStyle(.secondary)
+                }
+                .tag(SidebarItem.networks)
             }
             Section(header: Text("AI", bundle: .l10n)) {
                 McpStatusRow(mcp: mcp)

@@ -205,6 +205,15 @@
     "Containers" : { "localizations" : {
       "en" : { "stringUnit" : { "state" : "translated", "value" : "Containers" } },
       "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Containers" } } } },
+    "Images" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Images" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Imagens" } } } },
+    "Volumes" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Volumes" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Volumes" } } } },
+    "Networks" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Networks" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Redes" } } } },
     "Docker connected" : { "localizations" : {
       "en" : { "stringUnit" : { "state" : "translated", "value" : "Docker connected" } },
       "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Docker conectado" } } } },
