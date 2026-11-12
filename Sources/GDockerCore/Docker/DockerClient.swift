@@ -49,6 +49,42 @@ public actor DockerClient {
         _ = try await send(.DELETE, "/containers/\(id)?force=\(force)")
     }
 
+    /// Streams log lines in batches. Cancelling the consumer cancels the HTTP request.
+    public func logs(
+        _ id: String, tty: Bool, follow: Bool, tail: Int = 500, timestamps: Bool
+    ) -> AsyncThrowingStream<[LogLine], Error> {
+        let query = "stdout=1&stderr=1&follow=\(follow)&tail=\(tail)&timestamps=\(timestamps)"
+        let request = request(.GET, "/containers/\(id)/logs?\(query)")
+        return AsyncThrowingStream { continuation in
+            let task = Task {
+                do {
+                    // shortcut: a followed stream is capped at one year; reconnect logic is not worth it before that
+                    let response = try await self.execute(request, timeout: follow ? .hours(24 * 365) : .seconds(60))
+                    try await Self.requireOK(response)
+                    var demuxer = LogDemuxer(tty: tty, timestamps: timestamps)
+                    for try await chunk in response.body {
+                        let lines = demuxer.feed(Array(chunk.readableBytesView))
+                        if !lines.isEmpty { continuation.yield(lines) }
+                    }
+                    let rest = demuxer.flush()
+                    if !rest.isEmpty { continuation.yield(rest) }
+                    continuation.finish()
+                } catch {
+                    continuation.finish(throwing: error)
+                }
+            }
+            continuation.onTermination = { _ in task.cancel() }
+        }
+    }
+
+    static func requireOK(_ response: HTTPClientResponse) async throws {
+        guard response.status.code != 200 else { return }
+        let body = try await response.body.collect(upTo: 1024 * 1024)
+        let status = Int(response.status.code)
+        throw DockerError.from(status: status, body: Data(body.readableBytesView))
+            ?? .server(status: status, message: "unexpected status \(status)")
+    }
+
     // MARK: - Transport
 
     func request(_ method: HTTPMethod, _ path: String) -> HTTPClientRequest {
