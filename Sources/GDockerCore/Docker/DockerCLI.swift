@@ -28,6 +28,12 @@ public enum DockerCLI {
     public static func terminalArguments(containerID: String) -> [String] {
         ["exec", "-it", containerID, "/bin/sh", "-c", "command -v bash >/dev/null 2>&1 && exec bash || exec sh"]
     }
+
+    /// Turns a raw `waitpid` status into the code a shell would report: the exit status, or 128 + signal.
+    public static func exitCode(waitStatus status: Int32) -> Int32 {
+        let signal = status & 0x7f
+        return signal == 0 ? (status >> 8) & 0xff : 128 + signal
+    }
 }
 
 /// Whether a terminal session can open for a container, by its state. `docker exec` only works on `running`.

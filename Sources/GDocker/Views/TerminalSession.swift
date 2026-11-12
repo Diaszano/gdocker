@@ -9,6 +9,7 @@ final class TerminalSession: LocalProcessTerminalViewDelegate {
     private(set) var view: LocalProcessTerminalView?
     private(set) var exitCode: Int32?
     private(set) var isCLIAvailable: Bool
+    @ObservationIgnored private var exitWatcher: DispatchSourceProcess?
 
     init() {
         isCLIAvailable = Self.dockerBinary != nil
@@ -37,6 +38,27 @@ final class TerminalSession: LocalProcessTerminalViewDelegate {
             args: DockerCLI.terminalArguments(containerID: containerID),
             environment: env.map { "\($0.key)=\($0.value)" })
         view = terminal
+        watchExit(of: terminal.process.shellPid)
+    }
+
+    /// SwiftTerm 1.11 never reports a shell that exits on its own (and leaves it a zombie), so the app watches it.
+    private func watchExit(of pid: pid_t) {
+        guard pid > 0 else {
+            exitCode = -1  // fork failed
+            return
+        }
+        let source = DispatchSource.makeProcessSource(identifier: pid, eventMask: .exit, queue: .main)
+        source.setEventHandler { [weak self] in
+            var status: Int32 = 0
+            let reaped = waitpid(pid, &status, WNOHANG) == pid
+            MainActor.assumeIsolated {
+                self?.exitWatcher?.cancel()
+                self?.exitWatcher = nil
+                self?.exitCode = reaped ? DockerCLI.exitCode(waitStatus: status) : -1
+            }
+        }
+        exitWatcher = source
+        source.activate()
     }
 
     func reconnect(containerID: String) {
@@ -46,15 +68,21 @@ final class TerminalSession: LocalProcessTerminalViewDelegate {
 
     func terminate() {
         guard let view else { return }
+        exitWatcher?.cancel()
+        exitWatcher = nil
         view.processDelegate = nil
-        view.terminate()
+        let pid = view.process.shellPid
+        view.terminate()  // sends SIGTERM
         self.view = nil
+        // Reap it so it does not linger as a zombie; docker exits promptly on SIGTERM.
+        DispatchQueue.global().async {
+            var status: Int32 = 0
+            waitpid(pid, &status, 0)
+        }
     }
 
-    nonisolated func processTerminated(source: TerminalView, exitCode: Int32?) {
-        // SwiftTerm posts process events on the main queue.
-        MainActor.assumeIsolated { self.exitCode = exitCode ?? -1 }
-    }
+    // Exit is tracked by `watchExit`; SwiftTerm's own callback passes a raw wait status, when it fires at all.
+    nonisolated func processTerminated(source: TerminalView, exitCode: Int32?) {}
 
     nonisolated func sizeChanged(source: LocalProcessTerminalView, newCols: Int, newRows: Int) {}
     nonisolated func setTerminalTitle(source: LocalProcessTerminalView, title: String) {}
@@ -79,6 +107,8 @@ private final class ThemedTerminalView: LocalProcessTerminalView {
         effectiveAppearance.performAsCurrentDrawingAppearance {
             nativeForegroundColor = .textColor
             nativeBackgroundColor = .textBackgroundColor
+            // SwiftTerm paints the layer only once at init; the strip outside the cell grid shows it.
+            layer?.backgroundColor = nativeBackgroundColor.cgColor
         }
     }
 }

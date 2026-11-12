@@ -39,6 +39,13 @@ struct DockerCLITests {
         ])
     }
 
+    @Test func exitCodeDecodesRawWaitStatus() {
+        #expect(DockerCLI.exitCode(waitStatus: 0) == 0)
+        #expect(DockerCLI.exitCode(waitStatus: 768) == 3)  // exit 3
+        #expect(DockerCLI.exitCode(waitStatus: 32512) == 127)  // exit 127: command not found (distroless)
+        #expect(DockerCLI.exitCode(waitStatus: 15) == 143)  // killed by SIGTERM → 128 + 15, as shells report it
+    }
+
     @Test func availabilityFromState() {
         #expect(TerminalAvailability(state: "running") == .ready)
         #expect(TerminalAvailability(state: "paused") == .paused)
