@@ -34,7 +34,7 @@ struct ImagesView: View {
             }
         } message: {
             if let selected = store.selected {
-                Text("The image '\(selected.formattedTags)' (\(selected.shortID)) will be removed permanently.", bundle: .l10n)
+                Text(verbatim: String(localized: "The image '\(selected.formattedTags)' will be removed permanently.", bundle: .l10n))
             } else {
                 Text("The selected image will be removed permanently.", bundle: .l10n)
             }
@@ -75,20 +75,32 @@ struct ImagesView: View {
             Button {
                 Task { await store.refresh() }
             } label: {
-                Label("Refresh", systemImage: "arrow.clockwise")
+                Label {
+                    Text("Refresh", bundle: .l10n)
+                } icon: {
+                    Image(systemName: "arrow.clockwise")
+                }
             }
             .help(Text("Refresh images", bundle: .l10n))
 
             Button {
                 confirmPrune = true
             } label: {
-                Label("Prune Images…", systemImage: "trash.slash")
+                Label {
+                    Text("Prune Images", bundle: .l10n)
+                } icon: {
+                    Image(systemName: "trash.slash")
+                }
             }
 
             Button(role: .destructive) {
                 confirmRemove = true
             } label: {
-                Label("Remove", systemImage: "trash")
+                Label {
+                    Text("Remove", bundle: .l10n)
+                } icon: {
+                    Image(systemName: "trash")
+                }
             }
             .disabled(store.selected == nil)
             .keyboardShortcut(.delete, modifiers: [])
@@ -99,9 +111,13 @@ struct ImagesView: View {
 
     private var subtitle: String {
         if store.searchText.isEmpty {
-            return store.count == 1 ? "1 image" : "\(store.count) images"
+            if store.count == 1 {
+                return String(localized: "\(String(store.count)) image", bundle: .l10n)
+            } else {
+                return String(localized: "\(String(store.count)) images", bundle: .l10n)
+            }
         } else {
-            return "\(store.filteredImages.count) of \(store.count)"
+            return String(localized: "\(String(store.filteredImages.count)) of \(String(store.count))", bundle: .l10n)
         }
     }
 
@@ -111,7 +127,7 @@ struct ImagesView: View {
         if !containersStore.connected {
             ContentUnavailableView {
                 Label {
-                    Text("Docker Disconnected", bundle: .l10n)
+                    Text("Docker disconnected", bundle: .l10n)
                 } icon: {
                     Image(systemName: "bolt.slash")
                 }

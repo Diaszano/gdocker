@@ -1,288 +1,2246 @@
 {
-  "sourceLanguage" : "en",
-  "strings" : {
-    "AI activity" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "AI activity" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Atividade da IA" } } } },
-    "No AI activity yet" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "No AI activity yet" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Nenhuma atividade da IA ainda" } } } },
-    "Allowed" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Allowed" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Permitido" } } } },
-    "Approved" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Approved" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Aprovado" } } } },
-    "Denied" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Denied" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Negado" } } } },
-    "Error" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Error" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Erro" } } } },
-    "%@ wants to run: %@" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "%@ wants to run: %@" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "%@ quer executar: %@" } } } },
-    "Reason" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Reason" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Motivo" } } } },
-    "Always allow this action" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Always allow this action" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Sempre permitir esta ação" } } } },
-    "Allow once" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Allow once" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Permitir uma vez" } } } },
-    "Allow always" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Allow always" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Permitir sempre" } } } },
-    "%@ of %@" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "%@ of %@" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "%@ de %@" } } } },
-    "Approval request" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Approval request" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Pedido de aprovação" } } } },
-    "Permissions" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Permissions" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Permissões" } } } },
-    "Choose what the AI can do on its own, what needs your approval, and what is forbidden." : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Choose what the AI can do on its own, what needs your approval, and what is forbidden." } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Escolha o que a IA pode fazer sozinha, o que precisa da sua aprovação e o que é proibido." } } } },
-    "Reading" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Reading" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Leitura" } } } },
-    "Sensitive reading" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Sensitive reading" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Leitura sensível" } } } },
-    "Control" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Control" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Controle" } } } },
-    "Destructive" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Destructive" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Destrutivo" } } } },
-    "Allow" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Allow" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Permitir" } } } },
-    "Ask" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Ask" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Perguntar" } } } },
-    "Deny" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Deny" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Negar" } } } },
-    "MCP server active" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "MCP server active" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Servidor MCP ativo" } } } },
-    "Starting MCP server…" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Starting MCP server…" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Iniciando o servidor MCP…" } } } },
-    "MCP server stopped" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "MCP server stopped" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Servidor MCP parado" } } } },
-    "MCP server error" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "MCP server error" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Erro no servidor MCP" } } } },
-    "Connected clients: %@" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Connected clients: %@" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Clientes conectados: %@" } } } },
-    "Copy config" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Copy config" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Copiar config" } } } },
-    "Claude Code (HTTP)" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Claude Code (HTTP)" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Claude Code (HTTP)" } } } },
-    "JSON (HTTP)" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "JSON (HTTP)" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "JSON (HTTP)" } } } },
-    "Claude Desktop (stdio)" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Claude Desktop (stdio)" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Claude Desktop (stdio)" } } } },
-    "Regenerate token" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Regenerate token" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Gerar novo token" } } } },
-    "Regenerate token?" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Regenerate token?" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Gerar novo token?" } } } },
-    "Clients using the old token stop working until you copy the config again." : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Clients using the old token stop working until you copy the config again." } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Os clientes que usam o token antigo deixam de funcionar até você copiar a config de novo." } } } },
-    "Copied" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Copied" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Copiado" } } } },
-    "Cancel" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Cancel" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Cancelar" } } } },
-    "AI" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "AI" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "IA" } } } },
-    "MCP server" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "MCP server" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Servidor MCP" } } } },
-    "Stopped" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Stopped" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Parado" } } } },
-    "Starting…" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Starting…" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Iniciando…" } } } },
-    "localhost:%@ · clients: %@" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "localhost:%@ · clients: %@" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "localhost:%@ · clientes: %@" } } } },
-    "MCP: running" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "MCP: running" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "MCP: ativo" } } } },
-    "MCP: starting" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "MCP: starting" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "MCP: iniciando" } } } },
-    "MCP: stopped" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "MCP: stopped" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "MCP: parado" } } } },
-    "MCP: error" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "MCP: error" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "MCP: erro" } } } },
-    "Port %@ is already in use" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Port %@ is already in use" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "A porta %@ já está em uso" } } } },
-    "MCP port" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "MCP port" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Porta do MCP" } } } },
-    "Start the MCP server when the app opens" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Start the MCP server when the app opens" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Iniciar o servidor MCP ao abrir o app" } } } },
-    "Choose a port between 1024 and 65535" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Choose a port between 1024 and 65535" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Escolha uma porta entre 1024 e 65535" } } } },
-    "List containers and status" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "List containers and status" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Listar containers e status" } } } },
-    "Inspect a container" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Inspect a container" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Inspecionar um container" } } } },
-    "Read logs" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Read logs" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Ler logs" } } } },
-    "View stats (CPU/memory)" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "View stats (CPU/memory)" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Ver stats (CPU/memória)" } } } },
-    "View environment variables" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "View environment variables" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Ver variáveis de ambiente" } } } },
-    "Start a container" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Start a container" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Iniciar um container" } } } },
-    "Restart a container" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Restart a container" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Reiniciar um container" } } } },
-    "Stop a container" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Stop a container" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Parar um container" } } } },
-    "Run a command inside a container" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Run a command inside a container" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Executar um comando dentro de um container" } } } },
-    "Remove a container" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Remove a container" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Remover um container" } } } },
-    "Dark" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Dark" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Escuro" } } } },
-    "Keep running in the menu bar when the window is closed" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Keep running in the menu bar when the window is closed" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Continuar rodando na barra de menu ao fechar a janela" } } } },
-    "Light" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Light" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Claro" } } } },
-    "Open window" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Open window" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Abrir janela" } } } },
-    "Quit" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Quit" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Encerrar" } } } },
-    "System" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "System" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Sistema" } } } },
-    "Theme" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Theme" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Tema" } } } },
-    "CPU" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "CPU" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "CPU" } } } },
-    "Containers" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Containers" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Containers" } } } },
-    "Images" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Images" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Imagens" } } } },
-    "Volumes" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Volumes" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Volumes" } } } },
-    "Networks" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Networks" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Redes" } } } },
-    "Docker connected" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Docker connected" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Docker conectado" } } } },
-    "Docker disconnected" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Docker disconnected" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Docker desconectado" } } } },
-    "Docker error" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Docker error" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Erro do Docker" } } } },
-    "Env" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Env" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Env" } } } },
-    "Filter logs" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Filter logs" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Filtrar logs" } } } },
-    "Follow" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Follow" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Seguir" } } } },
-    "Inspect" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Inspect" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Inspecionar" } } } },
-    "Logs" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Logs" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Logs" } } } },
-    "Memory" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Memory" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Memória" } } } },
-    "Network" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Network" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Rede" } } } },
-    "No environment variables" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "No environment variables" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Sem variáveis de ambiente" } } } },
-    "No group" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "No group" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Sem grupo" } } } },
-    "OK" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "OK" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "OK" } } } },
-    "Remove" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Remove" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Remover" } } } },
-    "Remove container?" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Remove container?" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Remover container?" } } } },
-    "Restart" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Restart" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Reiniciar" } } } },
-    "Search containers" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Search containers" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Buscar containers" } } } },
-    "Select a container" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Select a container" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Selecione um container" } } } },
-    "Start" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Start" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Iniciar" } } } },
-    "Stats" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Stats" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Stats" } } } },
-    "Stop" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Stop" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Parar" } } } },
-    "The container will be deleted permanently." : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "The container will be deleted permanently." } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "O container será apagado permanentemente." } } } },
-    "Timestamps" : { "localizations" : {
-      "en" : { "stringUnit" : { "state" : "translated", "value" : "Timestamps" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Timestamps" } } } }
+  "sourceLanguage": "en",
+  "strings": {
+    "AI activity": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI activity"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atividade da IA"
+          }
+        }
+      }
+    },
+    "No AI activity yet": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No AI activity yet"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nenhuma atividade da IA ainda"
+          }
+        }
+      }
+    },
+    "Allowed": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allowed"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permitido"
+          }
+        }
+      }
+    },
+    "Approved": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Approved"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aprovado"
+          }
+        }
+      }
+    },
+    "Denied": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Denied"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Negado"
+          }
+        }
+      }
+    },
+    "Error": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Error"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erro"
+          }
+        }
+      }
+    },
+    "%@ wants to run: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ wants to run: %@"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ quer executar: %@"
+          }
+        }
+      }
+    },
+    "Reason": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reason"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Motivo"
+          }
+        }
+      }
+    },
+    "Always allow this action": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Always allow this action"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sempre permitir esta ação"
+          }
+        }
+      }
+    },
+    "Allow once": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow once"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permitir uma vez"
+          }
+        }
+      }
+    },
+    "Allow always": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow always"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permitir sempre"
+          }
+        }
+      }
+    },
+    "%@ of %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ of %@"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ de %@"
+          }
+        }
+      }
+    },
+    "Approval request": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Approval request"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pedido de aprovação"
+          }
+        }
+      }
+    },
+    "Permissions": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permissions"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permissões"
+          }
+        }
+      }
+    },
+    "Choose what the AI can do on its own, what needs your approval, and what is forbidden.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose what the AI can do on its own, what needs your approval, and what is forbidden."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escolha o que a IA pode fazer sozinha, o que precisa da sua aprovação e o que é proibido."
+          }
+        }
+      }
+    },
+    "Reading": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reading"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leitura"
+          }
+        }
+      }
+    },
+    "Sensitive reading": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sensitive reading"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leitura sensível"
+          }
+        }
+      }
+    },
+    "Control": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Control"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Controle"
+          }
+        }
+      }
+    },
+    "Destructive": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Destructive"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Destrutivo"
+          }
+        }
+      }
+    },
+    "Allow": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permitir"
+          }
+        }
+      }
+    },
+    "Ask": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ask"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Perguntar"
+          }
+        }
+      }
+    },
+    "Deny": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deny"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Negar"
+          }
+        }
+      }
+    },
+    "MCP server active": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MCP server active"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Servidor MCP ativo"
+          }
+        }
+      }
+    },
+    "Starting MCP server…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Starting MCP server…"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iniciando o servidor MCP…"
+          }
+        }
+      }
+    },
+    "MCP server stopped": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MCP server stopped"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Servidor MCP parado"
+          }
+        }
+      }
+    },
+    "MCP server error": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MCP server error"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erro no servidor MCP"
+          }
+        }
+      }
+    },
+    "Connected clients: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connected clients: %@"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clientes conectados: %@"
+          }
+        }
+      }
+    },
+    "Copy config": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy config"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copiar config"
+          }
+        }
+      }
+    },
+    "Claude Code (HTTP)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude Code (HTTP)"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude Code (HTTP)"
+          }
+        }
+      }
+    },
+    "JSON (HTTP)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "JSON (HTTP)"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "JSON (HTTP)"
+          }
+        }
+      }
+    },
+    "Claude Desktop (stdio)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude Desktop (stdio)"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude Desktop (stdio)"
+          }
+        }
+      }
+    },
+    "Regenerate token": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regenerate token"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gerar novo token"
+          }
+        }
+      }
+    },
+    "Regenerate token?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regenerate token?"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gerar novo token?"
+          }
+        }
+      }
+    },
+    "Clients using the old token stop working until you copy the config again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clients using the old token stop working until you copy the config again."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Os clientes que usam o token antigo deixam de funcionar até você copiar a config de novo."
+          }
+        }
+      }
+    },
+    "Copied": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copied"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copiado"
+          }
+        }
+      }
+    },
+    "Cancel": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancelar"
+          }
+        }
+      }
+    },
+    "AI": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "IA"
+          }
+        }
+      }
+    },
+    "MCP server": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MCP server"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Servidor MCP"
+          }
+        }
+      }
+    },
+    "Stopped": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stopped"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parado"
+          }
+        }
+      }
+    },
+    "Starting…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Starting…"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iniciando…"
+          }
+        }
+      }
+    },
+    "localhost:%@ · clients: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "localhost:%@ · clients: %@"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "localhost:%@ · clientes: %@"
+          }
+        }
+      }
+    },
+    "MCP: running": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MCP: running"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MCP: ativo"
+          }
+        }
+      }
+    },
+    "MCP: starting": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MCP: starting"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MCP: iniciando"
+          }
+        }
+      }
+    },
+    "MCP: stopped": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MCP: stopped"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MCP: parado"
+          }
+        }
+      }
+    },
+    "MCP: error": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MCP: error"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MCP: erro"
+          }
+        }
+      }
+    },
+    "Port %@ is already in use": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Port %@ is already in use"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A porta %@ já está em uso"
+          }
+        }
+      }
+    },
+    "MCP port": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MCP port"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Porta do MCP"
+          }
+        }
+      }
+    },
+    "Start the MCP server when the app opens": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start the MCP server when the app opens"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iniciar o servidor MCP ao abrir o app"
+          }
+        }
+      }
+    },
+    "Choose a port between 1024 and 65535": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose a port between 1024 and 65535"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escolha uma porta entre 1024 e 65535"
+          }
+        }
+      }
+    },
+    "List containers and status": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "List containers and status"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Listar containers e status"
+          }
+        }
+      }
+    },
+    "Inspect a container": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inspect a container"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inspecionar um container"
+          }
+        }
+      }
+    },
+    "Read logs": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Read logs"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ler logs"
+          }
+        }
+      }
+    },
+    "View stats (CPU/memory)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "View stats (CPU/memory)"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ver stats (CPU/memória)"
+          }
+        }
+      }
+    },
+    "View environment variables": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "View environment variables"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ver variáveis de ambiente"
+          }
+        }
+      }
+    },
+    "Start a container": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start a container"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iniciar um container"
+          }
+        }
+      }
+    },
+    "Restart a container": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restart a container"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reiniciar um container"
+          }
+        }
+      }
+    },
+    "Stop a container": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stop a container"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parar um container"
+          }
+        }
+      }
+    },
+    "Run a command inside a container": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Run a command inside a container"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Executar um comando dentro de um container"
+          }
+        }
+      }
+    },
+    "Remove a container": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove a container"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remover um container"
+          }
+        }
+      }
+    },
+    "Dark": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dark"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escuro"
+          }
+        }
+      }
+    },
+    "Keep running in the menu bar when the window is closed": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep running in the menu bar when the window is closed"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continuar rodando na barra de menu ao fechar a janela"
+          }
+        }
+      }
+    },
+    "Light": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Light"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claro"
+          }
+        }
+      }
+    },
+    "Open window": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open window"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abrir janela"
+          }
+        }
+      }
+    },
+    "Quit": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quit"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Encerrar"
+          }
+        }
+      }
+    },
+    "System": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "System"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sistema"
+          }
+        }
+      }
+    },
+    "Theme": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Theme"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tema"
+          }
+        }
+      }
+    },
+    "CPU": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CPU"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CPU"
+          }
+        }
+      }
+    },
+    "Containers": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Containers"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Containers"
+          }
+        }
+      }
+    },
+    "Images": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Images"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Imagens"
+          }
+        }
+      }
+    },
+    "Volumes": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Volumes"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Volumes"
+          }
+        }
+      }
+    },
+    "Networks": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Networks"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Redes"
+          }
+        }
+      }
+    },
+    "Docker connected": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Docker connected"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Docker conectado"
+          }
+        }
+      }
+    },
+    "Docker disconnected": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Docker disconnected"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Docker desconectado"
+          }
+        }
+      }
+    },
+    "Docker error": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Docker error"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erro do Docker"
+          }
+        }
+      }
+    },
+    "Env": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Env"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Env"
+          }
+        }
+      }
+    },
+    "Filter logs": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filter logs"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filtrar logs"
+          }
+        }
+      }
+    },
+    "Follow": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Follow"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seguir"
+          }
+        }
+      }
+    },
+    "Inspect": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inspect"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inspecionar"
+          }
+        }
+      }
+    },
+    "Logs": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Logs"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Logs"
+          }
+        }
+      }
+    },
+    "Memory": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Memory"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Memória"
+          }
+        }
+      }
+    },
+    "Network": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Network"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rede"
+          }
+        }
+      }
+    },
+    "No environment variables": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No environment variables"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sem variáveis de ambiente"
+          }
+        }
+      }
+    },
+    "No group": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No group"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sem grupo"
+          }
+        }
+      }
+    },
+    "OK": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OK"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OK"
+          }
+        }
+      }
+    },
+    "Remove": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remover"
+          }
+        }
+      }
+    },
+    "Remove container?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove container?"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remover container?"
+          }
+        }
+      }
+    },
+    "Restart": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restart"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reiniciar"
+          }
+        }
+      }
+    },
+    "Search containers": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search containers"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buscar containers"
+          }
+        }
+      }
+    },
+    "Select a container": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Select a container"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selecione um container"
+          }
+        }
+      }
+    },
+    "Start": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iniciar"
+          }
+        }
+      }
+    },
+    "Stats": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stats"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stats"
+          }
+        }
+      }
+    },
+    "Stop": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stop"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parar"
+          }
+        }
+      }
+    },
+    "The container will be deleted permanently.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The container will be deleted permanently."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O container será apagado permanentemente."
+          }
+        }
+      }
+    },
+    "Timestamps": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Timestamps"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Timestamps"
+          }
+        }
+      }
+    },
+    "%@ image": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ image"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ imagem"
+          }
+        }
+      }
+    },
+    "%@ images": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ images"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ imagens"
+          }
+        }
+      }
+    },
+    "%@ network": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ network"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ rede"
+          }
+        }
+      }
+    },
+    "%@ networks": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ networks"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ redes"
+          }
+        }
+      }
+    },
+    "%@ volume": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ volume"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ volume"
+          }
+        }
+      }
+    },
+    "%@ volumes": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ volumes"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ volumes"
+          }
+        }
+      }
+    },
+    "All dangling and unused images will be removed permanently.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All dangling and unused images will be removed permanently."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Todas as imagens órfãs e não utilizadas serão removidas permanentemente."
+          }
+        }
+      }
+    },
+    "All networks not used by at least one container will be removed permanently. Default networks will not be removed.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All networks not used by at least one container will be removed permanently. Default networks will not be removed."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Todas as redes não utilizadas por pelo menos um container serão removidas permanentemente. Redes padrão não serão removidas."
+          }
+        }
+      }
+    },
+    "All unused volumes will be removed permanently. Any data in unused volumes will be lost.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All unused volumes will be removed permanently. Any data in unused volumes will be lost."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Todos os volumes não utilizados serão removidos permanentemente. Qualquer dado em volumes não utilizados será perdido."
+          }
+        }
+      }
+    },
+    "Docker is not reachable. Ensure Docker Desktop or Docker Engine is running.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Docker is not reachable. Ensure Docker Desktop or Docker Engine is running."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O Docker não está acessível. Verifique se o Docker Desktop ou Docker Engine está em execução."
+          }
+        }
+      }
+    },
+    "List images": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "List images"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Listar imagens"
+          }
+        }
+      }
+    },
+    "List networks": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "List networks"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Listar redes"
+          }
+        }
+      }
+    },
+    "List volumes": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "List volumes"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Listar volumes"
+          }
+        }
+      }
+    },
+    "No Docker images found.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Docker images found."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nenhuma imagem Docker encontrada."
+          }
+        }
+      }
+    },
+    "No Docker networks found.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Docker networks found."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nenhuma rede Docker encontrada."
+          }
+        }
+      }
+    },
+    "No Docker volumes found.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Docker volumes found."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nenhum volume Docker encontrado."
+          }
+        }
+      }
+    },
+    "No Images": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Images"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nenhuma imagem"
+          }
+        }
+      }
+    },
+    "No Networks": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Networks"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nenhuma rede"
+          }
+        }
+      }
+    },
+    "No Volumes": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Volumes"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nenhum volume"
+          }
+        }
+      }
+    },
+    "Prune Images": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prune Images"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limpar imagens"
+          }
+        }
+      }
+    },
+    "Prune Networks": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prune Networks"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limpar redes"
+          }
+        }
+      }
+    },
+    "Prune Volumes": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prune Volumes"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limpar volumes"
+          }
+        }
+      }
+    },
+    "Prune unused images?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prune unused images?"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limpar imagens não utilizadas?"
+          }
+        }
+      }
+    },
+    "Prune unused networks?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prune unused networks?"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limpar redes não utilizadas?"
+          }
+        }
+      }
+    },
+    "Prune unused volumes?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prune unused volumes?"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limpar volumes não utilizados?"
+          }
+        }
+      }
+    },
+    "Refresh": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Refresh"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atualizar"
+          }
+        }
+      }
+    },
+    "Refresh images": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Refresh images"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atualizar imagens"
+          }
+        }
+      }
+    },
+    "Refresh networks": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Refresh networks"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atualizar redes"
+          }
+        }
+      }
+    },
+    "Refresh volumes": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Refresh volumes"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atualizar volumes"
+          }
+        }
+      }
+    },
+    "Remove a network": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove a network"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remover uma rede"
+          }
+        }
+      }
+    },
+    "Remove a volume": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove a volume"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remover um volume"
+          }
+        }
+      }
+    },
+    "Remove an image": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove an image"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remover uma imagem"
+          }
+        }
+      }
+    },
+    "Remove image?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove image?"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remover imagem?"
+          }
+        }
+      }
+    },
+    "Remove network?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove network?"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remover rede?"
+          }
+        }
+      }
+    },
+    "Remove volume?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove volume?"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remover volume?"
+          }
+        }
+      }
+    },
+    "Search images": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search images"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buscar imagens"
+          }
+        }
+      }
+    },
+    "Search networks": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search networks"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buscar redes"
+          }
+        }
+      }
+    },
+    "Search volumes": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search volumes"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buscar volumes"
+          }
+        }
+      }
+    },
+    "System prune": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "System prune"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limpeza do sistema"
+          }
+        }
+      }
+    },
+    "The image '%@' will be removed permanently.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The image '%@' will be removed permanently."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A imagem '%@' será removida permanentemente."
+          }
+        }
+      }
+    },
+    "The network '%@' will be removed permanently.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The network '%@' will be removed permanently."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A rede '%@' será removida permanentemente."
+          }
+        }
+      }
+    },
+    "The selected image will be removed permanently.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The selected image will be removed permanently."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A imagem selecionada será removida permanentemente."
+          }
+        }
+      }
+    },
+    "The selected network will be removed permanently.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The selected network will be removed permanently."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A rede selecionada será removida permanentemente."
+          }
+        }
+      }
+    },
+    "The selected volume will be removed permanently.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The selected volume will be removed permanently."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O volume selecionado será removido permanentemente."
+          }
+        }
+      }
+    },
+    "The volume '%@' will be removed permanently. Any stored data will be lost.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The volume '%@' will be removed permanently. Any stored data will be lost."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O volume '%@' será removido permanentemente. Qualquer dado armazenado será perdido."
+          }
+        }
+      }
+    },
+    "system": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "system"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "sistema"
+          }
+        }
+      }
+    }
   },
-  "version" : "1.0"
+  "version": "1.0"
 }

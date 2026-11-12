@@ -39,7 +39,7 @@ struct NetworksView: View {
             }
         } message: {
             if let selected = store.selected {
-                Text("The network '\(selected.name)' will be removed permanently.", bundle: .l10n)
+                Text(verbatim: String(localized: "The network '\(selected.name)' will be removed permanently.", bundle: .l10n))
             } else {
                 Text("The selected network will be removed permanently.", bundle: .l10n)
             }
@@ -80,20 +80,32 @@ struct NetworksView: View {
             Button {
                 Task { await store.refresh() }
             } label: {
-                Label("Refresh", systemImage: "arrow.clockwise")
+                Label {
+                    Text("Refresh", bundle: .l10n)
+                } icon: {
+                    Image(systemName: "arrow.clockwise")
+                }
             }
             .help(Text("Refresh networks", bundle: .l10n))
 
             Button {
                 confirmPrune = true
             } label: {
-                Label("Prune Networks…", systemImage: "trash.slash")
+                Label {
+                    Text("Prune Networks", bundle: .l10n)
+                } icon: {
+                    Image(systemName: "trash.slash")
+                }
             }
 
             Button(role: .destructive) {
                 confirmRemove = true
             } label: {
-                Label("Remove", systemImage: "trash")
+                Label {
+                    Text("Remove", bundle: .l10n)
+                } icon: {
+                    Image(systemName: "trash")
+                }
             }
             .disabled(!canRemoveSelected)
             .keyboardShortcut(.delete, modifiers: [])
@@ -104,9 +116,13 @@ struct NetworksView: View {
 
     private var subtitle: String {
         if store.searchText.isEmpty {
-            return store.count == 1 ? "1 network" : "\(store.count) networks"
+            if store.count == 1 {
+                return String(localized: "\(String(store.count)) network", bundle: .l10n)
+            } else {
+                return String(localized: "\(String(store.count)) networks", bundle: .l10n)
+            }
         } else {
-            return "\(store.filteredNetworks.count) of \(store.count)"
+            return String(localized: "\(String(store.filteredNetworks.count)) of \(String(store.count))", bundle: .l10n)
         }
     }
 
@@ -116,7 +132,7 @@ struct NetworksView: View {
         if !containersStore.connected {
             ContentUnavailableView {
                 Label {
-                    Text("Docker Disconnected", bundle: .l10n)
+                    Text("Docker disconnected", bundle: .l10n)
                 } icon: {
                     Image(systemName: "bolt.slash")
                 }

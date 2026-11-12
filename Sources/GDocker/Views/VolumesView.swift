@@ -2,6 +2,21 @@ import Foundation
 import GDockerCore
 import SwiftUI
 
+@MainActor
+private enum VolumeDateFormatters {
+    static let isoWithFraction: ISO8601DateFormatter = {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return formatter
+    }()
+
+    static let iso: ISO8601DateFormatter = {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime]
+        return formatter
+    }()
+}
+
 struct VolumesView: View {
     @Environment(VolumesStore.self) private var store
     @Environment(ContainersStore.self) private var containersStore
@@ -34,7 +49,7 @@ struct VolumesView: View {
             }
         } message: {
             if let selected = store.selected {
-                Text("The volume '\(selected.name)' will be removed permanently. Any stored data will be lost.", bundle: .l10n)
+                Text(verbatim: String(localized: "The volume '\(selected.name)' will be removed permanently. Any stored data will be lost.", bundle: .l10n))
             } else {
                 Text("The selected volume will be removed permanently.", bundle: .l10n)
             }
@@ -75,20 +90,32 @@ struct VolumesView: View {
             Button {
                 Task { await store.refresh() }
             } label: {
-                Label("Refresh", systemImage: "arrow.clockwise")
+                Label {
+                    Text("Refresh", bundle: .l10n)
+                } icon: {
+                    Image(systemName: "arrow.clockwise")
+                }
             }
             .help(Text("Refresh volumes", bundle: .l10n))
 
             Button {
                 confirmPrune = true
             } label: {
-                Label("Prune Volumes…", systemImage: "trash.slash")
+                Label {
+                    Text("Prune Volumes", bundle: .l10n)
+                } icon: {
+                    Image(systemName: "trash.slash")
+                }
             }
 
             Button(role: .destructive) {
                 confirmRemove = true
             } label: {
-                Label("Remove", systemImage: "trash")
+                Label {
+                    Text("Remove", bundle: .l10n)
+                } icon: {
+                    Image(systemName: "trash")
+                }
             }
             .disabled(store.selected == nil)
             .keyboardShortcut(.delete, modifiers: [])
@@ -99,9 +126,13 @@ struct VolumesView: View {
 
     private var subtitle: String {
         if store.searchText.isEmpty {
-            return store.count == 1 ? "1 volume" : "\(store.count) volumes"
+            if store.count == 1 {
+                return String(localized: "\(String(store.count)) volume", bundle: .l10n)
+            } else {
+                return String(localized: "\(String(store.count)) volumes", bundle: .l10n)
+            }
         } else {
-            return "\(store.filteredVolumes.count) of \(store.count)"
+            return String(localized: "\(String(store.filteredVolumes.count)) of \(String(store.count))", bundle: .l10n)
         }
     }
 
@@ -111,7 +142,7 @@ struct VolumesView: View {
         if !containersStore.connected {
             ContentUnavailableView {
                 Label {
-                    Text("Docker Disconnected", bundle: .l10n)
+                    Text("Docker disconnected", bundle: .l10n)
                 } icon: {
                     Image(systemName: "bolt.slash")
                 }
@@ -174,17 +205,15 @@ struct VolumesView: View {
 }
 
 extension VolumeSummary {
+    @MainActor
     var formattedCreated: String {
         guard let createdAt, !createdAt.isEmpty else { return "—" }
-        let isoWithFraction = ISO8601DateFormatter()
-        isoWithFraction.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        if let date = isoWithFraction.date(from: createdAt) {
+
+        if let date = VolumeDateFormatters.isoWithFraction.date(from: createdAt) {
             return date.formatted(date: .abbreviated, time: .shortened)
         }
 
-        let iso = ISO8601DateFormatter()
-        iso.formatOptions = [.withInternetDateTime]
-        if let date = iso.date(from: createdAt) {
+        if let date = VolumeDateFormatters.iso.date(from: createdAt) {
             return date.formatted(date: .abbreviated, time: .shortened)
         }
 
@@ -194,7 +223,7 @@ extension VolumeSummary {
                 let fracDigits = createdAt[createdAt.index(after: dotIndex)..<endIdx]
                 let suffix = createdAt[endIdx...]
                 let trimmed = String(createdAt[..<dotIndex]) + "." + String(fracDigits.prefix(3)) + String(suffix)
-                if let date = isoWithFraction.date(from: trimmed) {
+                if let date = VolumeDateFormatters.isoWithFraction.date(from: trimmed) {
                     return date.formatted(date: .abbreviated, time: .shortened)
                 }
             }
