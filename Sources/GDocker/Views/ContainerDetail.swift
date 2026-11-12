@@ -9,9 +9,10 @@ struct ContainerDetail: View {
     @State private var details: ContainerDetails?
     @State private var rawJSON = ""
     @State private var confirmRemove = false
+    @State private var terminal = TerminalSession()
 
     enum Tab: CaseIterable {
-        case logs, stats, inspect, env
+        case logs, stats, inspect, env, terminal
 
         var title: LocalizedStringKey {
             switch self {
@@ -19,6 +20,7 @@ struct ContainerDetail: View {
             case .stats: "Stats"
             case .inspect: "Inspect"
             case .env: "Env"
+            case .terminal: "Terminal"
             }
         }
     }
@@ -39,7 +41,10 @@ struct ContainerDetail: View {
         // Re-run when the container changes state or an action ran, so the log stream reconnects after a restart.
         .task(id: "\(container.id)|\(container.state)|\(store.revision)") { await load() }
         .onChange(of: logs.showTimestamps) { logs.restart() }
-        .onDisappear { logs.detach() }
+        .onDisappear {
+            logs.detach()
+            terminal.terminate()
+        }
         .confirmationDialog(
             Text("Remove container?", bundle: .l10n), isPresented: $confirmRemove, titleVisibility: .visible
         ) {
@@ -82,6 +87,7 @@ struct ContainerDetail: View {
         case .stats: StatsTab(client: store.client, id: container.id)
         case .inspect: InspectTab(rawJSON: rawJSON)
         case .env: EnvTab(env: details?.config.env ?? [])
+        case .terminal: TerminalTab(session: terminal, container: container)
         }
     }
 
@@ -94,6 +100,8 @@ struct ContainerDetail: View {
     }
 
     private func load() async {
+        // A stopped container ends its shell; the next Start opens a fresh one instead of the dead view.
+        if TerminalAvailability(state: container.state) != .ready { terminal.terminate() }
         details = nil
         rawJSON = ""
         guard let client = store.client else { return }

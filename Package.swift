@@ -12,6 +12,7 @@ let package = Package(
         .package(url: "https://github.com/swift-server/async-http-client.git", from: "1.21.0"),
         .package(url: "https://github.com/modelcontextprotocol/swift-sdk.git", from: "0.12.1"),
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.65.0"),
+        .package(url: "https://github.com/migueldeicaza/SwiftTerm.git", .upToNextMinor(from: "1.11.2")),  // 1.12+ ships a Metal shader that needs the separately downloaded Metal Toolchain
     ],
     targets: [
         .target(
@@ -30,7 +31,7 @@ let package = Package(
         ),
         .executableTarget(
             name: "GDocker",
-            dependencies: ["GDockerCore", "GDockerMCP"],
+            dependencies: ["GDockerCore", "GDockerMCP", .product(name: "SwiftTerm", package: "SwiftTerm")],
             resources: [.process("Resources")]
         ),
         .testTarget(
