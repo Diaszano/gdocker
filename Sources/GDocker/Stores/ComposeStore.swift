@@ -31,24 +31,14 @@ final class ComposeStore {
 
     var count: Int { projects.count }
 
-    var activeCount: Int {
-        projects.filter { $0.status == .running || $0.status == .partiallyRunning }.count
-    }
+    var activeCount: Int { projects.filter(\.isActive).count }
 
     var selected: ComposeProject? {
         guard let selectedProjectName else { return nil }
         return projects.first { $0.name == selectedProjectName }
     }
 
-    var filteredProjects: [ComposeProject] {
-        let query = searchText.trimmingCharacters(in: .whitespaces)
-        guard !query.isEmpty else { return projects }
-        return projects.filter { project in
-            project.name.localizedCaseInsensitiveContains(query)
-                || project.workingDir.localizedCaseInsensitiveContains(query)
-                || project.services.contains { $0.name.localizedCaseInsensitiveContains(query) }
-        }
-    }
+    var filteredProjects: [ComposeProject] { projects.filter { $0.matches(searchText) } }
 
     func refresh() async {
         isComposeAvailable = await runner.isComposeAvailable()

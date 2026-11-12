@@ -4,3 +4,4 @@
 .build/
 build/
 *.app
+.serena/

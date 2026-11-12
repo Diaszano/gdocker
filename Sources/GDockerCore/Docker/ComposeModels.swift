@@ -43,6 +43,17 @@ public struct ComposeProject: Sendable, Codable, Equatable, Identifiable {
         self.services = services
         self.status = status
     }
+
+    public var isActive: Bool { status == .running || status == .partiallyRunning }
+
+    /// Empty or whitespace-only queries match everything.
+    public func matches(_ query: String) -> Bool {
+        let query = query.trimmingCharacters(in: .whitespaces)
+        guard !query.isEmpty else { return true }
+        return name.localizedCaseInsensitiveContains(query)
+            || workingDir.localizedCaseInsensitiveContains(query)
+            || services.contains { $0.name.localizedCaseInsensitiveContains(query) }
+    }
 }
 
 public struct ComposeProjectRecord: Sendable, Codable, Equatable, Identifiable {

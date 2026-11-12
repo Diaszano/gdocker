@@ -40,15 +40,15 @@
 - Create: `Sources/GDockerCore/Docker/ComposeProjectRegistry.swift`
 - Create: `Tests/GDockerCoreTests/ComposeRegistryTests.swift`
 
-- [ ] **Step 1: Write failing tests for Compose models and registry**
+- [x] **Step 1: Write failing tests for Compose models and registry**
   - Escrever testes em `Tests/GDockerCoreTests/ComposeRegistryTests.swift`:
     - Ingestão de containers com labels Compose (`com.docker.compose.project`, `com.docker.compose.service`, `com.docker.compose.project.working_dir`, `com.docker.compose.project.config_files`).
     - Cálculo de status: todos rodando -> `.running`, mistura -> `.partiallyRunning`, todos parados -> `.stopped`, ausentes -> `.down`.
     - Persistência em disco: salvar registros em arquivo JSON temporário e recarregar preservando `serviceNames`, `workingDir`, `configFiles`.
     - Esquecer projeto: `removeProject(named:)` remove da memória e persiste remoção no disco.
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
   - `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer make test`
-- [ ] **Step 3: Implement ComposeModels and ComposeProjectRegistry**
+- [x] **Step 3: Implement ComposeModels and ComposeProjectRegistry**
   - Implementar em `Sources/GDockerCore/Docker/ComposeModels.swift`:
     - `ComposeServiceSummary` (`id`, `name`, `containerID`, `state`, `statusKind`).
     - `ComposeStatus` (`running`, `partiallyRunning`, `stopped`, `down`).
@@ -59,9 +59,9 @@
     - `ingest(containers: [ContainerSummary])`.
     - `removeProject(named: String)`.
     - `projects(containers: [ContainerSummary]) -> [ComposeProject]`.
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
   - `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer make test`
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
   - `git commit -m "feat(core): add compose models and project registry"`
 
 ---
@@ -72,15 +72,15 @@
 - Create: `Sources/GDockerCore/Docker/ComposeOperations.swift`
 - Create: `Tests/GDockerCoreTests/ComposeRunnerTests.swift`
 
-- [ ] **Step 1: Write failing tests for Compose runners**
+- [x] **Step 1: Write failing tests for Compose runners**
   - Escrever testes em `Tests/GDockerCoreTests/ComposeRunnerTests.swift`:
     - `FakeComposeRunner`: grava invocações (`calls`), simula saídas com sucesso e simula erros.
     - Validação de argumentos no `CLIComposeRunner`: flags `-f` para múltiplos arquivos de config, `--project-directory`, `-d` no `up`, `-v` no `down` condicional a `removeVolumes`.
     - Resolução de executável docker (caminhos conhecidos macOS).
     - Validação de existência de diretório de trabalho antes de invocar subprocesso (Review Focus 1).
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
   - `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer make test`
-- [ ] **Step 3: Implement ComposeOperations, FakeComposeRunner, and CLIComposeRunner**
+- [x] **Step 3: Implement ComposeOperations, FakeComposeRunner, and CLIComposeRunner**
   - Implementar em `Sources/GDockerCore/Docker/ComposeOperations.swift`:
     - Protocolo `ComposeOperations: Sendable`:
       - `func composeUp(project: String, workingDir: String, configFiles: [String]) async throws -> String`
@@ -89,9 +89,9 @@
     - `ComposeError`: casos para `binaryNotFound`, `directoryNotFound(String)`, `commandFailed(exitCode: Int, output: String)`.
     - `FakeComposeRunner`: implementação em memória para testes.
     - `CLIComposeRunner`: implementação usando `Process` em background, localizando binário em caminhos conhecidos do macOS (`/usr/local/bin/docker`, `/opt/homebrew/bin/docker`, etc.) e aplicando `DOCKER_HOST` a partir de `DockerSocket.discover()`.
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
   - `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer make test`
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
   - `git commit -m "feat(core): implement compose operations and cli runner"`
 
 ---
@@ -106,24 +106,24 @@
 - Modify: `Tests/GDockerMCPTests/McpHTTPServerTests.swift`
 - Modify: `Tests/GDockerMCPTests/McpTestSupport.swift`
 
-- [ ] **Step 1: Write failing tests for compose MCP tools**
+- [x] **Step 1: Write failing tests for compose MCP tools**
   - Escrever testes em `Tests/GDockerCoreTests/ToolRouterTests.swift`:
     - `list_compose_projects`: retorna JSON com projetos conhecidos, serviços e status.
     - `compose_up`: valida parâmetro `project`, resolve caminhos no registry, executa up, respeita aprovação `.ask`.
     - `compose_down`: valida `project`, respeita flag `remove_volumes`, proíbe `allowsAlways` (Review Focus / Anti-objetivo).
     - Retorna erro claro quando projeto não existe no registro ou diretório não existe no disco.
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
   - `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer make test`
-- [ ] **Step 3: Update ToolCatalog and ToolRouter**
+- [x] **Step 3: Update ToolCatalog and ToolRouter**
   - Em `ToolCatalog.swift`: adicionar `list_compose_projects` (.read, .allow), `compose_up` (.control, .ask), `compose_down` (.control, .ask, `allowsAlways: false`). Total sobe para 20 ferramentas.
   - Em `ToolRouter.swift`:
     - Adicionar propriedades `registry: ComposeProjectRegistry` e `compose: @Sendable () async -> (any ComposeOperations)?`.
     - No início de rotas de compose, sincronizar registry chamando `docker.listContainers()`.
     - Implementar execução das 3 ferramentas.
   - Em `McpController.swift` e testes: repassar registry e compose runner para `ToolRouter`.
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
   - `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer make test`
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
   - `git commit -m "feat(mcp): add compose tools to catalog and router"`
 
 ---
@@ -133,26 +133,26 @@
 **Files:**
 - Create: `Sources/GDocker/Stores/ComposeStore.swift`
 - Modify: `Sources/GDocker/GDockerApp.swift`
-- Create: `Tests/GDockerCoreTests/ComposeStoreTests.swift`
+- Create: `Tests/GDockerCoreTests/ComposeProjectTests.swift` (search/active logic lives on `ComposeProject` in `GDockerCore`, since the `GDocker` app target has no test target)
 
-- [ ] **Step 1: Write failing tests for ComposeStore logic**
+- [x] **Step 1: Write failing tests for ComposeStore logic**
   - Escrever testes em `Tests/GDockerCoreTests/ComposeStoreTests.swift`:
     - Atualização da lista de projetos quando containers mudam.
     - Filtro de busca (`searchText`) por nome do projeto e nome de serviço.
     - Contagem de projetos ativos para badge.
     - Ação `forget(project:)` chama registry.
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
   - `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer make test`
-- [ ] **Step 3: Implement ComposeStore and inject into GDockerApp**
+- [x] **Step 3: Implement ComposeStore and inject into GDockerApp**
   - Implementar `ComposeStore.swift`:
     - `@MainActor @Observable final class ComposeStore`.
     - `projects: [ComposeProject]`, `searchText: String`, `isComposeAvailable: Bool`, `isPerformingAction: Bool`.
     - `activeCount: Int` (computa stacks com status `.running` ou `.partiallyRunning`).
     - Métodos: `up(project:)`, `down(project:removeVolumes:)`, `forget(project:)`.
   - Integrar em `GDockerApp.swift`: instanciar `ComposeStore` e fornecer como `.environment(composeStore)`.
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
   - `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer make test`
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
   - `git commit -m "feat(store): add compose store with search and actions"`
 
 ---
@@ -163,7 +163,7 @@
 - Create: `Sources/GDocker/Views/ComposeView.swift`
 - Modify: `Sources/GDocker/Views/MainWindow.swift`
 
-- [ ] **Step 1: Implement ComposeView**
+- [x] **Step 1: Implement ComposeView**
   - Tabela/lista de projetos Compose com colunas: Nome, Status, Serviços, Diretório.
   - Badges de status coloridos (`running` -> verde, `partiallyRunning` -> amarelo, `stopped` -> cinza, `down` -> azul/cinza).
   - Linha expansível ou detalhe mostrando os serviços individuais da stack e seus containers.
@@ -172,12 +172,12 @@
   - Ação "Esquecer projeto" no menu de contexto ou botão quando a stack estiver em `down`.
   - Banner informativo se o CLI `docker compose` não estiver instalado.
   - Alerta de erro caso a pasta do projeto não exista no disco.
-- [ ] **Step 2: Add Compose to MainWindow Sidebar**
+- [x] **Step 2: Add Compose to MainWindow Sidebar**
   - Adicionar entrada de navegação `Compose` na seção "Docker" da barra lateral com ícone `square.stack.3d.forward.dottedline` e badge ao vivo com `composeStore.activeCount`.
   - Renderizar `ComposeView` quando a aba selecionada for `.compose`.
-- [ ] **Step 3: Build and verify app compilation**
+- [x] **Step 3: Build and verify app compilation**
   - `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer make test`
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
   - `git commit -m "feat(ui): add compose view and sidebar integration"`
 
 ---
@@ -187,14 +187,14 @@
 **Files:**
 - Modify: `Sources/GDocker/Resources/Localizable.xcstrings`
 
-- [ ] **Step 1: Extract and add all localization keys**
+- [x] **Step 1: Extract and add all localization keys**
   - Adicionar todas as novas chaves em inglês (`en`) e português (`pt-BR`) em `Localizable.xcstrings`:
     - "Compose", "Docker Compose", "Up", "Down", "Forget Project", "Remove Volumes", "Are you sure you want to stop this stack?", "This will stop and remove containers for project '%@'.", "Directory '%@' does not exist.", "Docker Compose CLI not found.", etc.
-- [ ] **Step 2: Verify localization with script**
+- [x] **Step 2: Verify localization with script**
   - `python3 -I scripts/check_l10n.py .`
   - Garantir 0 missing e 0 unused keys.
-- [ ] **Step 3: Run full test suite**
+- [x] **Step 3: Run full test suite**
   - `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer make test`
   - Garantir que todos os testes (GDockerCoreTests + GDockerMCPTests) passam com 100% de sucesso.
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
   - `git commit -m "chore(l10n): add localization for compose feature"`
