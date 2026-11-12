@@ -83,10 +83,7 @@ struct ComposeView: View {
     }
 
     private var subtitle: String {
-        String(
-            localized: "\(String(store.count)) projects · \(String(store.activeCount)) active",
-            bundle: .l10n
-        )
+        String(localized: "\(String(store.count)) projects · \(String(store.activeCount)) active", bundle: .l10n)
     }
 
     private var unavailableBanner: some View {
