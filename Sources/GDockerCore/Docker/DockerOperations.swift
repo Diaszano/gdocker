@@ -8,6 +8,7 @@ public protocol DockerOperations: Sendable {
     func stop(_ id: String) async throws
     func restart(_ id: String) async throws
     func remove(_ id: String, force: Bool) async throws
+    func exec(_ id: String, command: [String]) async throws -> ExecResult
 }
 
 extension DockerClient: DockerOperations {}

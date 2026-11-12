@@ -128,6 +128,11 @@ public actor DockerClient {
         }
     }
 
+    static func attach(_ json: [String: Any], to request: inout HTTPClientRequest) throws {
+        request.headers.add(name: "Content-Type", value: "application/json")
+        request.body = .bytes(try JSONSerialization.data(withJSONObject: json))
+    }
+
     static func requireOK(_ response: HTTPClientResponse) async throws {
         guard response.status.code != 200 else { return }
         let body = try await response.body.collect(upTo: 1024 * 1024)
@@ -154,8 +159,10 @@ public actor DockerClient {
         }
     }
 
-    private func send(_ method: HTTPMethod, _ path: String) async throws -> Data {
-        let response = try await execute(request(method, path))
+    func send(_ method: HTTPMethod, _ path: String, json: [String: Any]? = nil) async throws -> Data {
+        var request = self.request(method, path)
+        if let json { try Self.attach(json, to: &request) }
+        let response = try await execute(request)
         let buffer = try await response.body.collect(upTo: 64 * 1024 * 1024)
         let data = Data(buffer.readableBytesView)
         if let error = DockerError.from(status: Int(response.status.code), body: data) { throw error }

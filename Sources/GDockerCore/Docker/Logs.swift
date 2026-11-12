@@ -13,13 +13,31 @@ public struct LogLine: Identifiable, Sendable, Hashable {
     }
 }
 
-/// Decodes Docker's log stream into lines. Without a TTY the stream is multiplexed in frames
-/// (`[stream, 0, 0, 0, size UInt32 big-endian] + payload`); with a TTY it is raw stdout.
-/// Frames and lines may be split across `feed` calls, so partial data is kept between calls.
+/// Splits Docker's multiplexed stream into frames (`[stream, 0, 0, 0, size UInt32 big-endian] + payload`).
+/// A frame may arrive split across `feed` calls, so the incomplete tail is kept between calls.
+struct FrameReader {
+    private var raw: [UInt8] = []
+
+    mutating func feed(_ bytes: [UInt8]) -> [(stream: LogLine.Stream, payload: [UInt8])] {
+        raw += bytes
+        var frames: [(stream: LogLine.Stream, payload: [UInt8])] = []
+        while raw.count >= 8 {
+            let size = Int(raw[4]) << 24 | Int(raw[5]) << 16 | Int(raw[6]) << 8 | Int(raw[7])
+            guard raw.count >= 8 + size else { break }
+            frames.append((raw[0] == 2 ? .stderr : .stdout, Array(raw[8..<(8 + size)])))
+            raw.removeFirst(8 + size)
+        }
+        return frames
+    }
+}
+
+/// Decodes Docker's log stream into lines. Without a TTY the stream is multiplexed in frames;
+/// with a TTY it is raw stdout. Frames and lines may be split across `feed` calls,
+/// so partial data is kept between calls.
 public struct LogDemuxer {
     private let tty: Bool
     private let timestamps: Bool
-    private var raw: [UInt8] = []
+    private var frameReader = FrameReader()
     private var partial: [LogLine.Stream: [UInt8]] = [:]
     private var nextID = 1
     private let formatter: ISO8601DateFormatter = {
@@ -39,15 +57,7 @@ public struct LogDemuxer {
             append(bytes, .stdout, to: &lines)
             return lines
         }
-        raw += bytes
-        while raw.count >= 8 {
-            let size = Int(raw[4]) << 24 | Int(raw[5]) << 16 | Int(raw[6]) << 8 | Int(raw[7])
-            guard raw.count >= 8 + size else { break }
-            let stream: LogLine.Stream = raw[0] == 2 ? .stderr : .stdout
-            let payload = Array(raw[8..<(8 + size)])
-            raw.removeFirst(8 + size)
-            append(payload, stream, to: &lines)
-        }
+        for frame in frameReader.feed(bytes) { append(frame.payload, frame.stream, to: &lines) }
         return lines
     }
 

@@ -5,7 +5,7 @@ import Testing
 private let hasDocker = DockerSocket.discover() != nil
 
 /// AsyncHTTPClient crashes if a client is dropped without shutdown, so always shut down, even on failure.
-private func withClient<T: Sendable>(_ body: (DockerClient) async throws -> T) async throws -> T {
+func withClient<T: Sendable>(_ body: (DockerClient) async throws -> T) async throws -> T {
     let client = try DockerClient.connect()
     do {
         let result = try await body(client)
