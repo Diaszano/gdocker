@@ -1,0 +1,75 @@
+import GDockerCore
+import Observation
+
+enum ContainerAction { case start, stop, restart, remove }
+
+@MainActor @Observable
+final class ContainersStore {
+    private(set) var connected = false
+    private(set) var client: DockerClient?
+    var selectedID: String?
+    var lastError: String?
+    var searchText = ""
+
+    private(set) var all: [ContainerSummary] = []
+    private var loop: Task<Void, Never>?
+
+    var selected: ContainerSummary? { all.first { $0.id == selectedID } }
+
+    var visibleGroups: [ContainerGroup] {
+        let query = searchText.trimmingCharacters(in: .whitespaces)
+        let matching = query.isEmpty ? all : all.filter {
+            $0.name.localizedCaseInsensitiveContains(query) || $0.image.localizedCaseInsensitiveContains(query)
+        }
+        return groupByCompose(matching)
+    }
+
+    // shortcut: polling every 2s instead of the /events stream; switch to /events if the CPU cost shows up
+    func start() {
+        guard loop == nil else { return }
+        loop = Task {
+            while !Task.isCancelled {
+                await refresh()
+                try? await Task.sleep(for: .seconds(2))
+            }
+        }
+    }
+
+    func perform(_ action: ContainerAction, on id: String) async {
+        guard let client else { return }
+        do {
+            switch action {
+            case .start: try await client.start(id)
+            case .stop: try await client.stop(id)
+            case .restart: try await client.restart(id)
+            case .remove:
+                let running = all.first { $0.id == id }?.statusKind == .running
+                try await client.remove(id, force: running)
+            }
+            lastError = nil
+        } catch {
+            lastError = error.localizedDescription
+        }
+        await refresh()
+    }
+
+    private func refresh() async {
+        do {
+            if client == nil { client = try DockerClient.connect() }
+            guard let client else { return }
+            all = try await client.listContainers()
+            connected = true
+            if let selectedID, !all.contains(where: { $0.id == selectedID }) { self.selectedID = nil }
+        } catch {
+            connected = false
+            all = []
+            selectedID = nil
+            // AsyncHTTPClient crashes if a client is dropped without shutdown. Clear the property first so a
+            // concurrent refresh doesn't shut the same client down twice.
+            if let stale = client {
+                client = nil
+                await stale.shutdown()
+            }
+        }
+    }
+}

@@ -2,13 +2,14 @@ import SwiftUI
 
 @main
 struct GDockerApp: App {
+    @State private var store = ContainersStore()
+
     var body: some Scene {
         WindowGroup {
-            VStack(spacing: 8) {
-                Text("Containers", bundle: .l10n)
-                Text("Docker disconnected", bundle: .l10n).foregroundStyle(.secondary)
-            }
-            .frame(minWidth: 400, minHeight: 200)
+            MainWindow()
+                .environment(store)
+                .frame(minWidth: 1000, minHeight: 600)
+                .task { store.start() }
         }
     }
 }

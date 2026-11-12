@@ -7,10 +7,34 @@
         "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Containers" } }
       }
     },
+    "Docker connected" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Docker connected" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Docker conectado" } }
+      }
+    },
     "Docker disconnected" : {
       "localizations" : {
         "en" : { "stringUnit" : { "state" : "translated", "value" : "Docker disconnected" } },
         "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Docker desconectado" } }
+      }
+    },
+    "No group" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "No group" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Sem grupo" } }
+      }
+    },
+    "Search containers" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Search containers" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Buscar containers" } }
+      }
+    },
+    "Select a container" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Select a container" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Selecione um container" } }
       }
     }
   },
