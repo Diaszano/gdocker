@@ -33,6 +33,7 @@ final class NetworksStore {
         return all.filter { network in
             network.name.localizedCaseInsensitiveContains(query)
                 || network.driver.localizedCaseInsensitiveContains(query)
+                || network.id.localizedCaseInsensitiveContains(query)
         }
     }
 

@@ -156,7 +156,7 @@ struct NetworksView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
             Table(store.filteredNetworks, selection: $store.selectedID) {
-                TableColumn("Name") { network in
+                TableColumn(String(localized: "Name", bundle: .l10n)) { network in
                     HStack(spacing: 8) {
                         Image(systemName: "network")
                             .foregroundStyle(Color.accentColor)
@@ -173,23 +173,23 @@ struct NetworksView: View {
                         }
                     }
                 }
-                TableColumn("Network ID") { network in
+                TableColumn(String(localized: "Network ID", bundle: .l10n)) { network in
                     Text(verbatim: network.shortID)
                         .font(.system(.body, design: .monospaced))
                         .foregroundStyle(.secondary)
                 }
                 .width(min: 100, ideal: 120, max: 140)
-                TableColumn("Driver") { network in
+                TableColumn(String(localized: "Driver", bundle: .l10n)) { network in
                     Text(verbatim: network.driver)
                         .foregroundStyle(.secondary)
                 }
                 .width(min: 80, ideal: 100, max: 120)
-                TableColumn("Scope") { network in
+                TableColumn(String(localized: "Scope", bundle: .l10n)) { network in
                     Text(verbatim: network.scope)
                         .foregroundStyle(.secondary)
                 }
                 .width(min: 70, ideal: 90, max: 110)
-                TableColumn("Containers") { network in
+                TableColumn(String(localized: "Containers", bundle: .l10n)) { network in
                     Text(verbatim: "\(network.containerCount)")
                         .monospacedDigit()
                 }

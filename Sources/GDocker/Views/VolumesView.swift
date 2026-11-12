@@ -166,7 +166,7 @@ struct VolumesView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
             Table(store.filteredVolumes, selection: $store.selectedID) {
-                TableColumn("Name") { volume in
+                TableColumn(String(localized: "Name", bundle: .l10n)) { volume in
                     HStack(spacing: 8) {
                         Image(systemName: "externaldrive")
                             .foregroundStyle(Color.accentColor)
@@ -174,17 +174,17 @@ struct VolumesView: View {
                             .fontWeight(.medium)
                     }
                 }
-                TableColumn("Driver") { volume in
+                TableColumn(String(localized: "Driver", bundle: .l10n)) { volume in
                     Text(verbatim: volume.driver)
                         .foregroundStyle(.secondary)
                 }
                 .width(min: 80, ideal: 100, max: 120)
-                TableColumn("Scope") { volume in
+                TableColumn(String(localized: "Scope", bundle: .l10n)) { volume in
                     Text(verbatim: volume.scope)
                         .foregroundStyle(.secondary)
                 }
                 .width(min: 70, ideal: 90, max: 110)
-                TableColumn("Created") { volume in
+                TableColumn(String(localized: "Created", bundle: .l10n)) { volume in
                     Text(verbatim: volume.formattedCreated)
                         .foregroundStyle(.secondary)
                 }

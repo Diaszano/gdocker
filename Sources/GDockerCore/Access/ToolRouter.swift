@@ -233,11 +233,11 @@ public actor ToolRouter {
                 throw ToolFailure("Predefined network '\(network)' cannot be removed.")
             }
             let networks = try await docker.listNetworks()
-            if let match = networks.first(where: { $0.id == network || $0.id.hasPrefix(network) || $0.name == network }),
-               defaultNetworks.contains(match.name.lowercased()) {
+            let match = networks.first(where: { $0.id == network || $0.id.hasPrefix(network) || $0.name == network })
+            if let match, defaultNetworks.contains(match.name.lowercased()) {
                 throw ToolFailure("Predefined network '\(match.name)' cannot be removed.")
             }
-            try await docker.removeNetwork(network)
+            try await docker.removeNetwork(match?.id ?? network)
             return "Removed \(network)"
         case "system_prune":
             let all = args.bool("all") ?? false

@@ -368,8 +368,16 @@ func wrongTypesAreErrorsWithoutDocker(tool: String, arguments: [String: JSONValu
 
     let out = await h.call("remove_network", ["network": .string("custom_net")])
     #expect(!out.isError && out.text.contains("custom_net"))
-    #expect(await h.docker.calls.contains("removeNetwork:custom_net"))
+    #expect(await h.docker.calls.contains("removeNetwork:\(FakeDocker.id("net222"))"))
     #expect(await h.lastOutcome() == .allowed)
+
+    let shortOut = await h.call("remove_network", ["network": .string("net222")])
+    #expect(!shortOut.isError && shortOut.text.contains("net222"))
+    #expect(await h.docker.calls.contains("removeNetwork:\(FakeDocker.id("net222"))"))
+
+    let fallbackOut = await h.call("remove_network", ["network": .string("unlisted_net")])
+    #expect(!fallbackOut.isError && fallbackOut.text.contains("unlisted_net"))
+    #expect(await h.docker.calls.contains("removeNetwork:unlisted_net"))
 }
 
 @Test func systemPruneForwardsParametersAndOutputsReport() async throws {

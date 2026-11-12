@@ -151,7 +151,7 @@ struct ImagesView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
             Table(store.filteredImages, selection: $store.selectedID) {
-                TableColumn("Repository / Tag") { image in
+                TableColumn(String(localized: "Repository / Tag", bundle: .l10n)) { image in
                     HStack(spacing: 8) {
                         Image(systemName: "square.stack.3d.up")
                             .foregroundStyle(image.isDangling ? .secondary : Color.accentColor)
@@ -160,18 +160,18 @@ struct ImagesView: View {
                             .foregroundStyle(image.isDangling ? .secondary : .primary)
                     }
                 }
-                TableColumn("Image ID") { image in
+                TableColumn(String(localized: "Image ID", bundle: .l10n)) { image in
                     Text(verbatim: image.shortID)
                         .font(.system(.body, design: .monospaced))
                         .foregroundStyle(.secondary)
                 }
                 .width(min: 100, ideal: 120, max: 140)
-                TableColumn("Size") { image in
+                TableColumn(String(localized: "Size", bundle: .l10n)) { image in
                     Text(verbatim: image.formattedSize)
                         .monospacedDigit()
                 }
                 .width(min: 70, ideal: 90, max: 120)
-                TableColumn("Created") { image in
+                TableColumn(String(localized: "Created", bundle: .l10n)) { image in
                     Text(verbatim: image.formattedCreated)
                         .foregroundStyle(.secondary)
                 }
