@@ -18,6 +18,27 @@ actor FakeDocker: DockerOperations {
         FakeDocker.make("svc-b", id: FakeDocker.id("abc222"), state: "running", status: "Up 1 hour"),
     ]
 
+    var images: [ImageSummary] = [
+        ImageSummary(id: FakeDocker.id("img111"), repoTags: ["nginx:latest"], size: 142_000_000, created: 1700000000),
+        ImageSummary(id: FakeDocker.id("img222"), repoTags: ["redis:alpine"], size: 35_000_000, created: 1700001000),
+        ImageSummary(id: FakeDocker.id("img333"), repoTags: [], size: 50_000_000, created: 1700002000),
+    ]
+
+    var volumes: [VolumeSummary] = [
+        VolumeSummary(name: "db_data", driver: "local", scope: "local", createdAt: "2026-01-01T00:00:00Z"),
+        VolumeSummary(name: "cache", driver: "local", scope: "local", createdAt: "2026-01-02T00:00:00Z"),
+    ]
+
+    var networks: [NetworkSummary] = [
+        NetworkSummary(id: FakeDocker.id("net111"), name: "bridge", driver: "bridge", scope: "local", containerCount: 2),
+        NetworkSummary(id: FakeDocker.id("net222"), name: "custom_net", driver: "bridge", scope: "local", containerCount: 0),
+    ]
+
+    var pruneContainersResult: (deleted: [String], spaceReclaimed: Int64) = (["c1"], 1024)
+    var pruneImagesResult: (deleted: [String], spaceReclaimed: Int64) = (["img1"], 2048)
+    var pruneVolumesResult: (deleted: [String], spaceReclaimed: Int64) = (["vol1"], 4096)
+    var pruneNetworksResult: [String] = ["net1"]
+
     private static func make(
         _ name: String, id: String, state: String, status: String, project: String? = nil
     ) -> ContainerSummary {
@@ -76,6 +97,84 @@ actor FakeDocker: DockerOperations {
         try record("exec:\(id):\(command.joined(separator: " "))")
         return execResult
     }
+
+    // MARK: - Images
+
+    func listImages() async throws -> [ImageSummary] {
+        try record("listImages")
+        return images
+    }
+
+    func removeImage(_ id: String, force: Bool) async throws {
+        try record("removeImage:\(id):force=\(force)")
+    }
+
+    func pruneImages() async throws -> (deleted: [String], spaceReclaimed: Int64) {
+        try record("pruneImages")
+        return pruneImagesResult
+    }
+
+    // MARK: - Volumes
+
+    func listVolumes() async throws -> [VolumeSummary] {
+        try record("listVolumes")
+        return volumes
+    }
+
+    func removeVolume(_ name: String, force: Bool) async throws {
+        try record("removeVolume:\(name):force=\(force)")
+    }
+
+    func pruneVolumes() async throws -> (deleted: [String], spaceReclaimed: Int64) {
+        try record("pruneVolumes")
+        return pruneVolumesResult
+    }
+
+    // MARK: - Networks
+
+    func listNetworks() async throws -> [NetworkSummary] {
+        try record("listNetworks")
+        return networks
+    }
+
+    func removeNetwork(_ id: String) async throws {
+        try record("removeNetwork:\(id)")
+    }
+
+    func pruneNetworks() async throws -> [String] {
+        try record("pruneNetworks")
+        return pruneNetworksResult
+    }
+
+    // MARK: - Containers Prune & System Prune
+
+    func pruneContainers() async throws -> (deleted: [String], spaceReclaimed: Int64) {
+        try record("pruneContainers")
+        return pruneContainersResult
+    }
+
+    func systemPrune(all: Bool = false, volumes: Bool = false) async throws -> PruneReport {
+        try record("systemPrune:all=\(all):volumes=\(volumes)")
+        let c = try await pruneContainers()
+        let n = try await pruneNetworks()
+        let i = try await pruneImages()
+        let v = volumes ? try await pruneVolumes() : (deleted: [], spaceReclaimed: 0)
+        return PruneReport(
+            containersDeleted: c.deleted.count,
+            imagesDeleted: i.deleted.count,
+            networksDeleted: n.count,
+            volumesDeleted: v.deleted.count,
+            spaceReclaimed: c.spaceReclaimed + i.spaceReclaimed + v.spaceReclaimed
+        )
+    }
+
+    func setImages(_ images: [ImageSummary]) { self.images = images }
+    func setVolumes(_ volumes: [VolumeSummary]) { self.volumes = volumes }
+    func setNetworks(_ networks: [NetworkSummary]) { self.networks = networks }
+    func setPruneContainersResult(_ result: (deleted: [String], spaceReclaimed: Int64)) { pruneContainersResult = result }
+    func setPruneImagesResult(_ result: (deleted: [String], spaceReclaimed: Int64)) { pruneImagesResult = result }
+    func setPruneVolumesResult(_ result: (deleted: [String], spaceReclaimed: Int64)) { pruneVolumesResult = result }
+    func setPruneNetworksResult(_ result: [String]) { pruneNetworksResult = result }
 }
 
 enum FakeDockerError: Error { case missing }

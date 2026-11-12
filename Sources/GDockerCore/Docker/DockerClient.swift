@@ -58,6 +58,80 @@ public actor DockerClient {
         _ = try await send(.DELETE, "/containers/\(Self.pathSegment(id))?force=\(force)")
     }
 
+    // MARK: - Images
+
+    public func listImages() async throws -> [ImageSummary] {
+        let data = try await send(.GET, "/images/json")
+        return try JSONDecoder().decode([ImageSummary].self, from: data)
+    }
+
+    public func removeImage(_ id: String, force: Bool = false) async throws {
+        _ = try await send(.DELETE, "/images/\(Self.pathSegment(id))?force=\(force)")
+    }
+
+    public func pruneImages() async throws -> (deleted: [String], spaceReclaimed: Int64) {
+        let data = try await send(.POST, "/images/prune")
+        let res = try JSONDecoder().decode(ImagePruneResponse.self, from: data)
+        return (deleted: res.deletedItems, spaceReclaimed: res.spaceReclaimed ?? 0)
+    }
+
+    // MARK: - Volumes
+
+    public func listVolumes() async throws -> [VolumeSummary] {
+        let data = try await send(.GET, "/volumes")
+        let res = try JSONDecoder().decode(VolumesResponse.self, from: data)
+        return res.volumes ?? []
+    }
+
+    public func removeVolume(_ name: String, force: Bool = false) async throws {
+        _ = try await send(.DELETE, "/volumes/\(Self.pathSegment(name))?force=\(force)")
+    }
+
+    public func pruneVolumes() async throws -> (deleted: [String], spaceReclaimed: Int64) {
+        let data = try await send(.POST, "/volumes/prune")
+        let res = try JSONDecoder().decode(VolumePruneResponse.self, from: data)
+        return (deleted: res.volumesDeleted ?? [], spaceReclaimed: res.spaceReclaimed ?? 0)
+    }
+
+    // MARK: - Networks
+
+    public func listNetworks() async throws -> [NetworkSummary] {
+        let data = try await send(.GET, "/networks")
+        return try JSONDecoder().decode([NetworkSummary].self, from: data)
+    }
+
+    public func removeNetwork(_ id: String) async throws {
+        _ = try await send(.DELETE, "/networks/\(Self.pathSegment(id))")
+    }
+
+    public func pruneNetworks() async throws -> [String] {
+        let data = try await send(.POST, "/networks/prune")
+        let res = try JSONDecoder().decode(NetworkPruneResponse.self, from: data)
+        return res.networksDeleted ?? []
+    }
+
+    // MARK: - Containers Prune & System Prune
+
+    public func pruneContainers() async throws -> (deleted: [String], spaceReclaimed: Int64) {
+        let data = try await send(.POST, "/containers/prune")
+        let res = try JSONDecoder().decode(ContainerPruneResponse.self, from: data)
+        return (deleted: res.containersDeleted ?? [], spaceReclaimed: res.spaceReclaimed ?? 0)
+    }
+
+    public func systemPrune(all: Bool = false, volumes: Bool = false) async throws -> PruneReport {
+        let containers = try await pruneContainers()
+        let networks = try await pruneNetworks()
+        let images = try await pruneImages()
+        let volumesReport = volumes ? try await pruneVolumes() : (deleted: [], spaceReclaimed: 0)
+        return PruneReport(
+            containersDeleted: containers.deleted.count,
+            imagesDeleted: images.deleted.count,
+            networksDeleted: networks.count,
+            volumesDeleted: volumesReport.deleted.count,
+            spaceReclaimed: containers.spaceReclaimed + images.spaceReclaimed + volumesReport.spaceReclaimed
+        )
+    }
+
     /// The last `tail` log lines, without following.
     public func recentLogs(_ id: String, tail: Int, timestamps: Bool) async throws -> [LogLine] {
         let tty = try await inspect(id).details.config.tty
@@ -167,5 +241,61 @@ public actor DockerClient {
         let data = Data(buffer.readableBytesView)
         if let error = DockerError.from(status: Int(response.status.code), body: data) { throw error }
         return data
+    }
+}
+
+// MARK: - Internal Response Payloads
+
+struct ImagePruneResponse: Decodable {
+    struct Item: Decodable {
+        let untagged: String?
+        let deleted: String?
+        enum CodingKeys: String, CodingKey {
+            case untagged = "Untagged"
+            case deleted = "Deleted"
+        }
+    }
+    let imagesDeleted: [Item]?
+    let spaceReclaimed: Int64?
+
+    enum CodingKeys: String, CodingKey {
+        case imagesDeleted = "ImagesDeleted"
+        case spaceReclaimed = "SpaceReclaimed"
+    }
+
+    var deletedItems: [String] {
+        imagesDeleted?.compactMap { $0.deleted ?? $0.untagged } ?? []
+    }
+}
+
+struct VolumesResponse: Decodable {
+    let volumes: [VolumeSummary]?
+    enum CodingKeys: String, CodingKey {
+        case volumes = "Volumes"
+    }
+}
+
+struct VolumePruneResponse: Decodable {
+    let volumesDeleted: [String]?
+    let spaceReclaimed: Int64?
+    enum CodingKeys: String, CodingKey {
+        case volumesDeleted = "VolumesDeleted"
+        case spaceReclaimed = "SpaceReclaimed"
+    }
+}
+
+struct NetworkPruneResponse: Decodable {
+    let networksDeleted: [String]?
+    enum CodingKeys: String, CodingKey {
+        case networksDeleted = "NetworksDeleted"
+    }
+}
+
+struct ContainerPruneResponse: Decodable {
+    let containersDeleted: [String]?
+    let spaceReclaimed: Int64?
+    enum CodingKeys: String, CodingKey {
+        case containersDeleted = "ContainersDeleted"
+        case spaceReclaimed = "SpaceReclaimed"
     }
 }

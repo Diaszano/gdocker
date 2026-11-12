@@ -1,0 +1,33 @@
+[
+  {
+    "Id": "sha256:e9c7d0e10f9b301936f4051a8b1a8d01d4a04d275727fc378d8542e68447167b",
+    "ParentId": "",
+    "RepoTags": [
+      "ubuntu:latest",
+      "ubuntu:22.04"
+    ],
+    "RepoDigests": [
+      "ubuntu@sha256:e9c7d0e10f9b301936f4051a8b1a8d01d4a04d275727fc378d8542e68447167b"
+    ],
+    "Created": 1699990000,
+    "Size": 77840123,
+    "SharedSize": -1,
+    "VirtualSize": 77840123,
+    "Labels": {
+      "maintainer": "Canonical"
+    },
+    "Containers": 2
+  },
+  {
+    "Id": "sha256:1f2e3d4c5b6a7089901234567890abcdef1234567890abcdef1234567890abcd",
+    "ParentId": "",
+    "RepoTags": null,
+    "RepoDigests": [],
+    "Created": 1699980000,
+    "Size": 12345678,
+    "SharedSize": -1,
+    "VirtualSize": 12345678,
+    "Labels": null,
+    "Containers": 0
+  }
+]

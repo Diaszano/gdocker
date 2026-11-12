@@ -1,0 +1,25 @@
+{
+  "Volumes": [
+    {
+      "CreatedAt": "2026-01-01T12:00:00Z",
+      "Driver": "local",
+      "Labels": {
+        "com.docker.compose.project": "myapp"
+      },
+      "Mountpoint": "/var/lib/docker/volumes/app_data/_data",
+      "Name": "app_data",
+      "Options": null,
+      "Scope": "local"
+    },
+    {
+      "CreatedAt": "2026-01-02T15:30:00Z",
+      "Driver": "local",
+      "Labels": {},
+      "Mountpoint": "/var/lib/docker/volumes/db_data/_data",
+      "Name": "db_data",
+      "Options": null,
+      "Scope": "local"
+    }
+  ],
+  "Warnings": []
+}

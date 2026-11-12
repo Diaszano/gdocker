@@ -1,0 +1,44 @@
+[
+  {
+    "Name": "bridge",
+    "Id": "b8f52f8623ad76b5c32bb44a30e8c78c772cb33be85bb6da824db2f8c5b0451a",
+    "Created": "2026-01-01T00:00:00Z",
+    "Scope": "local",
+    "Driver": "bridge",
+    "EnableIPv6": false,
+    "IPAM": {
+      "Driver": "default",
+      "Options": null,
+      "Config": []
+    },
+    "Internal": false,
+    "Attachable": false,
+    "Ingress": false,
+    "Containers": {
+      "d258123fa4d1736b0ec719c8f000302ff4a86b97eb4b2be720a4697ffc640e74": {
+        "Name": "web",
+        "EndpointID": "6444ff5303a7a9117ff0a59f518a44b1c2b8c5e937d1189c4ec2a52427a1b857",
+        "MacAddress": "02:42:ac:11:00:02",
+        "IPv4Address": "172.17.0.2/16",
+        "IPv6Address": ""
+      },
+      "80902c3ef496d0ea80b85b2e98c760b2eb594ec172dfc0eb098935c1e55aa804": {
+        "Name": "api",
+        "EndpointID": "79b4a4cb88b0222a7f511728beaeebf75d5a894a8f90ee78c8121666f443b2f8",
+        "MacAddress": "02:42:ac:11:00:03",
+        "IPv4Address": "172.17.0.3/16",
+        "IPv6Address": ""
+      }
+    },
+    "Options": {},
+    "Labels": {}
+  },
+  {
+    "Name": "isolated_net",
+    "Id": "a1b2c3d4e5f678901234567890abcdef1234567890abcdef1234567890abcdef",
+    "Created": "2026-01-02T00:00:00Z",
+    "Scope": "local",
+    "Driver": "bridge",
+    "Containers": {}
+  }
+]

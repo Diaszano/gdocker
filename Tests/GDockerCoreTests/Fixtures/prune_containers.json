@@ -1,0 +1,7 @@
+{
+  "ContainersDeleted": [
+    "stopped_c1",
+    "stopped_c2"
+  ],
+  "SpaceReclaimed": 20971520
+}

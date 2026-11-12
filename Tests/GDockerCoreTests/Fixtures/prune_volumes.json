@@ -1,0 +1,7 @@
+{
+  "VolumesDeleted": [
+    "unused_vol_1",
+    "unused_vol_2"
+  ],
+  "SpaceReclaimed": 104857600
+}
