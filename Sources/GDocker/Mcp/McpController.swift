@@ -20,7 +20,10 @@ final class McpController {
     let permissions: PermissionStore
     let permissionsModel: PermissionsModel
     let activity: ActivityLog
+    let activityModel: ActivityModel
     let approvals: ApprovalQueue
+    let approvalModel: ApprovalModel
+    @ObservationIgnored private var approvalPanel: ApprovalPanelController?
 
     private let tokenProvider = McpTokenProvider(store: KeychainSecretStore())
     private let router: ToolRouter
@@ -37,10 +40,15 @@ final class McpController {
         self.permissions = permissions
         permissionsModel = PermissionsModel(store: permissions)
         self.activity = activity
+        activityModel = ActivityModel(log: activity)
         self.approvals = approvals
+        approvalModel = ApprovalModel(queue: approvals)
         router = ToolRouter(
             docker: { await store.client }, permissions: permissions, prompter: approvals, activity: activity,
             approvalTimeout: .seconds(seconds))
+        // The prompt must be able to appear whatever windows are open, so the app owns it from the start.
+        approvalPanel = ApprovalPanelController(model: approvalModel)
+        approvalPanel?.start()
         // The `--stdio` bridge reads the endpoint file, so a stale one would point it at a dead port. Only an
         // instance that is serving removes it: a second instance that failed on a busy port must not delete the
         // first one's file when it quits.

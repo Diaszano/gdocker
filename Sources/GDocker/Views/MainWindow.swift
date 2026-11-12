@@ -1,6 +1,6 @@
 import SwiftUI
 
-enum SidebarItem: Hashable { case containers, permissions }
+enum SidebarItem: Hashable { case containers, permissions, activity }
 
 struct MainWindow: View {
     @Environment(ContainersStore.self) private var store
@@ -14,6 +14,7 @@ struct MainWindow: View {
             switch section ?? .containers {
             case .containers: containers
             case .permissions: PermissionsView(mcp: mcp)
+            case .activity: ActivityView(model: mcp.activityModel)
             }
         }
         .alert(
@@ -39,6 +40,7 @@ struct MainWindow: View {
             Section(header: Text("AI", bundle: .l10n)) {
                 McpStatusRow(mcp: mcp)
                 Text("Permissions", bundle: .l10n).tag(SidebarItem.permissions)
+                Text("AI activity", bundle: .l10n).tag(SidebarItem.activity)
             }
         }
         .listStyle(.sidebar)

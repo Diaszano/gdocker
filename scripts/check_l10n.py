@@ -25,6 +25,7 @@ for path in (root / "Sources/GDocker").rglob("*.swift"):
     used |= set(re.findall(r'Text\("([^"]+)",\s*bundle:\s*\.l10n', source))
     used |= set(re.findall(r'case \.\w+: "([^"]+)"', source))  # LocalizedStringKey enum titles
     used |= set(re.findall(r'prompt:\s*Text\("([^"]+)"', source))
+    used |= set(re.findall(r'localizedString\(forKey:\s*"([^"]+)"', source))
     used |= {key(match) for match in re.findall(r'String\(localized:\s*"((?:[^"\\]|\\.)*)"', source)}
 
 # Tool titles are shown in the permissions screen, so they must be translated too.
