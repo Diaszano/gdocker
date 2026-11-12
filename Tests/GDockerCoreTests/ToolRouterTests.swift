@@ -1,0 +1,283 @@
+import Foundation
+import Testing
+@testable import GDockerCore
+
+private struct Harness {
+    let router: ToolRouter
+    let docker: FakeDocker
+    let permissions: PermissionStore
+    let activity: ActivityLog
+    let scripted: ScriptedPrompter
+
+    init(
+        decisions: [ApprovalDecision] = [], prompter: (any ApprovalPrompter)? = nil,
+        dockerAvailable: Bool = true, timeout: Duration = .seconds(5)
+    ) {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("gdocker-\(UUID().uuidString)")
+        let fake = FakeDocker()
+        let scripted = ScriptedPrompter(decisions)
+        let permissions = PermissionStore(fileURL: dir.appendingPathComponent("permissions.json"))
+        let activity = ActivityLog(fileURL: dir.appendingPathComponent("activity.jsonl"))
+        self.docker = fake
+        self.scripted = scripted
+        self.permissions = permissions
+        self.activity = activity
+        self.router = ToolRouter(
+            docker: { dockerAvailable ? fake : nil }, permissions: permissions,
+            prompter: prompter ?? scripted, activity: activity, approvalTimeout: timeout)
+    }
+
+    func call(_ tool: String, _ arguments: [String: JSONValue] = [:], client: String = "claude") async -> ToolOutput {
+        await router.call(tool, arguments: arguments, client: client)
+    }
+
+    func lastOutcome() async -> ActivityEntry.Outcome? { await activity.entries().first?.outcome }
+}
+
+private func json(_ text: String) throws -> Any {
+    try JSONSerialization.jsonObject(with: Data(text.utf8))
+}
+
+private let web = FakeDocker.id("aaa111")
+
+// MARK: - Validation
+
+@Test func unknownToolIsErrorAndRecorded() async {
+    let h = Harness()
+    let out = await h.call("nope")
+    #expect(out.isError && out.text.contains("Unknown tool"))
+    #expect(await h.lastOutcome() == .error)
+    #expect(await h.docker.calls.isEmpty)
+}
+
+@Test func missingRequiredArgumentIsErrorWithoutDockerOrPrompt() async {
+    let h = Harness(decisions: [.allowOnce])
+    let out = await h.call("stop_container")
+    #expect(out.isError && out.text.contains("container"))
+    #expect(await h.docker.calls.isEmpty)
+    #expect(await h.scripted.requests.isEmpty)
+    #expect(await h.lastOutcome() == .error)
+}
+
+@Test(arguments: [
+    ("exec_in_container", ["container": JSONValue.string("web"), "command": .string("ls")]),
+    ("exec_in_container", ["container": .string("web"), "command": .array([])]),
+    ("exec_in_container", ["container": .string("web"), "command": .array([.int(1)])]),
+    ("get_logs", ["container": .string("web"), "tail": .string("x")]),
+    ("start_container", ["container": .int(5)]),
+    ("start_container", ["container": .string("web"), "reason": .int(1)]),
+])
+func wrongTypesAreErrorsWithoutDocker(tool: String, arguments: [String: JSONValue]) async {
+    let h = Harness(decisions: [.allowOnce])
+    let out = await h.call(tool, arguments)
+    #expect(out.isError)
+    #expect(await h.docker.calls.isEmpty)
+    #expect(await h.scripted.requests.isEmpty)
+}
+
+// MARK: - Permissions
+
+@Test func allowRuleExecutesAndRecordsAllowed() async throws {
+    let h = Harness()
+    let out = await h.call("list_containers")
+    #expect(!out.isError)
+    let list = try #require(try json(out.text) as? [[String: Any]])
+    let web = try #require(list.first { $0["name"] as? String == "web" })
+    #expect((web["id"] as? String)?.count == 12)
+    #expect(web["state"] as? String == "running")
+    #expect(list.first { $0["name"] as? String == "db" }?["project"] as? String == "app")
+    #expect(await h.docker.calls == ["listContainers"])
+    #expect(await h.lastOutcome() == .allowed)
+}
+
+@Test func listContainersAllFalseHidesStopped() async throws {
+    let h = Harness()
+    let out = await h.call("list_containers", ["all": .bool(false)])
+    let names = try #require(try json(out.text) as? [[String: Any]]).compactMap { $0["name"] as? String }
+    #expect(!names.contains("web-2") && names.contains("web"))
+}
+
+@Test func denyRuleBlocksWithoutDockerCall() async throws {
+    let h = Harness(decisions: [.allowOnce])
+    try await h.permissions.set(.deny, for: "remove_container")
+    let out = await h.call("remove_container", ["container": .string("web")])
+    #expect(out.isError && out.text.contains("Blocked"))
+    #expect(await h.docker.calls.isEmpty)
+    #expect(await h.scripted.requests.isEmpty)
+    #expect(await h.lastOutcome() == .denied)
+}
+
+@Test func askAllowOnceExecutesAndAsksAgainNextTime() async {
+    let h = Harness(decisions: [.allowOnce, .allowOnce])
+    let first = await h.call("stop_container", ["container": .string("web")])
+    let second = await h.call("stop_container", ["container": .string("web")])
+    #expect(!first.isError && !second.isError)
+    #expect(await h.scripted.requests.count == 2)
+    #expect(await h.docker.calls.filter { $0 == "stop:\(web)" }.count == 2)
+    #expect(await h.lastOutcome() == .approved)
+}
+
+@Test func askAllowAlwaysFlipsRuleToAllow() async {
+    let h = Harness(decisions: [.allowAlways])
+    _ = await h.call("stop_container", ["container": .string("web")])
+    #expect(await h.permissions.permission(for: "stop_container") == .allow)
+    _ = await h.call("stop_container", ["container": .string("web")])
+    #expect(await h.scripted.requests.count == 1)
+    #expect(await h.lastOutcome() == .allowed)
+}
+
+@Test func execNeverOffersOrAppliesAlways() async {
+    let h = Harness(decisions: [.allowAlways])
+    let out = await h.call("exec_in_container", ["container": .string("web"), "command": .array([.string("ls")])])
+    #expect(!out.isError)
+    #expect(await h.scripted.requests.first?.allowsAlways == false)
+    #expect(await h.permissions.permission(for: "exec_in_container") == .ask)
+}
+
+@Test func askDenyDoesNotExecute() async {
+    let h = Harness(decisions: [.deny])
+    let out = await h.call("stop_container", ["container": .string("web")])
+    #expect(out.isError && out.text.contains("denied"))
+    #expect(await h.docker.calls.allSatisfy { !$0.hasPrefix("stop:") })
+    #expect(await h.lastOutcome() == .denied)
+}
+
+@Test func askTimeoutDeniesAndDoesNotExecute() async {
+    let h = Harness(prompter: NeverPrompter(), timeout: .milliseconds(50))
+    let out = await h.call("stop_container", ["container": .string("web")])
+    #expect(out.isError && out.text.contains("timed out"))
+    #expect(await h.docker.calls.allSatisfy { !$0.hasPrefix("stop:") })
+    #expect(await h.lastOutcome() == .denied)
+}
+
+@Test func timeoutRemovesTheRequestFromTheRealQueue() async throws {
+    let queue = ApprovalQueue()
+    let h = Harness(prompter: queue, timeout: .milliseconds(50))
+    let out = await h.call("stop_container", ["container": .string("web")])
+    #expect(out.isError)
+    for _ in 0..<200 where !(await queue.pending().isEmpty) { try await Task.sleep(for: .milliseconds(5)) }
+    #expect(await queue.pending().isEmpty)
+}
+
+@Test func dockerUnavailableIsExplainedNotHung() async {
+    let h = Harness(dockerAvailable: false)
+    let out = await h.call("list_containers")
+    #expect(out.isError && out.text.contains("Docker is not connected"))
+    #expect(await h.lastOutcome() == .error)
+}
+
+// MARK: - Container resolution
+
+@Test func containerResolution() async {
+    let h = Harness()
+    let byName = await h.call("start_container", ["container": .string("web")])
+    #expect(!byName.isError)
+    let byPrefix = await h.call("start_container", ["container": .string("bbb")])
+    #expect(!byPrefix.isError)
+    let calls = await h.docker.calls
+    #expect(calls.contains("start:\(web)"))
+    #expect(calls.contains("start:\(FakeDocker.id("bbb222"))"))
+
+    let ambiguous = await h.call("start_container", ["container": .string("abc")])
+    #expect(ambiguous.isError && ambiguous.text.contains("svc-a") && ambiguous.text.contains("svc-b"))
+
+    let missing = await h.call("start_container", ["container": .string("ghost")])
+    #expect(missing.isError && missing.text.contains("No container matches"))
+    #expect(await h.docker.calls.filter { $0.hasPrefix("start:") }.count == 2)
+}
+
+// MARK: - Outputs
+
+@Test func inspectMasksEnvButGetContainerEnvDoesNot() async {
+    let h = Harness(decisions: [.allowOnce])
+    let inspected = await h.call("inspect_container", ["container": .string("web")])
+    #expect(inspected.text.contains("PLAIN=***") && !inspected.text.contains("hunter2"))
+    let env = await h.call("get_container_env", ["container": .string("web")])
+    #expect(env.text.contains("SECRET=hunter2") && env.text.contains("PLAIN=1"))
+}
+
+@Test func getLogsClampsAndDefaultsTail() async {
+    let h = Harness()
+    let out = await h.call("get_logs", ["container": .string("web"), "tail": .int(5000)])
+    #expect(out.text == "first\nsecond")
+    #expect(await h.docker.requestedTail == 2000)
+    _ = await h.call("get_logs", ["container": .string("web")])
+    #expect(await h.docker.requestedTail == 100)
+    _ = await h.call("get_logs", ["container": .string("web"), "tail": .int(0)])
+    #expect(await h.docker.requestedTail == 1)
+}
+
+@Test func getStatsReturnsNamedFields() async throws {
+    let h = Harness()
+    let out = await h.call("get_stats", ["container": .string("web")])
+    let stats = try #require(try json(out.text) as? [String: Any])
+    #expect(stats["cpu_percent"] as? Double == 80)
+    #expect(stats["memory_used_bytes"] as? Int == 600)
+    #expect(stats["memory_limit_bytes"] as? Int == 1000)
+}
+
+@Test func execResultIsFormattedAsJSON() async throws {
+    let h = Harness(decisions: [.allowOnce])
+    let out = await h.call("exec_in_container", ["container": .string("web"), "command": .array([.string("echo")])])
+    let result = try #require(try json(out.text) as? [String: Any])
+    #expect(result["exit_code"] as? Int == 0)
+    #expect(result["stdout"] as? String == "hi\n")
+    #expect(result["truncated"] as? Bool == false)
+}
+
+@Test func removeContainerForwardsForce() async {
+    let h = Harness(decisions: [.allowOnce, .allowOnce])
+    _ = await h.call("remove_container", ["container": .string("web")])
+    _ = await h.call("remove_container", ["container": .string("web"), "force": .bool(true)])
+    let calls = await h.docker.calls
+    #expect(calls.contains("remove:\(web):force=false") && calls.contains("remove:\(web):force=true"))
+}
+
+// MARK: - Approval request content
+
+@Test func approvalRequestShowsContainerNameCommandAndReason() async throws {
+    let h = Harness(decisions: [.allowOnce])
+    _ = await h.call(
+        "exec_in_container",
+        ["container": .string("web"), "command": .array([.string("ls"), .string("-la"), .string("/my app")]),
+         "reason": .string("debugging")],
+        client: "Claude Code")
+    let request = try #require(await h.scripted.requests.first)
+    #expect(request.client == "Claude Code" && request.tool == "exec_in_container")
+    #expect(request.reason == "debugging")
+    #expect(request.arguments.contains(ApprovalArgument(name: "container", value: "web")))
+    #expect(request.arguments.contains(ApprovalArgument(name: "command", value: #"ls -la "/my app""#)))
+}
+
+// MARK: - Errors and activity
+
+@Test func dockerErrorBecomesToolError() async {
+    let h = Harness()
+    await h.docker.setFailure(DockerError.conflict("container is running"))
+    let out = await h.call("start_container", ["container": .string("web")])
+    #expect(out.isError && out.text.contains("container is running"))
+    #expect(await h.lastOutcome() == .error)
+}
+
+@Test func activityRecordsClientToolAndArguments() async throws {
+    let h = Harness()
+    _ = await h.call("get_logs", ["container": .string("web"), "tail": .int(5), "reason": .string("why")],
+                     client: "Cursor")
+    let entry = try #require(await h.activity.entries().first)
+    #expect(entry.client == "Cursor" && entry.tool == "get_logs")
+    #expect(entry.arguments.contains("container=web") && entry.arguments.contains("tail=5"))
+    #expect(entry.arguments.contains("reason=why"))
+}
+
+@Test func reasonIsAcceptedByEveryTool() async throws {
+    let h = Harness()
+    for spec in ToolCatalog.all { try await h.permissions.set(.allow, for: spec.name) }
+    for spec in ToolCatalog.all {
+        var arguments: [String: JSONValue] = ["reason": .string("because")]
+        for parameter in spec.parameters where parameter.required {
+            arguments[parameter.name] = parameter.kind == .stringArray ? .array([.string("echo")]) : .string("web")
+        }
+        let out = await h.call(spec.name, arguments)
+        #expect(!out.isError, "\(spec.name): \(out.text)")
+    }
+}

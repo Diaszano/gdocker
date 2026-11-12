@@ -1,0 +1,249 @@
+import Foundation
+
+public struct ToolOutput: Sendable, Equatable {
+    public let text: String
+    public let isError: Bool
+
+    public init(text: String, isError: Bool) { self.text = text; self.isError = isError }
+}
+
+/// Runs one MCP tool call: validates the arguments, applies the Allow/Ask/Deny rule (asking the user when needed),
+/// resolves the container, runs the Docker operation and records what happened. Nothing reaches Docker unless the
+/// rule or the user allowed it.
+public actor ToolRouter {
+    private let docker: @Sendable () async -> (any DockerOperations)?
+    private let permissions: PermissionStore
+    private let prompter: any ApprovalPrompter
+    private let activity: ActivityLog
+    private let approvalTimeout: Duration
+
+    public init(
+        docker: @escaping @Sendable () async -> (any DockerOperations)?,
+        permissions: PermissionStore, prompter: any ApprovalPrompter, activity: ActivityLog,
+        approvalTimeout: Duration = .seconds(120)
+    ) {
+        self.docker = docker
+        self.permissions = permissions
+        self.prompter = prompter
+        self.activity = activity
+        self.approvalTimeout = approvalTimeout
+    }
+
+    public func call(_ tool: String, arguments raw: [String: JSONValue], client: String) async -> ToolOutput {
+        guard let spec = ToolCatalog.spec(named: tool) else {
+            return await finish(client, tool, "", .error, "Unknown tool '\(tool)'.", isError: true)
+        }
+        let args: ToolArguments
+        do {
+            args = try ToolArguments(spec: spec, raw: raw)
+        } catch {
+            let message = (error as? ToolFailure)?.message ?? "\(error)"
+            return await finish(client, tool, "", .error, message, isError: true)
+        }
+        func done(_ outcome: ActivityEntry.Outcome, _ text: String, isError: Bool) async -> ToolOutput {
+            await finish(client, tool, args.summary, outcome, text, isError: isError)
+        }
+
+        let rule = await permissions.permission(for: tool)
+        if rule == .deny {
+            return await done(.denied, "Blocked: the user set \(tool) to Deny in gdocker Permissions.", isError: true)
+        }
+        guard let docker = await docker() else {
+            return await done(
+                .error, "Docker is not connected. Open GDocker and make sure Docker is running.", isError: true)
+        }
+
+        do {
+            let target = try await resolveTarget(of: spec, args, docker)
+            var outcome = ActivityEntry.Outcome.allowed
+            if rule == .ask {
+                let request = ApprovalRequest(
+                    client: client, tool: tool, arguments: displayArguments(spec, args, target),
+                    reason: args.reason, allowsAlways: spec.allowsAlways)
+                guard let decision = await decide(request) else {
+                    return await done(
+                        .denied, "Approval timed out: the user did not respond in time, so \(tool) was not run.",
+                        isError: true)
+                }
+                switch decision {
+                case .deny:
+                    return await done(.denied, "The user denied this request: \(tool) was not run.", isError: true)
+                case .allowAlways:
+                    if spec.allowsAlways { try? await permissions.set(.allow, for: tool) }
+                    outcome = .approved
+                case .allowOnce:
+                    outcome = .approved
+                }
+            }
+            return await done(outcome, try await run(tool, args, target, docker), isError: false)
+        } catch let failure as ToolFailure {
+            return await done(.error, failure.message, isError: true)
+        } catch {
+            return await done(.error, (error as? DockerError)?.errorDescription ?? "\(error)", isError: true)
+        }
+    }
+
+    // MARK: - Approval
+
+    /// `nil` when the user did not answer within the timeout. The prompter must honour cancellation (the
+    /// `ApprovalQueue` does), otherwise the race below cannot end.
+    private func decide(_ request: ApprovalRequest) async -> ApprovalDecision? {
+        let prompter = prompter
+        let timeout = approvalTimeout
+        return await withTaskGroup(of: ApprovalDecision?.self) { group in
+            group.addTask { await prompter.decide(request) }
+            group.addTask {
+                try? await Task.sleep(for: timeout)
+                return nil
+            }
+            let first = await group.next() ?? nil
+            group.cancelAll()
+            return first
+        }
+    }
+
+    private func displayArguments(
+        _ spec: ToolSpec, _ args: ToolArguments, _ target: ContainerSummary?
+    ) -> [ApprovalArgument] {
+        var shown: [ApprovalArgument] = []
+        if let target { shown.append(ApprovalArgument(name: "container", value: target.name)) }
+        for parameter in spec.parameters where parameter.name != "container" {
+            switch parameter.kind {
+            case .stringArray:
+                if let argv = args.strings(parameter.name) {
+                    shown.append(ApprovalArgument(name: parameter.name, value: ToolArguments.displayCommand(argv)))
+                }
+            case .string:
+                if let text = args.string(parameter.name) { shown.append(ApprovalArgument(name: parameter.name, value: text)) }
+            case .integer:
+                if let number = args.int(parameter.name) {
+                    shown.append(ApprovalArgument(name: parameter.name, value: String(number)))
+                }
+            case .boolean:
+                if let flag = args.bool(parameter.name) {
+                    shown.append(ApprovalArgument(name: parameter.name, value: String(flag)))
+                }
+            }
+        }
+        return shown
+    }
+
+    // MARK: - Container resolution
+
+    private func resolveTarget(
+        of spec: ToolSpec, _ args: ToolArguments, _ docker: any DockerOperations
+    ) async throws -> ContainerSummary? {
+        guard spec.parameters.contains(where: { $0.name == "container" }), let reference = args.string("container")
+        else { return nil }
+        let containers = try await docker.listContainers()
+        if let exact = containers.first(where: { $0.name == reference }) { return exact }
+        let byPrefix = containers.filter { $0.id.hasPrefix(reference) }
+        switch byPrefix.count {
+        case 1: return byPrefix[0]
+        case 0: throw ToolFailure("No container matches '\(reference)'.")
+        default:
+            let names = byPrefix.map(\.name).joined(separator: ", ")
+            throw ToolFailure("Ambiguous container '\(reference)': matches \(names). Use the full name or a longer id.")
+        }
+    }
+
+    // MARK: - Execution
+
+    private func run(
+        _ tool: String, _ args: ToolArguments, _ target: ContainerSummary?, _ docker: any DockerOperations
+    ) async throws -> String {
+        switch tool {
+        case "list_containers":
+            let showAll = args.bool("all") ?? true
+            let containers = try await docker.listContainers().filter { showAll || $0.isActive }
+            return Self.jsonText(containers.map(Self.describe))
+        case "inspect_container":
+            return Masking.maskEnv(inInspectJSON: try await docker.inspect(try need(target).id).rawJSON)
+        case "get_logs":
+            let tail = min(max(args.int("tail") ?? 100, 1), 2000)
+            let timestamps = args.bool("timestamps") ?? false
+            let lines = try await docker.recentLogs(try need(target).id, tail: tail, timestamps: timestamps)
+            return lines.map { line in
+                line.timestamp.map { "\(Self.iso($0)) \(line.text)" } ?? line.text
+            }.joined(separator: "\n")
+        case "get_stats":
+            let sample = try await docker.statsOnce(try need(target).id)
+            return Self.jsonText([
+                "cpu_percent": (sample.cpuPercent * 100).rounded() / 100,
+                "memory_used_bytes": Int(clamping: sample.memoryUsed),
+                "memory_limit_bytes": Int(clamping: sample.memoryLimit),
+                "net_rx_bytes": Int(clamping: sample.netRx),
+                "net_tx_bytes": Int(clamping: sample.netTx),
+            ] as [String: Any])
+        case "get_container_env":
+            let env = try await docker.inspect(try need(target).id).details.config.env
+            return env.isEmpty ? "(no environment variables)" : env.joined(separator: "\n")
+        case "start_container":
+            let container = try need(target)
+            try await docker.start(container.id)
+            return "Started \(container.name)"
+        case "restart_container":
+            let container = try need(target)
+            try await docker.restart(container.id)
+            return "Restarted \(container.name)"
+        case "stop_container":
+            let container = try need(target)
+            try await docker.stop(container.id)
+            return "Stopped \(container.name)"
+        case "exec_in_container":
+            let container = try need(target)
+            let result = try await docker.exec(container.id, command: args.strings("command") ?? [])
+            return Self.jsonText([
+                "exit_code": result.exitCode, "stdout": result.stdout, "stderr": result.stderr,
+                "truncated": result.truncated,
+            ] as [String: Any])
+        case "remove_container":
+            let container = try need(target)
+            try await docker.remove(container.id, force: args.bool("force") ?? false)
+            return "Removed \(container.name)"
+        default:
+            throw ToolFailure("Tool '\(tool)' is not implemented.")
+        }
+    }
+
+    private func need(_ target: ContainerSummary?) throws -> ContainerSummary {
+        guard let target else { throw ToolFailure("Missing required argument 'container'.") }
+        return target
+    }
+
+    // MARK: - Formatting
+
+    private func finish(
+        _ client: String, _ tool: String, _ arguments: String, _ outcome: ActivityEntry.Outcome,
+        _ text: String, isError: Bool
+    ) async -> ToolOutput {
+        await activity.record(
+            client: client, tool: tool, arguments: arguments, outcome: outcome,
+            detail: isError ? text : nil)
+        return ToolOutput(text: text, isError: isError)
+    }
+
+    private static func describe(_ container: ContainerSummary) -> [String: Any] {
+        var ports: [String] = []
+        for port in container.ports {
+            let text = port.publicPort.map { "\($0)->\(port.privatePort)/\(port.type)" } ?? "\(port.privatePort)/\(port.type)"
+            if !ports.contains(text) { ports.append(text) }
+        }
+        return [
+            "id": String(container.id.prefix(12)), "name": container.name, "image": container.image,
+            "state": container.state, "status": container.status,
+            "project": container.composeProject ?? NSNull(), "ports": ports,
+        ]
+    }
+
+    private static func jsonText(_ object: Any) -> String {
+        let data = try? JSONSerialization.data(withJSONObject: object, options: [.prettyPrinted, .sortedKeys])
+        return String(decoding: data ?? Data(), as: UTF8.self)
+    }
+
+    private static func iso(_ date: Date) -> String {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return formatter.string(from: date)
+    }
+}
