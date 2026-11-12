@@ -4,6 +4,9 @@ enum SidebarItem: Hashable { case containers, permissions, activity }
 
 struct MainWindow: View {
     @Environment(ContainersStore.self) private var store
+    @Environment(ImagesStore.self) private var imagesStore
+    @Environment(VolumesStore.self) private var volumesStore
+    @Environment(NetworksStore.self) private var networksStore
     @Environment(McpController.self) private var mcp
     @State private var section: SidebarItem? = .containers
 
