@@ -1,6 +1,5 @@
 import SwiftUI
 
-@main
 struct GDockerApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var delegate
     @State private var store = ContainersStore()

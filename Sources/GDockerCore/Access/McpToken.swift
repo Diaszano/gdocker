@@ -3,10 +3,13 @@ import Security
 
 /// The bearer token every MCP request must carry. Created on first use and kept in the secret store.
 public actor McpTokenProvider {
+    /// The keychain account of the token; the `--stdio` bridge reads it without ever creating one.
+    public static let defaultAccount = "mcp-token"
+
     private let store: any SecretStore
     private let account: String
 
-    public init(store: any SecretStore, account: String = "mcp-token") {
+    public init(store: any SecretStore, account: String = McpTokenProvider.defaultAccount) {
         self.store = store
         self.account = account
     }
