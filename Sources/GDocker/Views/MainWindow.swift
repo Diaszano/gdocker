@@ -33,10 +33,18 @@ struct MainWindow: View {
                 .navigationSplitViewColumnWidth(min: 300, ideal: 380, max: 480)
         } detail: {
             if let selected = store.selected {
-                Text(verbatim: selected.name)
+                ContainerDetail(container: selected).id(selected.id)
             } else {
                 Text("Select a container", bundle: .l10n).foregroundStyle(.secondary)
             }
+        }
+        .alert(
+            Text("Docker error", bundle: .l10n),
+            isPresented: Binding(get: { store.lastError != nil }, set: { if !$0 { store.lastError = nil } })
+        ) {
+            Button { } label: { Text("OK", bundle: .l10n) }
+        } message: {
+            Text(verbatim: store.lastError ?? "")
         }
     }
 }

@@ -1,42 +1,81 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "Containers" : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Containers" } },
-        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Containers" } }
-      }
-    },
-    "Docker connected" : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Docker connected" } },
-        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Docker conectado" } }
-      }
-    },
-    "Docker disconnected" : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Docker disconnected" } },
-        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Docker desconectado" } }
-      }
-    },
-    "No group" : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "No group" } },
-        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Sem grupo" } }
-      }
-    },
-    "Search containers" : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Search containers" } },
-        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Buscar containers" } }
-      }
-    },
-    "Select a container" : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Select a container" } },
-        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Selecione um container" } }
-      }
-    }
+    "CPU" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "CPU" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "CPU" } } } },
+    "Containers" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Containers" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Containers" } } } },
+    "Docker connected" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Docker connected" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Docker conectado" } } } },
+    "Docker disconnected" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Docker disconnected" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Docker desconectado" } } } },
+    "Docker error" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Docker error" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Erro do Docker" } } } },
+    "Env" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Env" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Env" } } } },
+    "Filter logs" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Filter logs" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Filtrar logs" } } } },
+    "Follow" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Follow" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Seguir" } } } },
+    "Inspect" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Inspect" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Inspecionar" } } } },
+    "Logs" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Logs" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Logs" } } } },
+    "Memory" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Memory" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Memória" } } } },
+    "Network" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Network" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Rede" } } } },
+    "No environment variables" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "No environment variables" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Sem variáveis de ambiente" } } } },
+    "No group" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "No group" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Sem grupo" } } } },
+    "OK" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "OK" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "OK" } } } },
+    "Remove" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Remove" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Remover" } } } },
+    "Remove container?" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Remove container?" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Remover container?" } } } },
+    "Restart" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Restart" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Reiniciar" } } } },
+    "Search containers" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Search containers" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Buscar containers" } } } },
+    "Select a container" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Select a container" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Selecione um container" } } } },
+    "Start" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Start" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Iniciar" } } } },
+    "Stats" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Stats" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Stats" } } } },
+    "Stop" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Stop" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Parar" } } } },
+    "The container will be deleted permanently." : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "The container will be deleted permanently." } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "O container será apagado permanentemente." } } } },
+    "Timestamps" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Timestamps" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Timestamps" } } } }
   },
   "version" : "1.0"
 }
