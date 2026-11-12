@@ -77,6 +77,32 @@ public actor DockerClient {
         }
     }
 
+    /// Streams stats samples, skipping the first one (no previous CPU reading yet).
+    public func stats(_ id: String) -> AsyncThrowingStream<StatsSample, Error> {
+        let request = request(.GET, "/containers/\(id)/stats?stream=1")
+        return AsyncThrowingStream { continuation in
+            let task = Task {
+                do {
+                    let response = try await self.execute(request, timeout: .hours(24 * 365))
+                    try await Self.requireOK(response)
+                    var pending = Data()
+                    for try await chunk in response.body {
+                        pending.append(contentsOf: chunk.readableBytesView)
+                        while let newline = pending.firstIndex(of: 0x0A) {
+                            let line = pending[..<newline]
+                            pending.removeSubrange(...newline)
+                            if let sample = try StatsSample.from(json: Data(line)) { continuation.yield(sample) }
+                        }
+                    }
+                    continuation.finish()
+                } catch {
+                    continuation.finish(throwing: error)
+                }
+            }
+            continuation.onTermination = { _ in task.cancel() }
+        }
+    }
+
     static func requireOK(_ response: HTTPClientResponse) async throws {
         guard response.status.code != 200 else { return }
         let body = try await response.body.collect(upTo: 1024 * 1024)

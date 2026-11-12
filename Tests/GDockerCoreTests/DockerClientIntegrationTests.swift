@@ -40,6 +40,16 @@ private func withClient<T: Sendable>(_ body: (DockerClient) async throws -> T) a
         #expect(lines.allSatisfy { $0.timestamp != nil })
     }
 
+    @Test func statsStreamYieldsASampleAndCancels() async throws {
+        let sample = try await withClient { client -> StatsSample? in
+            guard let running = try await client.listContainers().first(where: { $0.statusKind == .running })
+            else { return nil }
+            for try await sample in await client.stats(running.id) { return sample }
+            return nil
+        }
+        if let sample { #expect(sample.memoryLimit > 0) }
+    }
+
     @Test func inspectMissingContainerIsNotFound() async throws {
         await #expect {
             try await withClient { _ = try await $0.inspect("gdocker-nope-\(UUID().uuidString)") }
