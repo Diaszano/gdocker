@@ -23,8 +23,6 @@ struct ContainerDetail: View {
         }
     }
 
-    private var isActive: Bool { container.statusKind == .running || container.statusKind == .transitioning }
-
     var body: some View {
         VStack(spacing: 0) {
             header
@@ -38,8 +36,8 @@ struct ContainerDetail: View {
             Divider()
             content
         }
-        // Re-run when the container restarts (same id, new state) so the log stream reconnects.
-        .task(id: "\(container.id)|\(container.state)") { await load() }
+        // Re-run when the container changes state or an action ran, so the log stream reconnects after a restart.
+        .task(id: "\(container.id)|\(container.state)|\(store.revision)") { await load() }
         .onChange(of: logs.showTimestamps) { logs.restart() }
         .onDisappear { logs.detach() }
         .confirmationDialog(
@@ -64,7 +62,7 @@ struct ContainerDetail: View {
             Button { Task { await store.perform(.restart, on: container.id) } } label: {
                 Text("Restart", bundle: .l10n)
             }
-            if isActive {
+            if container.isActive {
                 Button { Task { await store.perform(.stop, on: container.id) } } label: {
                     Text("Stop", bundle: .l10n)
                 }

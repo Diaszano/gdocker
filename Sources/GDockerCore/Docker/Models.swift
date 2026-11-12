@@ -53,6 +53,9 @@ public struct ContainerSummary: Decodable, Identifiable, Hashable, Sendable {
 
     public var composeProject: String? { labels["com.docker.compose.project"] }
 
+    /// Has a live process, so the user can stop it. `created` is not active (it offers Start) even though its dot is orange.
+    public var isActive: Bool { ["running", "paused", "restarting"].contains(state) }
+
     public var statusKind: StatusKind {
         switch state {
         case "running": return .running

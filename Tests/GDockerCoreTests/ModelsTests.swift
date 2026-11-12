@@ -36,6 +36,15 @@ func statusKindMapping(state: String, status: String, expected: StatusKind) {
     #expect(summary("c", state: state, status: status).statusKind == expected)
 }
 
+/// "created" counts as transitioning for the status dot but must offer Start, not Stop.
+@Test(arguments: [
+    ("running", true), ("paused", true), ("restarting", true),
+    ("created", false), ("exited", false), ("dead", false),
+])
+func isActiveDecidesStopVersusStart(state: String, expected: Bool) {
+    #expect(summary("c", state: state).isActive == expected)
+}
+
 @Test func grouping() {
     let groups = groupByCompose([
         summary("postgres", project: "myapp"),

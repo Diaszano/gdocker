@@ -9,6 +9,9 @@ final class ContainersStore {
     private(set) var client: DockerClient?
     var selectedID: String?
     var lastError: String?
+    /// Bumped after every action. A restart can finish between two polls, leaving id and state unchanged, while Docker
+    /// has already closed the container's log stream; views key their streams on this to reopen them.
+    private(set) var revision = 0
     var searchText = ""
 
     private(set) var all: [ContainerSummary] = []
@@ -50,6 +53,7 @@ final class ContainersStore {
         } catch {
             lastError = error.localizedDescription
         }
+        revision += 1
         await refresh()
     }
 
