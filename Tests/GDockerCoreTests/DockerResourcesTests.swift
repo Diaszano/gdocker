@@ -207,7 +207,10 @@ import Testing
         let prune = try await fake.pruneImages()
         #expect(prune.deleted == ["img1"])
         #expect(prune.spaceReclaimed == 2048)
-        #expect(await fake.calls.contains("pruneImages"))
+        #expect(await fake.calls.contains("pruneImages:all=false"))
+
+        _ = try await fake.pruneImages(all: true)
+        #expect(await fake.calls.contains("pruneImages:all=true"))
     }
 
     @Test func fakeDockerVolumeOperations() async throws {
@@ -260,13 +263,13 @@ import Testing
         let calls = await fake.calls
         #expect(calls.contains("pruneContainers"))
         #expect(calls.contains("pruneNetworks"))
-        #expect(calls.contains("pruneImages"))
+        #expect(calls.contains("pruneImages:all=false"))
         #expect(!calls.contains("pruneVolumes"))
 
         // Check execution order: containers -> networks -> images
         let containerIndex = try #require(calls.firstIndex(of: "pruneContainers"))
         let networkIndex = try #require(calls.firstIndex(of: "pruneNetworks"))
-        let imageIndex = try #require(calls.firstIndex(of: "pruneImages"))
+        let imageIndex = try #require(calls.firstIndex(of: "pruneImages:all=false"))
         #expect(containerIndex < networkIndex)
         #expect(networkIndex < imageIndex)
     }
@@ -284,13 +287,13 @@ import Testing
         let calls = await fake.calls
         #expect(calls.contains("pruneContainers"))
         #expect(calls.contains("pruneNetworks"))
-        #expect(calls.contains("pruneImages"))
+        #expect(calls.contains("pruneImages:all=true"))
         #expect(calls.contains("pruneVolumes"))
 
         // Check execution order: containers -> networks -> images -> volumes
         let containerIndex = try #require(calls.firstIndex(of: "pruneContainers"))
         let networkIndex = try #require(calls.firstIndex(of: "pruneNetworks"))
-        let imageIndex = try #require(calls.firstIndex(of: "pruneImages"))
+        let imageIndex = try #require(calls.firstIndex(of: "pruneImages:all=true"))
         let volumeIndex = try #require(calls.firstIndex(of: "pruneVolumes"))
         #expect(containerIndex < networkIndex)
         #expect(networkIndex < imageIndex)

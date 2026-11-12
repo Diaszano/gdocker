@@ -69,8 +69,9 @@ public actor DockerClient {
         _ = try await send(.DELETE, "/images/\(Self.pathSegment(id))?force=\(force)")
     }
 
-    public func pruneImages() async throws -> (deleted: [String], spaceReclaimed: Int64) {
-        let data = try await send(.POST, "/images/prune")
+    public func pruneImages(all: Bool = false) async throws -> (deleted: [String], spaceReclaimed: Int64) {
+        let query = all ? "?filters=%7B%22dangling%22%3A%5B%22false%22%5D%7D" : ""
+        let data = try await send(.POST, "/images/prune\(query)")
         let res = try JSONDecoder().decode(ImagePruneResponse.self, from: data)
         return (deleted: res.deletedItems, spaceReclaimed: res.spaceReclaimed ?? 0)
     }
@@ -110,26 +111,12 @@ public actor DockerClient {
         return res.networksDeleted ?? []
     }
 
-    // MARK: - Containers Prune & System Prune
+    // MARK: - Containers Prune
 
     public func pruneContainers() async throws -> (deleted: [String], spaceReclaimed: Int64) {
         let data = try await send(.POST, "/containers/prune")
         let res = try JSONDecoder().decode(ContainerPruneResponse.self, from: data)
         return (deleted: res.containersDeleted ?? [], spaceReclaimed: res.spaceReclaimed ?? 0)
-    }
-
-    public func systemPrune(all: Bool = false, volumes: Bool = false) async throws -> PruneReport {
-        let containers = try await pruneContainers()
-        let networks = try await pruneNetworks()
-        let images = try await pruneImages()
-        let volumesReport = volumes ? try await pruneVolumes() : (deleted: [], spaceReclaimed: 0)
-        return PruneReport(
-            containersDeleted: containers.deleted.count,
-            imagesDeleted: images.deleted.count,
-            networksDeleted: networks.count,
-            volumesDeleted: volumesReport.deleted.count,
-            spaceReclaimed: containers.spaceReclaimed + images.spaceReclaimed + volumesReport.spaceReclaimed
-        )
     }
 
     /// The last `tail` log lines, without following.

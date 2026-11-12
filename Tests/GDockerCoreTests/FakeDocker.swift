@@ -109,8 +109,8 @@ actor FakeDocker: DockerOperations {
         try record("removeImage:\(id):force=\(force)")
     }
 
-    func pruneImages() async throws -> (deleted: [String], spaceReclaimed: Int64) {
-        try record("pruneImages")
+    func pruneImages(all: Bool = false) async throws -> (deleted: [String], spaceReclaimed: Int64) {
+        try record("pruneImages:all=\(all)")
         return pruneImagesResult
     }
 
@@ -157,7 +157,7 @@ actor FakeDocker: DockerOperations {
         try record("systemPrune:all=\(all):volumes=\(volumes)")
         let c = try await pruneContainers()
         let n = try await pruneNetworks()
-        let i = try await pruneImages()
+        let i = try await pruneImages(all: all)
         let v = volumes ? try await pruneVolumes() : (deleted: [], spaceReclaimed: 0)
         return PruneReport(
             containersDeleted: c.deleted.count,
