@@ -1,12 +1,13 @@
 import SwiftUI
 
-enum SidebarItem: Hashable { case containers, images, volumes, networks, permissions, activity }
+enum SidebarItem: Hashable { case containers, images, volumes, networks, compose, permissions, activity }
 
 struct MainWindow: View {
     @Environment(ContainersStore.self) private var store
     @Environment(ImagesStore.self) private var imagesStore
     @Environment(VolumesStore.self) private var volumesStore
     @Environment(NetworksStore.self) private var networksStore
+    @Environment(ComposeStore.self) private var composeStore
     @Environment(McpController.self) private var mcp
     @State private var section: SidebarItem? = .containers
 
@@ -19,6 +20,7 @@ struct MainWindow: View {
             case .images: ImagesView()
             case .volumes: VolumesView()
             case .networks: NetworksView()
+            case .compose: ComposeView()
             case .permissions: PermissionsView(mcp: mcp)
             case .activity: ActivityView(model: mcp.activityModel)
             }
@@ -27,12 +29,14 @@ struct MainWindow: View {
             await imagesStore.refresh()
             await volumesStore.refresh()
             await networksStore.refresh()
+            await composeStore.refresh()
         }
         .task(id: section) {
             switch section {
             case .images: await imagesStore.refresh()
             case .volumes: await volumesStore.refresh()
             case .networks: await networksStore.refresh()
+            case .compose: await composeStore.refresh()
             default: break
             }
         }
@@ -42,6 +46,7 @@ struct MainWindow: View {
                     await imagesStore.refresh()
                     await volumesStore.refresh()
                     await networksStore.refresh()
+                    await composeStore.refresh()
                 }
             }
         }
@@ -101,6 +106,17 @@ struct MainWindow: View {
                     Text(verbatim: "\(networksStore.count)").foregroundStyle(.secondary)
                 }
                 .tag(SidebarItem.networks)
+
+                HStack {
+                    Label {
+                        Text("Compose", bundle: .l10n)
+                    } icon: {
+                        Image(systemName: "square.stack.3d.forward.dottedline")
+                    }
+                    Spacer()
+                    Text(verbatim: "\(composeStore.activeCount)").foregroundStyle(.secondary)
+                }
+                .tag(SidebarItem.compose)
             }
             Section(header: Text("AI", bundle: .l10n)) {
                 McpStatusRow(mcp: mcp)
