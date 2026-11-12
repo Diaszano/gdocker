@@ -281,3 +281,115 @@ func wrongTypesAreErrorsWithoutDocker(tool: String, arguments: [String: JSONValu
         #expect(!out.isError, "\(spec.name): \(out.text)")
     }
 }
+
+// MARK: - Resource tools (Images, Volumes, Networks, System Prune)
+
+@Test func listImagesAllowedAndOutputsJSON() async throws {
+    let h = Harness()
+    let out = await h.call("list_images")
+    #expect(!out.isError)
+    let list = try #require(try json(out.text) as? [[String: Any]])
+    #expect(list.count == 3)
+    let nginx = try #require(list.first { ($0["repo_tags"] as? [String])?.contains("nginx:latest") == true })
+    #expect((nginx["id"] as? String)?.count == 12)
+    #expect(nginx["size_bytes"] as? Int64 == 142_000_000 || nginx["size_bytes"] as? Int == 142_000_000)
+    #expect(await h.docker.calls == ["listImages"])
+    #expect(await h.lastOutcome() == .allowed)
+}
+
+@Test func listVolumesAllowedAndOutputsJSON() async throws {
+    let h = Harness()
+    let out = await h.call("list_volumes")
+    #expect(!out.isError)
+    let list = try #require(try json(out.text) as? [[String: Any]])
+    #expect(list.count == 2)
+    let dbVol = try #require(list.first { $0["name"] as? String == "db_data" })
+    #expect(dbVol["driver"] as? String == "local")
+    #expect(dbVol["scope"] as? String == "local")
+    #expect(await h.docker.calls == ["listVolumes"])
+    #expect(await h.lastOutcome() == .allowed)
+}
+
+@Test func listNetworksAllowedAndOutputsJSON() async throws {
+    let h = Harness()
+    let out = await h.call("list_networks")
+    #expect(!out.isError)
+    let list = try #require(try json(out.text) as? [[String: Any]])
+    #expect(list.count == 2)
+    let bridge = try #require(list.first { $0["name"] as? String == "bridge" })
+    #expect((bridge["id"] as? String)?.count == 12)
+    #expect(bridge["driver"] as? String == "bridge")
+    #expect(bridge["container_count"] as? Int == 2)
+    #expect(await h.docker.calls == ["listNetworks"])
+    #expect(await h.lastOutcome() == .allowed)
+}
+
+@Test func removeImageDenyByDefaultAndAllowExecutesWithForce() async throws {
+    let h = Harness()
+    let denied = await h.call("remove_image", ["image": .string("img111")])
+    #expect(denied.isError && denied.text.contains("Blocked"))
+    #expect(await h.docker.calls.isEmpty)
+    #expect(await h.lastOutcome() == .denied)
+
+    try await h.permissions.set(.allow, for: "remove_image")
+    let out = await h.call("remove_image", ["image": .string("img111"), "force": .bool(true)])
+    #expect(!out.isError && out.text.contains("img111"))
+    #expect(await h.docker.calls == ["removeImage:img111:force=true"])
+    #expect(await h.lastOutcome() == .allowed)
+}
+
+@Test func removeVolumePromptsApprovalWhenAsk() async throws {
+    let h = Harness(decisions: [.allowOnce])
+    try await h.permissions.set(.ask, for: "remove_volume")
+    let out = await h.call("remove_volume", ["volume": .string("db_data")], client: "claude")
+    #expect(!out.isError && out.text.contains("db_data"))
+    #expect(await h.docker.calls == ["removeVolume:db_data:force=false"])
+    #expect(await h.lastOutcome() == .approved)
+
+    let req = try #require(await h.scripted.requests.first)
+    #expect(req.tool == "remove_volume")
+    #expect(req.client == "claude")
+    #expect(req.arguments.contains(ApprovalArgument(name: "volume", value: "db_data")))
+}
+
+@Test func removeNetworkBlocksDefaultNetworksAndExecutesCustom() async throws {
+    let h = Harness()
+    let denied = await h.call("remove_network", ["network": .string("custom_net")])
+    #expect(denied.isError && denied.text.contains("Blocked"))
+    #expect(await h.docker.calls.isEmpty)
+    #expect(await h.lastOutcome() == .denied)
+
+    try await h.permissions.set(.allow, for: "remove_network")
+    for predefined in ["bridge", "host", "none"] {
+        let blocked = await h.call("remove_network", ["network": .string(predefined)])
+        #expect(blocked.isError && blocked.text.contains("cannot be removed"))
+    }
+    #expect(await h.docker.calls.filter { $0.hasPrefix("removeNetwork:") }.isEmpty)
+
+    let out = await h.call("remove_network", ["network": .string("custom_net")])
+    #expect(!out.isError && out.text.contains("custom_net"))
+    #expect(await h.docker.calls.contains("removeNetwork:custom_net"))
+    #expect(await h.lastOutcome() == .allowed)
+}
+
+@Test func systemPruneForwardsParametersAndOutputsReport() async throws {
+    let h = Harness()
+    let denied = await h.call("system_prune")
+    #expect(denied.isError && denied.text.contains("Blocked"))
+    #expect(await h.docker.calls.isEmpty)
+    #expect(await h.lastOutcome() == .denied)
+
+    try await h.permissions.set(.allow, for: "system_prune")
+    let out = await h.call("system_prune", ["all": .bool(true), "volumes": .bool(true)])
+    #expect(!out.isError)
+    #expect(await h.docker.calls.contains("systemPrune:all=true:volumes=true"))
+    let report = try #require(try json(out.text) as? [String: Any])
+    #expect(report["containers_deleted"] as? Int == 1)
+    #expect(report["images_deleted"] as? Int == 1)
+    #expect(report["networks_deleted"] as? Int == 1)
+    #expect(report["volumes_deleted"] as? Int == 1)
+    #expect((report["space_reclaimed_bytes"] as? Int64 ?? (report["space_reclaimed_bytes"] as? Int).map(Int64.init)) == 7168)
+
+    _ = await h.call("system_prune")
+    #expect(await h.docker.calls.contains("systemPrune:all=false:volumes=false"))
+}

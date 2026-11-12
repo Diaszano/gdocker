@@ -65,6 +65,52 @@ public enum ToolCatalog {
                 ToolParameter(name: "force", kind: .boolean, required: false,
                               summary: "Remove even if running. Defaults to false."),
             ]),
+        ToolSpec(
+            name: "list_images", title: "List images", group: .read, defaultPermission: .allow,
+            summary: "List local Docker images with their repository tags, size and creation date.",
+            parameters: []),
+        ToolSpec(
+            name: "list_volumes", title: "List volumes", group: .read, defaultPermission: .allow,
+            summary: "List Docker volumes with their name, driver and creation date.",
+            parameters: []),
+        ToolSpec(
+            name: "list_networks", title: "List networks", group: .read, defaultPermission: .allow,
+            summary: "List Docker networks with their name, driver, scope and connected container count.",
+            parameters: []),
+        ToolSpec(
+            name: "remove_image", title: "Remove an image", group: .destructive, defaultPermission: .deny,
+            summary: "Delete a Docker image permanently.",
+            parameters: [
+                ToolParameter(name: "image", kind: .string, required: true,
+                              summary: "Image ID, tag, or repository name."),
+                ToolParameter(name: "force", kind: .boolean, required: false,
+                              summary: "Force removal of the image. Defaults to false."),
+            ]),
+        ToolSpec(
+            name: "remove_volume", title: "Remove a volume", group: .destructive, defaultPermission: .deny,
+            summary: "Delete a Docker volume permanently.",
+            parameters: [
+                ToolParameter(name: "volume", kind: .string, required: true,
+                              summary: "Volume name."),
+                ToolParameter(name: "force", kind: .boolean, required: false,
+                              summary: "Force removal of the volume. Defaults to false."),
+            ]),
+        ToolSpec(
+            name: "remove_network", title: "Remove a network", group: .destructive, defaultPermission: .deny,
+            summary: "Delete a Docker network permanently.",
+            parameters: [
+                ToolParameter(name: "network", kind: .string, required: true,
+                              summary: "Network name or ID."),
+            ]),
+        ToolSpec(
+            name: "system_prune", title: "System prune", group: .destructive, defaultPermission: .deny,
+            summary: "Remove unused Docker data: stopped containers, unused networks, dangling/unused images, and optionally volumes.",
+            parameters: [
+                ToolParameter(name: "all", kind: .boolean, required: false,
+                              summary: "Remove all unused images, not just dangling ones. Defaults to false."),
+                ToolParameter(name: "volumes", kind: .boolean, required: false,
+                              summary: "Prune volumes in addition to other resources. Defaults to false."),
+            ]),
     ]
 
     public static func spec(named name: String) -> ToolSpec? { all.first { $0.name == name } }

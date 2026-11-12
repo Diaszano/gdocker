@@ -201,6 +201,49 @@ public actor ToolRouter {
             let container = try need(target)
             try await docker.remove(container.id, force: args.bool("force") ?? false)
             return "Removed \(container.name)"
+        case "list_images":
+            let images = try await docker.listImages()
+            return Self.jsonText(images.map(Self.describe))
+        case "list_volumes":
+            let volumes = try await docker.listVolumes()
+            return Self.jsonText(volumes.map(Self.describe))
+        case "list_networks":
+            let networks = try await docker.listNetworks()
+            return Self.jsonText(networks.map(Self.describe))
+        case "remove_image":
+            guard let image = args.string("image") else {
+                throw ToolFailure("Missing required argument 'image'.")
+            }
+            let force = args.bool("force") ?? false
+            try await docker.removeImage(image, force: force)
+            return "Removed \(image)"
+        case "remove_volume":
+            guard let volume = args.string("volume") else {
+                throw ToolFailure("Missing required argument 'volume'.")
+            }
+            let force = args.bool("force") ?? false
+            try await docker.removeVolume(volume, force: force)
+            return "Removed \(volume)"
+        case "remove_network":
+            guard let network = args.string("network") else {
+                throw ToolFailure("Missing required argument 'network'.")
+            }
+            let defaultNetworks: Set<String> = ["bridge", "host", "none"]
+            if defaultNetworks.contains(network.lowercased()) {
+                throw ToolFailure("Predefined network '\(network)' cannot be removed.")
+            }
+            let networks = try await docker.listNetworks()
+            if let match = networks.first(where: { $0.id == network || $0.id.hasPrefix(network) || $0.name == network }),
+               defaultNetworks.contains(match.name.lowercased()) {
+                throw ToolFailure("Predefined network '\(match.name)' cannot be removed.")
+            }
+            try await docker.removeNetwork(network)
+            return "Removed \(network)"
+        case "system_prune":
+            let all = args.bool("all") ?? false
+            let volumes = args.bool("volumes") ?? false
+            let report = try await docker.systemPrune(all: all, volumes: volumes)
+            return Self.jsonText(Self.describe(report))
         default:
             throw ToolFailure("Tool '\(tool)' is not implemented.")
         }
@@ -233,6 +276,48 @@ public actor ToolRouter {
             "id": String(container.id.prefix(12)), "name": container.name, "image": container.image,
             "state": container.state, "status": container.status,
             "project": container.composeProject ?? NSNull(), "ports": ports,
+        ]
+    }
+
+    private static func describe(_ image: ImageSummary) -> [String: Any] {
+        let cleanId = image.id.replacingOccurrences(of: "sha256:", with: "")
+        return [
+            "id": String(cleanId.prefix(12)),
+            "repo_tags": image.repoTags,
+            "size_bytes": image.size,
+            "created": image.created,
+        ]
+    }
+
+    private static func describe(_ volume: VolumeSummary) -> [String: Any] {
+        var dict: [String: Any] = [
+            "name": volume.name,
+            "driver": volume.driver,
+            "scope": volume.scope,
+        ]
+        if let createdAt = volume.createdAt {
+            dict["created_at"] = createdAt
+        }
+        return dict
+    }
+
+    private static func describe(_ network: NetworkSummary) -> [String: Any] {
+        return [
+            "id": String(network.id.prefix(12)),
+            "name": network.name,
+            "driver": network.driver,
+            "scope": network.scope,
+            "container_count": network.containerCount,
+        ]
+    }
+
+    private static func describe(_ report: PruneReport) -> [String: Any] {
+        return [
+            "containers_deleted": report.containersDeleted,
+            "images_deleted": report.imagesDeleted,
+            "networks_deleted": report.networksDeleted,
+            "volumes_deleted": report.volumesDeleted,
+            "space_reclaimed_bytes": report.spaceReclaimed,
         ]
     }
 
