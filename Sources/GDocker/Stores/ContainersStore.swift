@@ -57,7 +57,7 @@ final class ContainersStore {
         await refresh()
     }
 
-    private func refresh() async {
+    func refresh() async {
         do {
             if client == nil { client = try DockerClient.connect() }
             guard let client else { return }

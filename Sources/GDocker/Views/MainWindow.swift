@@ -57,7 +57,7 @@ struct MainWindow: View {
 
     private var sidebar: some View {
         List(selection: $section) {
-            Section(header: Text(verbatim: "Docker")) {
+            Section(header: Text("Docker", bundle: .l10n)) {
                 HStack {
                     Label {
                         Text("Containers", bundle: .l10n)

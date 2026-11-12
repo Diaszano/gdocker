@@ -2,7 +2,7 @@
 """Checks that every user-facing string used in the code exists in the string catalog with en and pt-BR.
 
 Usage: python3 -I scripts/check_l10n.py <repo root>
-Exits 1 when a string is missing a translation or is used but absent from the catalog.
+Exits 1 when a string is missing a translation, is used but absent from the catalog, or is unused.
 """
 import json
 import pathlib
@@ -26,6 +26,7 @@ for path in (root / "Sources/GDocker").rglob("*.swift"):
     used |= set(re.findall(r'case \.\w+: "([^"]+)"', source))  # LocalizedStringKey enum titles
     used |= set(re.findall(r'prompt:\s*Text\("([^"]+)"', source))
     used |= set(re.findall(r'localizedString\(forKey:\s*"([^"]+)"', source))
+    used |= set(re.findall(r'CommandMenu\("([^"]+)"', source))
     used |= {key(match) for match in re.findall(r'String\(localized:\s*"((?:[^"\\]|\\.)*)"', source)}
 
 # Tool titles are shown in the permissions screen, so they must be translated too.
@@ -41,4 +42,4 @@ print("missing pt-BR:", missing_pt)
 print("missing en:", missing_en)
 print("used but not in catalog:", unknown)
 print("in catalog but unused:", unused)
-sys.exit(1 if (missing_pt or missing_en or unknown) else 0)
+sys.exit(1 if (missing_pt or missing_en or unknown or unused) else 0)
