@@ -18,6 +18,7 @@ final class McpController {
     private(set) var state = State.stopped
     private(set) var clientCount = 0
     let permissions: PermissionStore
+    let permissionsModel: PermissionsModel
     let activity: ActivityLog
     let approvals: ApprovalQueue
 
@@ -34,6 +35,7 @@ final class McpController {
         // GDOCKER_APPROVAL_TIMEOUT (seconds) exists so a verification run does not wait two minutes for a prompt.
         let seconds = ProcessInfo.processInfo.environment["GDOCKER_APPROVAL_TIMEOUT"].flatMap(Double.init) ?? 120
         self.permissions = permissions
+        permissionsModel = PermissionsModel(store: permissions)
         self.activity = activity
         self.approvals = approvals
         router = ToolRouter(

@@ -1,6 +1,75 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "Permissions" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Permissions" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Permissões" } } } },
+    "Choose what the AI can do on its own, what needs your approval, and what is forbidden." : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Choose what the AI can do on its own, what needs your approval, and what is forbidden." } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Escolha o que a IA pode fazer sozinha, o que precisa da sua aprovação e o que é proibido." } } } },
+    "Reading" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Reading" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Leitura" } } } },
+    "Sensitive reading" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Sensitive reading" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Leitura sensível" } } } },
+    "Control" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Control" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Controle" } } } },
+    "Destructive" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Destructive" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Destrutivo" } } } },
+    "Allow" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Allow" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Permitir" } } } },
+    "Ask" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Ask" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Perguntar" } } } },
+    "Deny" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Deny" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Negar" } } } },
+    "MCP server active" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "MCP server active" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Servidor MCP ativo" } } } },
+    "Starting MCP server…" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Starting MCP server…" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Iniciando o servidor MCP…" } } } },
+    "MCP server stopped" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "MCP server stopped" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Servidor MCP parado" } } } },
+    "MCP server error" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "MCP server error" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Erro no servidor MCP" } } } },
+    "Connected clients: %@" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Connected clients: %@" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Clientes conectados: %@" } } } },
+    "Copy config" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Copy config" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Copiar config" } } } },
+    "Claude Code (HTTP)" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Claude Code (HTTP)" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Claude Code (HTTP)" } } } },
+    "JSON (HTTP)" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "JSON (HTTP)" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "JSON (HTTP)" } } } },
+    "Claude Desktop (stdio)" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Claude Desktop (stdio)" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Claude Desktop (stdio)" } } } },
+    "Regenerate token" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Regenerate token" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Gerar novo token" } } } },
+    "Regenerate token?" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Regenerate token?" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Gerar novo token?" } } } },
+    "Clients using the old token stop working until you copy the config again." : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Clients using the old token stop working until you copy the config again." } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Os clientes que usam o token antigo deixam de funcionar até você copiar a config de novo." } } } },
+    "Copied" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Copied" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Copiado" } } } },
+    "Cancel" : { "localizations" : {
+      "en" : { "stringUnit" : { "state" : "translated", "value" : "Cancel" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Cancelar" } } } },
     "AI" : { "localizations" : {
       "en" : { "stringUnit" : { "state" : "translated", "value" : "AI" } },
       "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "IA" } } } },

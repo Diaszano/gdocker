@@ -1,45 +1,19 @@
 import SwiftUI
 
+enum SidebarItem: Hashable { case containers, permissions }
+
 struct MainWindow: View {
     @Environment(ContainersStore.self) private var store
     @Environment(McpController.self) private var mcp
+    @State private var section: SidebarItem? = .containers
 
     var body: some View {
         NavigationSplitView {
-            List {
-                Section(header: Text(verbatim: "Docker")) {
-                    HStack {
-                        Text("Containers", bundle: .l10n)
-                        Spacer()
-                        Text(verbatim: "\(store.all.count)").foregroundStyle(.secondary)
-                    }
-                }
-                Section(header: Text("AI", bundle: .l10n)) {
-                    McpStatusRow(mcp: mcp)
-                }
-            }
-            .listStyle(.sidebar)
-            .safeAreaInset(edge: .bottom) {
-                HStack(spacing: 6) {
-                    Circle().fill(store.connected ? Color.green : Color.red).frame(width: 8, height: 8)
-                    store.connected
-                        ? Text("Docker connected", bundle: .l10n)
-                        : Text("Docker disconnected", bundle: .l10n)
-                    Spacer()
-                }
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .padding(10)
-            }
-            .navigationSplitViewColumnWidth(min: 170, ideal: 190, max: 240)
-        } content: {
-            ContainerList()
-                .navigationSplitViewColumnWidth(min: 300, ideal: 380, max: 480)
+            sidebar
         } detail: {
-            if let selected = store.selected {
-                ContainerDetail(container: selected).id(selected.id)
-            } else {
-                Text("Select a container", bundle: .l10n).foregroundStyle(.secondary)
+            switch section ?? .containers {
+            case .containers: containers
+            case .permissions: PermissionsView(mcp: mcp)
             }
         }
         .alert(
@@ -49,6 +23,54 @@ struct MainWindow: View {
             Button { } label: { Text("OK", bundle: .l10n) }
         } message: {
             Text(verbatim: store.lastError ?? "")
+        }
+    }
+
+    private var sidebar: some View {
+        List(selection: $section) {
+            Section(header: Text(verbatim: "Docker")) {
+                HStack {
+                    Text("Containers", bundle: .l10n)
+                    Spacer()
+                    Text(verbatim: "\(store.all.count)").foregroundStyle(.secondary)
+                }
+                .tag(SidebarItem.containers)
+            }
+            Section(header: Text("AI", bundle: .l10n)) {
+                McpStatusRow(mcp: mcp)
+                Text("Permissions", bundle: .l10n).tag(SidebarItem.permissions)
+            }
+        }
+        .listStyle(.sidebar)
+        .safeAreaInset(edge: .bottom) {
+            HStack(spacing: 6) {
+                Circle().fill(store.connected ? Color.green : Color.red).frame(width: 8, height: 8)
+                store.connected
+                    ? Text("Docker connected", bundle: .l10n)
+                    : Text("Docker disconnected", bundle: .l10n)
+                Spacer()
+            }
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .padding(10)
+        }
+        .navigationSplitViewColumnWidth(min: 170, ideal: 190, max: 240)
+    }
+
+    /// The list and the detail side by side. A plain split view rather than a third navigation column, because the
+    /// permissions screen needs the whole width next to the sidebar.
+    private var containers: some View {
+        HSplitView {
+            ContainerList()
+                .frame(minWidth: 300, idealWidth: 380, maxWidth: 480)
+            Group {
+                if let selected = store.selected {
+                    ContainerDetail(container: selected).id(selected.id)
+                } else {
+                    Text("Select a container", bundle: .l10n).foregroundStyle(.secondary)
+                }
+            }
+            .frame(minWidth: 420, maxWidth: .infinity, maxHeight: .infinity)
         }
     }
 }
