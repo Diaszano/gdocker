@@ -18,10 +18,13 @@ A native macOS app for Docker, in the spirit of [lazydocker](https://github.com/
 ## Install
 
 ```sh
+brew trust --cask diaszano/tap/gdocker
 brew install --cask diaszano/tap/gdocker
 ```
 
 The app is not notarized. The cask removes the quarantine flag on install; if you download the zip by hand instead, run `xattr -dr com.apple.quarantine /Applications/GDocker.app` before opening it.
+
+Each new version has a new ad-hoc signature, so on its first launch macOS asks for your login password to let GDocker read its MCP token from the Keychain. Choose **Always Allow**.
 
 ## Connect an AI client
 

@@ -24,13 +24,13 @@ cask "gdocker" do
   desc "Native Docker GUI with a built-in MCP server for AI clients"
   homepage "https://github.com/Diaszano/gdocker"
 
-  depends_on macos: ">= :sonoma"
+  depends_on macos: :sonoma
 
   app "GDocker.app"
 
   # The app is ad-hoc signed, not notarized, so Gatekeeper would refuse to open it with the quarantine flag set.
-  postflight do
-    system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{appdir}/GDocker.app"]
+  postflight_steps do
+    run "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "{{appdir}}/GDocker.app"]
   end
 
   zap trash: [
