@@ -164,7 +164,8 @@ public actor McpHTTPServer {
 
     private func makeServer(clientName: ClientName) async -> Server {
         let server = Server(
-            name: "gdocker", version: "0.1.0",
+            name: "gdocker",
+            version: Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "dev",
             instructions: "Controls the user's local Docker through GDocker. The user can block each tool or require "
                 + "approval; pass `reason` so they know why you are calling it.",
             capabilities: .init(tools: .init(listChanged: false)))
