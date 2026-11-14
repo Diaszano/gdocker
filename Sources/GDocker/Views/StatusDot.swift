@@ -4,10 +4,10 @@ import SwiftUI
 extension StatusKind {
     var color: Color {
         switch self {
-        case .running: .green
-        case .transitioning: .orange
-        case .stopped: .gray
-        case .failed: .red
+        case .running: Color.ctp.ok
+        case .transitioning: Color.ctp.warn
+        case .stopped: Color.ctp.muted
+        case .failed: Color.ctp.err
         }
     }
 }

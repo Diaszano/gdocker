@@ -12,13 +12,31 @@ enum SettingsKey {
 }
 
 enum Theme: String, CaseIterable {
-    case system, light, dark
+    case system, latte, frappe, macchiato, mocha
 
     var title: LocalizedStringKey {
         switch self {
         case .system: "System"
-        case .light: "Light"
-        case .dark: "Dark"
+        case .latte: "Catppuccin Latte"
+        case .frappe: "Catppuccin Frappé"
+        case .macchiato: "Catppuccin Macchiato"
+        case .mocha: "Catppuccin Mocha"
+        }
+    }
+
+    /// Settings saved before the Catppuccin themes: light and dark map to each one's default flavor.
+    static var saved: Theme {
+        let raw = UserDefaults.standard.string(forKey: SettingsKey.theme) ?? ""
+        return Theme(rawValue: raw) ?? (raw == "light" ? .latte : raw == "dark" ? .macchiato : .system)
+    }
+
+    func flavor(systemDark: Bool) -> Flavor {
+        switch self {
+        case .system: systemDark ? .macchiato : .latte
+        case .latte: .latte
+        case .frappe: .frappe
+        case .macchiato: .macchiato
+        case .mocha: .mocha
         }
     }
 
@@ -26,13 +44,10 @@ enum Theme: String, CaseIterable {
     @MainActor func apply() {
         switch self {
         case .system: NSApp.appearance = nil
-        case .light: NSApp.appearance = NSAppearance(named: .aqua)
-        case .dark: NSApp.appearance = NSAppearance(named: .darkAqua)
+        case .latte: NSApp.appearance = NSAppearance(named: .aqua)
+        case .frappe, .macchiato, .mocha: NSApp.appearance = NSAppearance(named: .darkAqua)
         }
     }
 
-    @MainActor static func applySaved() {
-        let saved = UserDefaults.standard.string(forKey: SettingsKey.theme) ?? ""
-        (Theme(rawValue: saved) ?? .system).apply()
-    }
+    @MainActor static func applySaved() { saved.apply() }
 }

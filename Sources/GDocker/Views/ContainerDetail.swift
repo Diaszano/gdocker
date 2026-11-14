@@ -61,7 +61,7 @@ struct ContainerDetail: View {
             StatusDot(kind: container.statusKind).padding(.top, 7)
             VStack(alignment: .leading, spacing: 3) {
                 Text(verbatim: container.name).font(.title2.bold())
-                Text(verbatim: subtitle).font(.caption).foregroundStyle(.secondary)
+                Text(verbatim: subtitle).font(.caption).foregroundStyle(Color.ctp.muted)
             }
             Spacer()
             Button { Task { await store.perform(.restart, on: container.id) } } label: {

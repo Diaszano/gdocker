@@ -89,11 +89,13 @@ final class TerminalSession: LocalProcessTerminalViewDelegate {
     nonisolated func hostCurrentDirectoryUpdate(source: TerminalView, directory: String?) {}
 }
 
-/// SwiftTerm copies colors once, so dynamic system colors are re-applied when the light/dark appearance changes.
+/// SwiftTerm copies colors once, so the dynamic Catppuccin colors are re-applied when the appearance or theme changes.
 private final class ThemedTerminalView: LocalProcessTerminalView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         applyColors()
+        NotificationCenter.default.addObserver(
+            self, selector: #selector(themeChanged), name: UserDefaults.didChangeNotification, object: nil)
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) is not used") }
@@ -103,10 +105,12 @@ private final class ThemedTerminalView: LocalProcessTerminalView {
         applyColors()
     }
 
+    @objc private func themeChanged() { applyColors() }
+
     private func applyColors() {
         effectiveAppearance.performAsCurrentDrawingAppearance {
-            nativeForegroundColor = .textColor
-            nativeBackgroundColor = .textBackgroundColor
+            nativeForegroundColor = .ctp(\.text)
+            nativeBackgroundColor = .ctp(\.bg)
             // SwiftTerm paints the layer only once at init; the strip outside the cell grid shows it.
             layer?.backgroundColor = nativeBackgroundColor.cgColor
         }

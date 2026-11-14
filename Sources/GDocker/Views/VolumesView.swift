@@ -84,7 +84,7 @@ struct VolumesView: View {
                     .font(.title2.bold())
                 Text(verbatim: subtitle)
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.ctp.muted)
             }
             Spacer()
             Button {
@@ -169,24 +169,24 @@ struct VolumesView: View {
                 TableColumn(String(localized: "Name", bundle: .l10n)) { volume in
                     HStack(spacing: 8) {
                         Image(systemName: "externaldrive")
-                            .foregroundStyle(Color.accentColor)
+                            .foregroundStyle(Color.ctp.accent)
                         Text(verbatim: volume.name)
                             .fontWeight(.medium)
                     }
                 }
                 TableColumn(String(localized: "Driver", bundle: .l10n)) { volume in
                     Text(verbatim: volume.driver)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.ctp.muted)
                 }
                 .width(min: 80, ideal: 100, max: 120)
                 TableColumn(String(localized: "Scope", bundle: .l10n)) { volume in
                     Text(verbatim: volume.scope)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.ctp.muted)
                 }
                 .width(min: 70, ideal: 90, max: 110)
                 TableColumn(String(localized: "Created", bundle: .l10n)) { volume in
                     Text(verbatim: volume.formattedCreated)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.ctp.muted)
                 }
                 .width(min: 120, ideal: 150, max: 200)
             }

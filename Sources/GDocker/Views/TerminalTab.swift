@@ -42,7 +42,7 @@ struct TerminalTab: View {
             if let code = session.exitCode {
                 Divider()
                 HStack {
-                    Text(verbatim: String(localized: "Session ended (code \(String(code)))", bundle: .l10n)).foregroundStyle(.secondary)
+                    Text(verbatim: String(localized: "Session ended (code \(String(code)))", bundle: .l10n)).foregroundStyle(Color.ctp.muted)
                     Spacer()
                     Button { session.reconnect(containerID: container.id) } label: {
                         Text("Reconnect", bundle: .l10n)

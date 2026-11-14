@@ -64,7 +64,7 @@ struct ComposeView: View {
         HStack(alignment: .center, spacing: 12) {
             VStack(alignment: .leading, spacing: 2) {
                 Text("Compose", bundle: .l10n).font(.title2.bold())
-                Text(verbatim: subtitle).font(.caption).foregroundStyle(.secondary)
+                Text(verbatim: subtitle).font(.caption).foregroundStyle(Color.ctp.muted)
             }
             Spacer()
             Button {
@@ -88,17 +88,17 @@ struct ComposeView: View {
 
     private var unavailableBanner: some View {
         HStack(alignment: .top, spacing: 10) {
-            Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(.yellow)
+            Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(Color.ctp.warn)
             VStack(alignment: .leading, spacing: 2) {
                 Text("Docker Compose CLI not found.", bundle: .l10n).fontWeight(.medium)
                 Text("The docker compose binary was not detected on this system.", bundle: .l10n)
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.ctp.muted)
             }
             Spacer()
         }
         .padding(10)
-        .background(Color.yellow.opacity(0.15))
+        .background(Color.ctp.warn.opacity(0.15))
     }
 
     @ViewBuilder
@@ -142,7 +142,7 @@ struct ComposeView: View {
                     .width(min: 60, ideal: 80, max: 100)
                     TableColumn(String(localized: "Working Directory", bundle: .l10n)) { project in
                         Text(verbatim: project.workingDir)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(Color.ctp.muted)
                             .lineLimit(1)
                             .truncationMode(.middle)
                     }
@@ -176,7 +176,7 @@ struct ComposeView: View {
                     if let selected = store.selected {
                         detail(selected)
                     } else {
-                        Text("Select a compose project", bundle: .l10n).foregroundStyle(.secondary)
+                        Text("Select a compose project", bundle: .l10n).foregroundStyle(Color.ctp.muted)
                     }
                 }
                 .frame(maxWidth: .infinity, minHeight: 160, maxHeight: .infinity)
@@ -219,9 +219,9 @@ struct ComposeView: View {
                 }
             }
             VStack(alignment: .leading, spacing: 2) {
-                Text(verbatim: project.workingDir).font(.caption).foregroundStyle(.secondary)
+                Text(verbatim: project.workingDir).font(.caption).foregroundStyle(Color.ctp.muted)
                 ForEach(project.configFiles, id: \.self) { file in
-                    Text(verbatim: file).font(.caption.monospaced()).foregroundStyle(.secondary)
+                    Text(verbatim: file).font(.caption.monospaced()).foregroundStyle(Color.ctp.muted)
                 }
             }
             .textSelection(.enabled)
@@ -232,13 +232,13 @@ struct ComposeView: View {
                 TableColumn(String(localized: "Container", bundle: .l10n)) { service in
                     Text(verbatim: service.containerID.map { String($0.prefix(12)) } ?? "-")
                         .font(.system(.body, design: .monospaced))
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.ctp.muted)
                 }
                 .width(min: 100, ideal: 120, max: 140)
                 TableColumn(String(localized: "State", bundle: .l10n)) { service in
                     HStack(spacing: 6) {
                         StatusDot(kind: service.statusKind ?? .stopped)
-                        Text(verbatim: service.state ?? "-").foregroundStyle(.secondary)
+                        Text(verbatim: service.state ?? "-").foregroundStyle(Color.ctp.muted)
                     }
                 }
             }
@@ -272,10 +272,10 @@ private struct ComposeStatusBadge: View {
 
     private var color: Color {
         switch status {
-        case .running: .green
-        case .partiallyRunning: .yellow
-        case .stopped: .secondary
-        case .down: .blue
+        case .running: Color.ctp.ok
+        case .partiallyRunning: Color.ctp.warn
+        case .stopped: Color.ctp.muted
+        case .down: Color.ctp.accent
         }
     }
 }

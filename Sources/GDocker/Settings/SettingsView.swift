@@ -29,7 +29,7 @@ struct SettingsView: View {
                 .onSubmit { if portIsValid { Task { await mcp.restart() } } }
                 if !portIsValid {
                     Text("Choose a port between 1024 and 65535", bundle: .l10n)
-                        .font(.caption).foregroundStyle(.red)
+                        .font(.caption).foregroundStyle(Color.ctp.err)
                 }
             }
         }

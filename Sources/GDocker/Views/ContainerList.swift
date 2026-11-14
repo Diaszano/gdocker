@@ -32,13 +32,13 @@ private struct ContainerRow: View {
             StatusDot(kind: container.statusKind)
             VStack(alignment: .leading, spacing: 2) {
                 Text(verbatim: container.name).fontWeight(.semibold)
-                Text(verbatim: container.image).font(.caption).foregroundStyle(.secondary)
+                Text(verbatim: container.image).font(.caption).foregroundStyle(Color.ctp.muted)
             }
             Spacer()
             Text(verbatim: container.status)
                 .font(.caption)
                 .foregroundStyle(container.statusKind == .transitioning || container.statusKind == .failed
-                                 ? container.statusKind.color : Color.secondary)
+                                 ? container.statusKind.color : Color.ctp.muted)
         }
         .padding(.vertical, 2)
     }

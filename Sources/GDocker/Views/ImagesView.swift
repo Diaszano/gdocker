@@ -69,7 +69,7 @@ struct ImagesView: View {
                     .font(.title2.bold())
                 Text(verbatim: subtitle)
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.ctp.muted)
             }
             Spacer()
             Button {
@@ -154,16 +154,16 @@ struct ImagesView: View {
                 TableColumn(String(localized: "Repository / Tag", bundle: .l10n)) { image in
                     HStack(spacing: 8) {
                         Image(systemName: "square.stack.3d.up")
-                            .foregroundStyle(image.isDangling ? .secondary : Color.accentColor)
+                            .foregroundStyle(image.isDangling ? Color.ctp.muted : Color.ctp.accent)
                         Text(verbatim: image.formattedTags)
                             .fontWeight(image.isDangling ? .regular : .medium)
-                            .foregroundStyle(image.isDangling ? .secondary : .primary)
+                            .foregroundStyle(image.isDangling ? Color.ctp.muted : .primary)
                     }
                 }
                 TableColumn(String(localized: "Image ID", bundle: .l10n)) { image in
                     Text(verbatim: image.shortID)
                         .font(.system(.body, design: .monospaced))
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.ctp.muted)
                 }
                 .width(min: 100, ideal: 120, max: 140)
                 TableColumn(String(localized: "Size", bundle: .l10n)) { image in
@@ -173,7 +173,7 @@ struct ImagesView: View {
                 .width(min: 70, ideal: 90, max: 120)
                 TableColumn(String(localized: "Created", bundle: .l10n)) { image in
                     Text(verbatim: image.formattedCreated)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.ctp.muted)
                 }
                 .width(min: 120, ideal: 150, max: 200)
             }

@@ -7,7 +7,7 @@ struct ActivityView: View {
     var body: some View {
         Group {
             if model.entries.isEmpty {
-                Text("No AI activity yet", bundle: .l10n).foregroundStyle(.secondary)
+                Text("No AI activity yet", bundle: .l10n).foregroundStyle(Color.ctp.muted)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 List(model.entries) { EntryRow(entry: $0) }
@@ -26,12 +26,12 @@ private struct EntryRow: View {
             VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 8) {
                     Text(verbatim: entry.tool).font(.system(size: 12, weight: .semibold, design: .monospaced))
-                    Text(verbatim: entry.client).foregroundStyle(.secondary)
+                    Text(verbatim: entry.client).foregroundStyle(Color.ctp.muted)
                 }
                 if !entry.arguments.isEmpty {
                     Text(verbatim: entry.arguments)
                         .font(.system(size: 11, design: .monospaced))
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.ctp.muted)
                         .lineLimit(2)
                 }
                 if let detail = entry.detail {
@@ -40,7 +40,7 @@ private struct EntryRow: View {
             }
             Spacer()
             Text(entry.date.formatted(date: .abbreviated, time: .standard))
-                .font(.caption).foregroundStyle(.secondary)
+                .font(.caption).foregroundStyle(Color.ctp.muted)
         }
         .padding(.vertical, 4)
     }
@@ -68,10 +68,10 @@ private struct OutcomeBadge: View {
 
     private var color: Color {
         switch outcome {
-        case .allowed: .green
-        case .approved: .blue
-        case .denied: .red
-        case .error: .orange
+        case .allowed: Color.ctp.ok
+        case .approved: Color.ctp.accent
+        case .denied: Color.ctp.err
+        case .error: Color.ctp.warn
         }
     }
 }

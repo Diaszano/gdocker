@@ -10,6 +10,8 @@ struct MainWindow: View {
     @Environment(ComposeStore.self) private var composeStore
     @Environment(McpController.self) private var mcp
     @State private var section: SidebarItem? = .containers
+    // Dynamic colors don't invalidate SwiftUI when only the flavor changes, so the theme keys the view tree.
+    @AppStorage(SettingsKey.theme) private var theme = Theme.system
 
     var body: some View {
         NavigationSplitView {
@@ -25,6 +27,10 @@ struct MainWindow: View {
             case .activity: ActivityView(model: mcp.activityModel)
             }
         }
+        .scrollContentBackground(.hidden)
+        .background(Color.ctp.bg)
+        .tint(Color.ctp.accent)
+        .id(theme)
         .task {
             await imagesStore.refresh()
             await volumesStore.refresh()
@@ -70,7 +76,7 @@ struct MainWindow: View {
                         Image(systemName: "shippingbox")
                     }
                     Spacer()
-                    Text(verbatim: "\(store.all.count)").foregroundStyle(.secondary)
+                    Text(verbatim: "\(store.all.count)").foregroundStyle(Color.ctp.muted)
                 }
                 .tag(SidebarItem.containers)
 
@@ -81,7 +87,7 @@ struct MainWindow: View {
                         Image(systemName: "square.stack.3d.up")
                     }
                     Spacer()
-                    Text(verbatim: "\(imagesStore.count)").foregroundStyle(.secondary)
+                    Text(verbatim: "\(imagesStore.count)").foregroundStyle(Color.ctp.muted)
                 }
                 .tag(SidebarItem.images)
 
@@ -92,7 +98,7 @@ struct MainWindow: View {
                         Image(systemName: "externaldrive")
                     }
                     Spacer()
-                    Text(verbatim: "\(volumesStore.count)").foregroundStyle(.secondary)
+                    Text(verbatim: "\(volumesStore.count)").foregroundStyle(Color.ctp.muted)
                 }
                 .tag(SidebarItem.volumes)
 
@@ -103,7 +109,7 @@ struct MainWindow: View {
                         Image(systemName: "network")
                     }
                     Spacer()
-                    Text(verbatim: "\(networksStore.count)").foregroundStyle(.secondary)
+                    Text(verbatim: "\(networksStore.count)").foregroundStyle(Color.ctp.muted)
                 }
                 .tag(SidebarItem.networks)
 
@@ -114,7 +120,7 @@ struct MainWindow: View {
                         Image(systemName: "square.stack.3d.forward.dottedline")
                     }
                     Spacer()
-                    Text(verbatim: "\(composeStore.activeCount)").foregroundStyle(.secondary)
+                    Text(verbatim: "\(composeStore.activeCount)").foregroundStyle(Color.ctp.muted)
                 }
                 .tag(SidebarItem.compose)
             }
@@ -125,16 +131,18 @@ struct MainWindow: View {
             }
         }
         .listStyle(.sidebar)
+        .scrollContentBackground(.hidden)
+        .background(Color.ctp.side)
         .safeAreaInset(edge: .bottom) {
             HStack(spacing: 6) {
-                Circle().fill(store.connected ? Color.green : Color.red).frame(width: 8, height: 8)
+                Circle().fill(store.connected ? Color.ctp.ok : Color.ctp.err).frame(width: 8, height: 8)
                 store.connected
                     ? Text("Docker connected", bundle: .l10n)
                     : Text("Docker disconnected", bundle: .l10n)
                 Spacer()
             }
             .font(.caption)
-            .foregroundStyle(.secondary)
+            .foregroundStyle(Color.ctp.muted)
             .padding(10)
         }
         .navigationSplitViewColumnWidth(min: 170, ideal: 190, max: 240)
@@ -150,7 +158,7 @@ struct MainWindow: View {
                 if let selected = store.selected {
                     ContainerDetail(container: selected).id(selected.id)
                 } else {
-                    Text("Select a container", bundle: .l10n).foregroundStyle(.secondary)
+                    Text("Select a container", bundle: .l10n).foregroundStyle(Color.ctp.muted)
                 }
             }
             .frame(minWidth: 420, maxWidth: .infinity, maxHeight: .infinity)
@@ -167,16 +175,16 @@ private struct McpStatusRow: View {
             Circle().fill(color).frame(width: 8, height: 8)
             VStack(alignment: .leading, spacing: 2) {
                 Text("MCP server", bundle: .l10n)
-                Text(verbatim: detail).font(.caption).foregroundStyle(.secondary)
+                Text(verbatim: detail).font(.caption).foregroundStyle(Color.ctp.muted)
             }
         }
     }
 
     private var color: Color {
         switch mcp.state {
-        case .running: .green
-        case .starting, .stopped: .gray
-        case .failed: .red
+        case .running: Color.ctp.ok
+        case .starting, .stopped: Color.ctp.muted
+        case .failed: Color.ctp.err
         }
     }
 

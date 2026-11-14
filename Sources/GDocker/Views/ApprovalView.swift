@@ -27,13 +27,13 @@ private struct RequestCard: View {
         VStack(spacing: 14) {
             Image(systemName: "exclamationmark.triangle.fill")
                 .font(.system(size: 26))
-                .foregroundStyle(.orange)
+                .foregroundStyle(Color.ctp.warn)
                 .frame(width: 52, height: 52)
-                .background(RoundedRectangle(cornerRadius: 12).fill(Color.orange.opacity(0.15)))
+                .background(RoundedRectangle(cornerRadius: 12).fill(Color.ctp.warn.opacity(0.15)))
             Text(verbatim: title).font(.headline).multilineTextAlignment(.center)
             if pendingCount > 1 {
                 Text(verbatim: String(localized: "\(String(1)) of \(String(pendingCount))", bundle: .l10n))
-                    .font(.caption).foregroundStyle(.secondary)
+                    .font(.caption).foregroundStyle(Color.ctp.muted)
             }
             details
             if request.allowsAlways {
@@ -61,12 +61,12 @@ private struct RequestCard: View {
             Text(verbatim: request.tool).fontWeight(.semibold)
             ForEach(request.arguments, id: \.name) { argument in
                 Text(verbatim: "\(argument.name): \(argument.value)")
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.ctp.muted)
                     .lineLimit(4)
             }
             if let reason = request.reason, !reason.isEmpty {
                 Divider().padding(.vertical, 2)
-                Text("Reason", bundle: .l10n).font(.caption).foregroundStyle(.secondary)
+                Text("Reason", bundle: .l10n).font(.caption).foregroundStyle(Color.ctp.muted)
                 Text(verbatim: reason).lineLimit(4)
             }
         }
@@ -74,7 +74,7 @@ private struct RequestCard: View {
         .textSelection(.enabled)
         .padding(12)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(RoundedRectangle(cornerRadius: 8).fill(Color.secondary.opacity(0.12)))
+        .background(RoundedRectangle(cornerRadius: 8).fill(Color.ctp.muted.opacity(0.12)))
     }
 
     private var title: String {

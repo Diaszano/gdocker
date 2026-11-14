@@ -13,14 +13,14 @@ struct PermissionsView: View {
                 ServerCard(mcp: mcp)
                 Text("Choose what the AI can do on its own, what needs your approval, and what is forbidden.", bundle: .l10n)
                     .font(.callout)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.ctp.muted)
                 ForEach(ToolGroup.allCases, id: \.self) { group in
                     let rows = model.rows(in: group)
                     if !rows.isEmpty {
                         VStack(alignment: .leading, spacing: 0) {
                             Text(group.title, bundle: .l10n)
                                 .font(.caption.weight(.semibold))
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(Color.ctp.muted)
                                 .textCase(.uppercase)
                                 .padding(.bottom, 6)
                             ForEach(rows) { row in
@@ -83,7 +83,7 @@ private struct PermissionPicker: View {
                 Button { onChange(option) } label: {
                     Text(option.title, bundle: .l10n)
                         .font(.system(size: 11, weight: option == selection ? .semibold : .regular))
-                        .foregroundStyle(option == selection ? option.color : Color.secondary)
+                        .foregroundStyle(option == selection ? option.color : Color.ctp.muted)
                         .frame(width: 72, height: 22)
                         .background {
                             if option == selection {
@@ -98,7 +98,7 @@ private struct PermissionPicker: View {
             }
         }
         .padding(2)
-        .background(RoundedRectangle(cornerRadius: 7).fill(Color.secondary.opacity(0.15)))
+        .background(RoundedRectangle(cornerRadius: 7).fill(Color.ctp.muted.opacity(0.15)))
     }
 }
 
@@ -113,9 +113,9 @@ private extension Permission {
 
     var color: Color {
         switch self {
-        case .allow: .green
-        case .ask: .orange
-        case .deny: .red
+        case .allow: Color.ctp.ok
+        case .ask: Color.ctp.warn
+        case .deny: Color.ctp.err
         }
     }
 }
@@ -132,10 +132,10 @@ private struct ServerCard: View {
             Circle().fill(color).frame(width: 10, height: 10)
             VStack(alignment: .leading, spacing: 3) {
                 title.fontWeight(.semibold)
-                Text(verbatim: detail).font(.caption).foregroundStyle(.secondary)
+                Text(verbatim: detail).font(.caption).foregroundStyle(Color.ctp.muted)
             }
             Spacer()
-            if copied { Text("Copied", bundle: .l10n).font(.caption).foregroundStyle(.green) }
+            if copied { Text("Copied", bundle: .l10n).font(.caption).foregroundStyle(Color.ctp.ok) }
             Menu {
                 Button { copy(.claudeCodeHTTP) } label: { Text("Claude Code (HTTP)", bundle: .l10n) }
                 Button { copy(.jsonHTTP) } label: { Text("JSON (HTTP)", bundle: .l10n) }
@@ -146,7 +146,7 @@ private struct ServerCard: View {
             toggleButton
         }
         .padding(16)
-        .background(RoundedRectangle(cornerRadius: 10).fill(Color.secondary.opacity(0.1)))
+        .background(RoundedRectangle(cornerRadius: 10).fill(Color.ctp.muted.opacity(0.1)))
         .confirmationDialog(
             Text("Regenerate token?", bundle: .l10n), isPresented: $confirmRegenerate, titleVisibility: .visible
         ) {
@@ -172,9 +172,9 @@ private struct ServerCard: View {
 
     private var color: Color {
         switch mcp.state {
-        case .running: .green
-        case .starting, .stopped: .gray
-        case .failed: .red
+        case .running: Color.ctp.ok
+        case .starting, .stopped: Color.ctp.muted
+        case .failed: Color.ctp.err
         }
     }
 

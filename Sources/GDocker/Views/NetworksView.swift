@@ -74,7 +74,7 @@ struct NetworksView: View {
                     .font(.title2.bold())
                 Text(verbatim: subtitle)
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.ctp.muted)
             }
             Spacer()
             Button {
@@ -159,7 +159,7 @@ struct NetworksView: View {
                 TableColumn(String(localized: "Name", bundle: .l10n)) { network in
                     HStack(spacing: 8) {
                         Image(systemName: "network")
-                            .foregroundStyle(Color.accentColor)
+                            .foregroundStyle(Color.ctp.accent)
                         Text(verbatim: network.name)
                             .fontWeight(.medium)
                         if network.isDefaultNetwork {
@@ -167,26 +167,26 @@ struct NetworksView: View {
                                 .font(.caption2)
                                 .padding(.horizontal, 5)
                                 .padding(.vertical, 1)
-                                .background(Color.secondary.opacity(0.15))
+                                .background(Color.ctp.muted.opacity(0.15))
                                 .clipShape(Capsule())
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(Color.ctp.muted)
                         }
                     }
                 }
                 TableColumn(String(localized: "Network ID", bundle: .l10n)) { network in
                     Text(verbatim: network.shortID)
                         .font(.system(.body, design: .monospaced))
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.ctp.muted)
                 }
                 .width(min: 100, ideal: 120, max: 140)
                 TableColumn(String(localized: "Driver", bundle: .l10n)) { network in
                     Text(verbatim: network.driver)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.ctp.muted)
                 }
                 .width(min: 80, ideal: 100, max: 120)
                 TableColumn(String(localized: "Scope", bundle: .l10n)) { network in
                     Text(verbatim: network.scope)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.ctp.muted)
                 }
                 .width(min: 70, ideal: 90, max: 110)
                 TableColumn(String(localized: "Containers", bundle: .l10n)) { network in
