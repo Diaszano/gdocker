@@ -117,7 +117,7 @@ struct ImagesView: View {
                 }
                 Spacer()
 
-                TableSearchField(text: $store.searchText, prompt: String(localized: "Search images", bundle: .l10n), width: 230)
+                TableSearchField(text: $store.searchText, prompt: String(localized: "Search images", bundle: .l10n), width: 260)
 
                 IconActionButton(
                     systemImage: "arrow.clockwise",
@@ -230,7 +230,7 @@ struct ImagesView: View {
                 help: LocalizedStringKey(String(localized: "Select all", bundle: .l10n)),
                 action: toggleSelectAll
             )
-            Spacer().frame(width: 30)
+            Spacer().frame(width: 28)
 
             Text("Repository / Tag", bundle: .l10n)
                 .frame(minWidth: nameMinWidth, maxWidth: .infinity, alignment: .leading)

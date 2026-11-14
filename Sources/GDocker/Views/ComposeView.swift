@@ -95,7 +95,7 @@ struct ComposeView: View {
                 }
                 Spacer()
 
-                TableSearchField(text: $store.searchText, prompt: String(localized: "Search compose projects", bundle: .l10n), width: 230)
+                TableSearchField(text: $store.searchText, prompt: String(localized: "Search compose projects", bundle: .l10n), width: 260)
 
                 IconActionButton(
                     systemImage: "arrow.clockwise",
@@ -240,7 +240,7 @@ struct ComposeView: View {
 
     private var tableHeader: some View {
         HStack(spacing: 6) {
-            Spacer().frame(width: 30)
+            Spacer().frame(width: 28)
 
             Text("Project", bundle: .l10n)
                 .frame(minWidth: nameMinWidth, maxWidth: .infinity, alignment: .leading)

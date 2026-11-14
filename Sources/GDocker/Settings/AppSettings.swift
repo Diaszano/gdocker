@@ -47,6 +47,10 @@ enum Theme: String, CaseIterable {
         case .latte: NSApp.appearance = NSAppearance(named: .aqua)
         case .frappe, .macchiato, .mocha: NSApp.appearance = NSAppearance(named: .darkAqua)
         }
+        for window in NSApp.windows {
+            window.titlebarAppearsTransparent = true
+            window.backgroundColor = NSColor.ctp(\.bg)
+        }
     }
 
     @MainActor static func applySaved() { saved.apply() }

@@ -66,7 +66,7 @@ struct TableCheckbox: View {
 struct TableSearchField: View {
     @Binding var text: String
     let prompt: String
-    var width: CGFloat = 240
+    var width: CGFloat = 260
     @FocusState private var isFocused: Bool
 
     var body: some View {
@@ -196,6 +196,8 @@ struct SectionMenuButton<MenuContent: View>: View {
     var help: LocalizedStringKey? = nil
     @ViewBuilder let menuContent: () -> MenuContent
 
+    @State private var hovered = false
+
     var body: some View {
         Menu {
             menuContent()
@@ -204,14 +206,20 @@ struct SectionMenuButton<MenuContent: View>: View {
                 .font(.system(size: 12, weight: .medium))
                 .foregroundStyle(Color.ctp.text)
                 .frame(width: 28, height: 28)
-                .background(
-                    RoundedRectangle(cornerRadius: 6)
-                        .strokeBorder(Color.ctp.muted.opacity(0.28), lineWidth: 1)
-                )
+                .contentShape(Rectangle())
         }
         .menuStyle(.borderlessButton)
         .menuIndicator(.hidden)
         .frame(width: 28, height: 28)
+        .background(
+            RoundedRectangle(cornerRadius: 6)
+                .fill(hovered ? Color.ctp.text.opacity(0.14) : Color.clear)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 6)
+                        .strokeBorder(Color.ctp.text.opacity(hovered ? 0.55 : 0.28), lineWidth: 1)
+                )
+        )
+        .onHover { hovered = $0 }
         .help(help.map { Text($0, bundle: .l10n) } ?? Text(verbatim: ""))
     }
 }

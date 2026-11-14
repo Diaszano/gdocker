@@ -42,6 +42,8 @@ struct MainWindow: View {
             .background(Color.ctp.bg)
         }
         .background(Color.ctp.bg)
+        .background(WindowThemeAccessor(theme: theme))
+        .ignoresSafeArea(.container, edges: .top)
         .tint(Color.ctp.accent)
         .id(theme)
         .task {
@@ -132,7 +134,7 @@ struct MainWindow: View {
                 compact: sidebarCollapsed
             )
         }
-        .frame(width: sidebarCollapsed ? 60 : 220)
+        .frame(width: sidebarCollapsed ? 76 : 220)
         .background(Color.ctp.side)
     }
 
@@ -164,7 +166,8 @@ struct MainWindow: View {
         }
         .frame(maxWidth: .infinity, alignment: sidebarCollapsed ? .center : .leading)
         .padding(.horizontal, sidebarCollapsed ? 0 : 14)
-        .padding(.vertical, 12)
+        .padding(.top, 34)
+        .padding(.bottom, 10)
         .contentShape(Rectangle())
         .onTapGesture {
             if sidebarCollapsed {
@@ -200,7 +203,7 @@ struct MainWindow: View {
                 if !sidebarCollapsed {
                     Text(title, bundle: .l10n)
                         .font(.system(size: 13, weight: active ? .semibold : .regular))
-                        .foregroundStyle(active ? Color.ctp.text : Color.ctp.muted)
+                        .foregroundStyle(Color.ctp.text)
                     Spacer()
                     if let count {
                         Text(verbatim: "\(count)")
@@ -215,7 +218,7 @@ struct MainWindow: View {
             .padding(.vertical, 7)
             .background(
                 RoundedRectangle(cornerRadius: 7)
-                    .fill(active ? Color.ctp.hover : Color.clear)
+                    .fill(active ? Color.ctp.accent.opacity(0.18) : Color.clear)
             )
             .contentShape(Rectangle())
         }
@@ -293,5 +296,34 @@ private struct McpStatusRow: View {
         case .stopped: String(localized: "Stopped", bundle: .l10n)
         case .failed(let message): message
         }
+    }
+}
+
+/// Applies the active Catppuccin window background and transparent titlebar to the hosting `NSWindow`.
+private struct WindowThemeAccessor: NSViewRepresentable {
+    let theme: Theme
+
+    func makeNSView(context: Context) -> NSView {
+        let view = NSView()
+        DispatchQueue.main.async {
+            if let window = view.window {
+                configure(window)
+            }
+        }
+        return view
+    }
+
+    func updateNSView(_ nsView: NSView, context: Context) {
+        DispatchQueue.main.async {
+            if let window = nsView.window {
+                configure(window)
+            }
+        }
+    }
+
+    private func configure(_ window: NSWindow) {
+        window.titlebarAppearsTransparent = true
+        window.titleVisibility = .hidden
+        window.backgroundColor = NSColor.ctp(\.bg)
     }
 }

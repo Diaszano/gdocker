@@ -116,7 +116,7 @@ struct NetworksView: View {
                 }
                 Spacer()
 
-                TableSearchField(text: $store.searchText, prompt: String(localized: "Search networks", bundle: .l10n), width: 230)
+                TableSearchField(text: $store.searchText, prompt: String(localized: "Search networks", bundle: .l10n), width: 260)
 
                 IconActionButton(
                     systemImage: "arrow.clockwise",
@@ -219,7 +219,7 @@ struct NetworksView: View {
                 help: LocalizedStringKey(String(localized: "Select all", bundle: .l10n)),
                 action: toggleSelectAll
             )
-            Spacer().frame(width: 30)
+            Spacer().frame(width: 28)
 
             Text("Name", bundle: .l10n)
                 .frame(minWidth: nameMinWidth, maxWidth: .infinity, alignment: .leading)

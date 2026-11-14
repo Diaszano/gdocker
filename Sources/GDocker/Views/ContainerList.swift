@@ -169,7 +169,7 @@ struct ContainerList: View {
                     .foregroundStyle(Color.ctp.text)
                 Spacer()
 
-                TableSearchField(text: $store.searchText, prompt: String(localized: "Search containers", bundle: .l10n), width: 230)
+                TableSearchField(text: $store.searchText, prompt: String(localized: "Search containers", bundle: .l10n), width: 260)
 
                 IconActionButton(
                     systemImage: "arrow.clockwise",
@@ -246,7 +246,7 @@ struct ContainerList: View {
                 help: LocalizedStringKey(String(localized: "Select all", bundle: .l10n)),
                 action: toggleSelectAll
             )
-            Spacer().frame(width: 30) // logo(28) alignment
+            Spacer().frame(width: 28) // logo(28) alignment
 
             Text("Name", bundle: .l10n)
                 .frame(minWidth: nameMinWidth, maxWidth: .infinity, alignment: .leading)
@@ -379,25 +379,13 @@ private struct ContainerRow: View {
                 IconActionButton(systemImage: "trash", tint: Color.ctp.err, help: "Remove") {
                     onAction(.remove)
                 }
-                Menu {
+                SectionMenuButton {
                     Button { onOpenTab(.logs) } label: { Label { Text("Logs", bundle: .l10n) } icon: { Image(systemName: "doc.text") } }
                     Button { onOpenTab(.stats) } label: { Label { Text("Stats", bundle: .l10n) } icon: { Image(systemName: "waveform.path.ecg") } }
                     Button { onOpenTab(.inspect) } label: { Label { Text("Inspect", bundle: .l10n) } icon: { Image(systemName: "magnifyingglass") } }
                     Button { onOpenTab(.env) } label: { Label { Text("Env", bundle: .l10n) } icon: { Image(systemName: "curlybraces") } }
                     Button { onOpenTab(.terminal) } label: { Label { Text("Terminal", bundle: .l10n) } icon: { Image(systemName: "terminal") } }
-                } label: {
-                    Image(systemName: "ellipsis")
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundStyle(Color.ctp.text)
-                        .frame(width: 28, height: 28)
-                        .background(
-                            RoundedRectangle(cornerRadius: 6)
-                                .strokeBorder(Color.ctp.muted.opacity(0.28), lineWidth: 1)
-                        )
                 }
-                .menuStyle(.borderlessButton)
-                .menuIndicator(.hidden)
-                .frame(width: 28, height: 28)
             }
             .frame(width: actionsWidth, alignment: .leading)
         }

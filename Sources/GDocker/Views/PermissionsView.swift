@@ -196,7 +196,7 @@ private struct ServerCard: View {
                     .foregroundStyle(Color.ctp.ok)
             }
 
-            Menu {
+            SectionMenuButton {
                 Button { copy(.claudeCodeHTTP) } label: { Text("Claude Code (HTTP)", bundle: .l10n) }
                 Button { copy(.jsonHTTP) } label: { Text("JSON (HTTP)", bundle: .l10n) }
                 Button { copy(.claudeDesktopStdio) } label: { Text("Claude Desktop (stdio)", bundle: .l10n) }
@@ -210,19 +210,7 @@ private struct ServerCard: View {
                 case .starting:
                     EmptyView()
                 }
-            } label: {
-                Image(systemName: "ellipsis")
-                    .font(.system(size: 12))
-                    .foregroundStyle(Color.ctp.text)
-                    .frame(width: 28, height: 28)
-                    .background(
-                        RoundedRectangle(cornerRadius: 6)
-                            .strokeBorder(Color.ctp.muted.opacity(0.28), lineWidth: 1)
-                    )
             }
-            .menuStyle(.borderlessButton)
-            .menuIndicator(.hidden)
-            .frame(width: 28, height: 28)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)

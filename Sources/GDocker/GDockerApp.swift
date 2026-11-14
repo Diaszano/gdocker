@@ -56,6 +56,7 @@ struct GDockerApp: App {
                     Text("This will remove all stopped containers, unused networks, and dangling images. Volumes will not be removed.", bundle: .l10n)
                 }
         }
+        .windowStyle(.hiddenTitleBar)
         .defaultSize(width: 1400, height: 840)
         .commands {
             CommandMenu(Text("Docker", bundle: .l10n)) {
