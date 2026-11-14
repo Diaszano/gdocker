@@ -1,3 +1,4 @@
+import GDockerCore
 import SwiftUI
 
 /// Bottom status bar across main views, matching Penpot `01`–`04`.
@@ -5,6 +6,7 @@ struct StatusBar: View {
     let connected: Bool
     let runningCount: Int
     let totalCount: Int
+    let hostInfo: DockerHostInfo?
     let mcp: McpController
 
     var body: some View {
@@ -13,11 +15,29 @@ struct StatusBar: View {
                 Circle()
                     .fill(connected ? Color.ctp.ok : Color.ctp.err)
                     .frame(width: 6, height: 6)
-                Text(connected ? "Docker connected" : "Docker disconnected", bundle: .l10n)
+                if hostInfo?.isColima == true {
+                    if connected {
+                        Text("Colima connected", bundle: .l10n)
+                    } else {
+                        Text("Docker disconnected", bundle: .l10n)
+                    }
+                } else {
+                    if connected {
+                        Text("Docker connected", bundle: .l10n)
+                    } else {
+                        Text("Docker disconnected", bundle: .l10n)
+                    }
+                }
             }
 
             Text(verbatim: String(localized: "\(String(runningCount)) of \(String(totalCount)) running", bundle: .l10n))
                 .foregroundStyle(Color.ctp.muted)
+
+            if let memTotal = hostInfo?.memTotal, memTotal > 0 {
+                let gb = Double(memTotal) / 1_073_741_824.0
+                Text(verbatim: String(format: "%.1f GB RAM", gb))
+                    .foregroundStyle(Color.ctp.muted)
+            }
 
             HStack(spacing: 6) {
                 Circle()

@@ -8,8 +8,10 @@ public actor DockerClient {
 
     private let http: HTTPClient
     private let baseURL: String
+    private let socketPath: String
 
     public init(socketPath: String) {
+        self.socketPath = socketPath
         let host = socketPath.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed) ?? socketPath
         baseURL = "http+unix://\(host)/\(Self.apiVersion)"
         http = HTTPClient(eventLoopGroupProvider: .singleton)
@@ -33,6 +35,65 @@ public actor DockerClient {
 
     public func ping() async throws {
         _ = try await send(.GET, "/_ping")
+    }
+
+    public func hostInfo() async throws -> DockerHostInfo {
+        struct RawInfo: Decodable {
+            let name: String?
+            let ncpu: Int?
+            let memTotal: Int64?
+            enum CodingKeys: String, CodingKey {
+                case name = "Name", ncpu = "NCPU", memTotal = "MemTotal"
+            }
+        }
+        struct RawDF: Decodable {
+            let layersSize: Int64?
+            enum CodingKeys: String, CodingKey { case layersSize = "LayersSize" }
+        }
+
+        let infoData = try await send(.GET, "/info")
+        let raw = try JSONDecoder().decode(RawInfo.self, from: infoData)
+        let isColima = socketPath.lowercased().contains("colima")
+            || (raw.name?.lowercased().contains("colima") ?? false)
+
+        var diskUsed: Int64? = nil
+        if let dfData = try? await send(.GET, "/system/df"),
+           let df = try? JSONDecoder().decode(RawDF.self, from: dfData) {
+            diskUsed = df.layersSize
+        }
+
+        var diskTotal: Int64? = nil
+        if isColima, let colimaDisk = Self.readColimaDiskBytes() {
+            diskTotal = colimaDisk
+        }
+
+        return DockerHostInfo(
+            name: raw.name ?? (isColima ? "Colima" : "Docker"),
+            cpus: raw.ncpu ?? 0,
+            memTotal: raw.memTotal ?? 0,
+            diskUsed: diskUsed,
+            diskTotal: diskTotal,
+            isColima: isColima
+        )
+    }
+
+    private static func readColimaDiskBytes() -> Int64? {
+        struct ColimaStatus: Decodable { let disk: Int64? }
+        let process = Process()
+        let pipe = Pipe()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/env")
+        process.arguments = ["colima", "status", "--json"]
+        process.standardOutput = pipe
+        process.standardError = FileHandle.nullDevice
+        do {
+            try process.run()
+            process.waitUntilExit()
+            guard process.terminationStatus == 0 else { return nil }
+            let data = pipe.fileHandleForReading.readDataToEndOfFile()
+            return try? JSONDecoder().decode(ColimaStatus.self, from: data).disk
+        } catch {
+            return nil
+        }
     }
 
     public func listContainers() async throws -> [ContainerSummary] {

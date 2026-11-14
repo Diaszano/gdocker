@@ -6,7 +6,12 @@ struct RuntimeCard: View {
     let connected: Bool
     let runningCount: Int
     let totalCount: Int
+    let hostInfo: DockerHostInfo?
     let compact: Bool
+
+    private var runtimeTitle: String {
+        hostInfo?.isColima == true ? "Colima" : "Docker"
+    }
 
     var body: some View {
         if compact {
@@ -34,7 +39,7 @@ struct RuntimeCard: View {
                         Circle()
                             .fill(connected ? Color.ctp.ok : Color.ctp.err)
                             .frame(width: 7, height: 7)
-                        Text("Docker", bundle: .l10n)
+                        Text(verbatim: runtimeTitle)
                             .font(.system(size: 12, weight: .semibold))
                             .foregroundStyle(Color.ctp.text)
                     }
@@ -46,21 +51,32 @@ struct RuntimeCard: View {
 
                 HStack {
                     Text(verbatim: String(localized: "\(String(runningCount)) of \(String(totalCount)) containers", bundle: .l10n))
-                        .font(.system(size: 11))
-                        .foregroundStyle(Color.ctp.muted)
                     Spacer()
-                }
-
-                GeometryReader { geo in
-                    let ratio = totalCount > 0 ? CGFloat(runningCount) / CGFloat(totalCount) : 0
-                    ZStack(alignment: .leading) {
-                        Capsule().fill(Color.ctp.hover)
-                        Capsule()
-                            .fill(connected ? Color.ctp.accent : Color.ctp.err)
-                            .frame(width: max(0, geo.size.width * min(1, ratio)))
+                    if let cpus = hostInfo?.cpus, cpus > 0 {
+                        Text(verbatim: String(localized: "\(String(cpus)) CPUs", bundle: .l10n))
                     }
                 }
-                .frame(height: 4)
+                .font(.system(size: 11))
+                .foregroundStyle(Color.ctp.muted)
+
+                if let memTotal = hostInfo?.memTotal, memTotal > 0 {
+                    metricBar(
+                        label: Text("Memory", bundle: .l10n),
+                        value: formatGB(memTotal),
+                        ratio: totalCount > 0 ? CGFloat(runningCount) / CGFloat(totalCount) : 0.25,
+                        color: Color.ctp.accent
+                    )
+                }
+
+                if let diskTotal = hostInfo?.diskTotal, diskTotal > 0 {
+                    let used = hostInfo?.diskUsed ?? 0
+                    metricBar(
+                        label: Text("Disk", bundle: .l10n),
+                        value: "\(formatGB(used)) / \(formatGB(diskTotal))",
+                        ratio: CGFloat(used) / CGFloat(diskTotal),
+                        color: Color.ctp.ok
+                    )
+                }
             }
             .padding(10)
             .background(
@@ -71,5 +87,33 @@ struct RuntimeCard: View {
             .padding(.horizontal, 12)
             .padding(.bottom, 10)
         }
+    }
+
+    private func metricBar(label: Text, value: String, ratio: CGFloat, color: Color) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                label
+                    .font(.system(size: 10))
+                    .foregroundStyle(Color.ctp.muted)
+                Spacer()
+                Text(verbatim: value)
+                    .font(.system(size: 10, design: .monospaced))
+                    .foregroundStyle(Color.ctp.text)
+            }
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Capsule().fill(Color.ctp.hover)
+                    Capsule()
+                        .fill(connected ? color : Color.ctp.err)
+                        .frame(width: max(0, geo.size.width * min(1, max(0.05, ratio))))
+                }
+            }
+            .frame(height: 4)
+        }
+    }
+
+    private func formatGB(_ bytes: Int64) -> String {
+        let gb = Double(bytes) / 1_073_741_824.0
+        return String(format: "%.1f GB", gb)
     }
 }

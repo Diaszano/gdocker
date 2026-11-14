@@ -160,19 +160,25 @@ struct NetworksView: View {
                     HStack(spacing: 8) {
                         Image(systemName: "network")
                             .foregroundStyle(Color.ctp.accent)
+                            .frame(width: 16)
                         Text(verbatim: network.name)
                             .fontWeight(.medium)
+                            .lineLimit(1)
                         if network.isDefaultNetwork {
                             Text("system", bundle: .l10n)
                                 .font(.caption2)
-                                .padding(.horizontal, 5)
-                                .padding(.vertical, 1)
+                                .fixedSize(horizontal: true, vertical: false)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
                                 .background(Color.ctp.muted.opacity(0.15))
                                 .clipShape(Capsule())
                                 .foregroundStyle(Color.ctp.muted)
                         }
+                        Spacer(minLength: 0)
                     }
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
+                .width(min: 200, ideal: 240)
                 TableColumn(String(localized: "Network ID", bundle: .l10n)) { network in
                     Text(verbatim: network.shortID)
                         .font(.system(.body, design: .monospaced))

@@ -13,7 +13,7 @@ struct TabStrip<Tab: Hashable>: View {
     let items: [Item]
 
     var body: some View {
-        HStack(spacing: 18) {
+        HStack(spacing: 14) {
             ForEach(items) { item in
                 let active = item.tab == selection
                 Button {
@@ -25,7 +25,9 @@ struct TabStrip<Tab: Hashable>: View {
                                 .font(.system(size: 11, weight: active ? .semibold : .regular))
                             Text(item.title, bundle: .l10n)
                                 .font(.system(size: 12, weight: active ? .semibold : .medium))
+                                .lineLimit(1)
                         }
+                        .fixedSize(horizontal: true, vertical: false)
                         .foregroundStyle(active ? Color.ctp.accent : Color.ctp.muted)
                         Rectangle()
                             .fill(active ? Color.ctp.accent : Color.clear)

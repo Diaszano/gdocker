@@ -73,6 +73,24 @@ public struct ContainerSummary: Decodable, Identifiable, Hashable, Sendable {
     }
 }
 
+public struct DockerHostInfo: Sendable, Equatable {
+    public let name: String
+    public let cpus: Int
+    public let memTotal: Int64
+    public let diskUsed: Int64?
+    public let diskTotal: Int64?
+    public let isColima: Bool
+
+    public init(name: String, cpus: Int, memTotal: Int64, diskUsed: Int64? = nil, diskTotal: Int64? = nil, isColima: Bool = false) {
+        self.name = name
+        self.cpus = cpus
+        self.memTotal = memTotal
+        self.diskUsed = diskUsed
+        self.diskTotal = diskTotal
+        self.isColima = isColima
+    }
+}
+
 public enum ContainerStatusFilter: String, CaseIterable, Sendable {
     case all, running, stopped, failed
 

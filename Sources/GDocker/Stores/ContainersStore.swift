@@ -7,6 +7,7 @@ enum ContainerAction { case start, stop, restart, remove }
 final class ContainersStore {
     private(set) var connected = false
     private(set) var client: DockerClient?
+    private(set) var hostInfo: DockerHostInfo?
     var selectedID: String?
     var lastError: String?
     /// Bumped after every action. A restart can finish between two polls, leaving id and state unchanged, while Docker
@@ -67,6 +68,9 @@ final class ContainersStore {
             if client == nil { client = try DockerClient.connect() }
             guard let client else { return }
             all = try await client.listContainers()
+            if hostInfo == nil {
+                hostInfo = try? await client.hostInfo()
+            }
             connected = true
             if let selectedID, !all.contains(where: { $0.id == selectedID }) { self.selectedID = nil }
         } catch {

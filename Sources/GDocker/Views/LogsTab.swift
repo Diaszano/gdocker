@@ -40,6 +40,7 @@ struct LogsTab: View {
                     .background(Capsule().fill(Color.ctp.side))
                 }
                 .buttonStyle(.plain)
+                .fixedSize(horizontal: true, vertical: false)
 
                 Toggle(isOn: $model.showTimestamps) {
                     Text("Timestamps", bundle: .l10n)
@@ -47,6 +48,7 @@ struct LogsTab: View {
                         .foregroundStyle(Color.ctp.muted)
                 }
                 .toggleStyle(.checkbox)
+                .fixedSize(horizontal: true, vertical: false)
             }
 
             ScrollViewReader { proxy in

@@ -35,6 +35,7 @@ struct MainWindow: View {
                     connected: store.connected,
                     runningCount: runningCount,
                     totalCount: store.all.count,
+                    hostInfo: store.hostInfo,
                     mcp: mcp
                 )
             }
@@ -127,6 +128,7 @@ struct MainWindow: View {
                 connected: store.connected,
                 runningCount: runningCount,
                 totalCount: store.all.count,
+                hostInfo: store.hostInfo,
                 compact: sidebarCollapsed
             )
         }
@@ -229,7 +231,7 @@ struct MainWindow: View {
                     showInspector = true
                 }
             )
-            .frame(minWidth: 520, maxWidth: .infinity, maxHeight: .infinity)
+            .frame(minWidth: 620, maxWidth: .infinity, maxHeight: .infinity)
 
             if showInspector {
                 Group {
@@ -246,7 +248,7 @@ struct MainWindow: View {
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                     }
                 }
-                .frame(minWidth: 340, idealWidth: 420, maxWidth: 520, maxHeight: .infinity)
+                .frame(minWidth: 380, idealWidth: 420, maxWidth: 520, maxHeight: .infinity)
             }
         }
     }

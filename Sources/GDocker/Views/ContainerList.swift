@@ -103,7 +103,7 @@ struct ContainerList: View {
             }
 
             HStack(spacing: 8) {
-                FilterPill(title: "All", dotColor: nil, isSelected: store.statusFilter == .all) {
+                FilterPill(title: LocalizedStringKey(String(localized: "All", bundle: .l10n)), dotColor: nil, isSelected: store.statusFilter == .all) {
                     store.statusFilter = .all
                 }
                 FilterPill(title: "Running", dotColor: Color.ctp.ok, isSelected: store.statusFilter == .running) {
@@ -126,10 +126,10 @@ struct ContainerList: View {
     private var tableHeader: some View {
         HStack(spacing: 12) {
             Spacer().frame(width: 56) // checkbox + logo
-            Text("Name", bundle: .l10n).frame(maxWidth: .infinity, alignment: .leading)
-            Text("State", bundle: .l10n).frame(width: 112, alignment: .leading)
+            Text("Name", bundle: .l10n).frame(minWidth: 160, maxWidth: .infinity, alignment: .leading)
+            Text("State", bundle: .l10n).frame(width: 118, alignment: .leading)
             Text("Ports", bundle: .l10n).frame(width: 96, alignment: .leading)
-            Text("Size", bundle: .l10n).frame(width: 72, alignment: .leading)
+            Text("Size", bundle: .l10n).frame(width: 68, alignment: .leading)
             Text("Actions", bundle: .l10n).frame(width: 132, alignment: .leading)
         }
         .textCase(.uppercase)
@@ -213,10 +213,11 @@ private struct ContainerRow: View {
                     .foregroundStyle(Color.ctp.muted)
                     .lineLimit(1)
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(minWidth: 160, maxWidth: .infinity, alignment: .leading)
 
             StatusBadge(kind: container.statusKind, label: statusLabel)
-                .frame(width: 112, alignment: .leading)
+                .fixedSize(horizontal: true, vertical: false)
+                .frame(width: 118, alignment: .leading)
 
             Text(verbatim: formattedPorts)
                 .font(.system(size: 11, design: .monospaced))
@@ -228,7 +229,7 @@ private struct ContainerRow: View {
                 .font(.system(size: 11, design: .monospaced))
                 .foregroundStyle(Color.ctp.muted)
                 .lineLimit(1)
-                .frame(width: 72, alignment: .leading)
+                .frame(width: 68, alignment: .leading)
 
             HStack(spacing: 6) {
                 IconActionButton(systemImage: "arrow.clockwise", help: "Restart") {

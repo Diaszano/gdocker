@@ -35,7 +35,7 @@ struct GDockerApp: App {
                 .environment(networksStore)
                 .environment(composeStore)
                 .environment(mcp)
-                .frame(minWidth: 1000, minHeight: 600)
+                .frame(minWidth: 1260, minHeight: 740)
                 .task {
                     store.start()
                     await mcp.startIfEnabled()
@@ -56,6 +56,7 @@ struct GDockerApp: App {
                     Text("This will remove all stopped containers, unused networks, and dangling images. Volumes will not be removed.", bundle: .l10n)
                 }
         }
+        .defaultSize(width: 1400, height: 840)
         .commands {
             CommandMenu(Text("Docker", bundle: .l10n)) {
                 Button {
