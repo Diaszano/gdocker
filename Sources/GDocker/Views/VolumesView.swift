@@ -28,7 +28,7 @@ struct VolumesView: View {
     @State private var driverWidth: CGFloat = 88
     @State private var scopeWidth: CGFloat = 84
     @State private var createdWidth: CGFloat = 136
-    private let actionsWidth: CGFloat = 68
+    private let actionsWidth: CGFloat = 64
 
     private var selectAllState: TableCheckState {
         let visible = store.filteredVolumes.map(\.name)
@@ -171,7 +171,7 @@ struct VolumesView: View {
             }
         }
         .padding(.horizontal, 20)
-        .padding(.top, 16)
+        .padding(.top, 28)
         .padding(.bottom, 12)
     }
 

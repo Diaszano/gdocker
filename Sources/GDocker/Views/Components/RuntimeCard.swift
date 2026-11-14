@@ -98,7 +98,7 @@ struct RuntimeCard: View {
                     .fill(Color.ctp.bg.opacity(0.55))
                     .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(Color.ctp.muted.opacity(0.22), lineWidth: 1))
             )
-            .padding(.horizontal, 12)
+            .padding(.horizontal, 10)
             .padding(.bottom, 10)
         }
     }

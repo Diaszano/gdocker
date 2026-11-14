@@ -14,7 +14,7 @@ struct NetworksView: View {
     @State private var scopeWidth: CGFloat = 76
     @State private var containersWidth: CGFloat = 88
     @State private var idWidth: CGFloat = 110
-    private let actionsWidth: CGFloat = 68
+    private let actionsWidth: CGFloat = 64
 
     private var selectableVisibleIDs: [String] {
         store.filteredNetworks.filter { !$0.isDefaultNetwork }.map(\.id)
@@ -161,7 +161,7 @@ struct NetworksView: View {
             }
         }
         .padding(.horizontal, 20)
-        .padding(.top, 16)
+        .padding(.top, 28)
         .padding(.bottom, 12)
     }
 
@@ -302,7 +302,7 @@ private struct NetworkRow: View {
     var body: some View {
         HStack(spacing: 6) {
             if network.isDefaultNetwork {
-                Spacer().frame(width: 22)
+                Spacer().frame(width: 16)
             } else {
                 TableCheckbox(state: isChecked ? .checked : .unchecked, action: onToggleCheck)
             }

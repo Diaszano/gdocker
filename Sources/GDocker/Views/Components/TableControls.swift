@@ -38,9 +38,9 @@ struct TableCheckbox: View {
                         EmptyView()
                     }
                 }
-                .frame(width: 15, height: 15)
-                .frame(width: 22, height: 22)
-                .contentShape(Rectangle())
+                .frame(width: 16, height: 16)
+                .frame(width: 16, height: 22)
+                .contentShape(Rectangle().inset(by: -4))
         }
         .buttonStyle(.plain)
         .help(help.map { Text($0, bundle: .l10n) } ?? Text(verbatim: ""))
@@ -199,17 +199,23 @@ struct SectionMenuButton<MenuContent: View>: View {
     @State private var hovered = false
 
     var body: some View {
-        Menu {
-            menuContent()
-        } label: {
+        ZStack {
+            Menu {
+                menuContent()
+            } label: {
+                Color.clear
+                    .frame(width: 28, height: 28)
+                    .contentShape(Rectangle())
+            }
+            .menuStyle(.borderlessButton)
+            .menuIndicator(.hidden)
+            .frame(width: 28, height: 28)
+
             Image(systemName: "ellipsis")
                 .font(.system(size: 12, weight: .medium))
                 .foregroundStyle(Color.ctp.text)
-                .frame(width: 28, height: 28)
-                .contentShape(Rectangle())
+                .allowsHitTesting(false)
         }
-        .menuStyle(.borderlessButton)
-        .menuIndicator(.hidden)
         .frame(width: 28, height: 28)
         .background(
             RoundedRectangle(cornerRadius: 6)

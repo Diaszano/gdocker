@@ -37,7 +37,9 @@ struct ActivityView: View {
                     KpiCard(title: String(localized: "Pending", bundle: .l10n), value: approvalModel.pending.count)
                 }
             }
-            .padding(20)
+            .padding(.horizontal, 20)
+            .padding(.top, 28)
+            .padding(.bottom, 20)
 
             tableHeader
             Divider().overlay(Color.ctp.muted.opacity(0.18))

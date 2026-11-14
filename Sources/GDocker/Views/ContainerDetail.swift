@@ -94,7 +94,7 @@ struct ContainerDetail: View {
             }
         }
         .padding(.horizontal, 16)
-        .padding(.top, 16)
+        .padding(.top, 28)
         .padding(.bottom, 10)
     }
 

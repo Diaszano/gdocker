@@ -166,7 +166,7 @@ struct MainWindow: View {
         }
         .frame(maxWidth: .infinity, alignment: sidebarCollapsed ? .center : .leading)
         .padding(.horizontal, sidebarCollapsed ? 0 : 14)
-        .padding(.top, 34)
+        .padding(.top, 28)
         .padding(.bottom, 10)
         .contentShape(Rectangle())
         .onTapGesture {

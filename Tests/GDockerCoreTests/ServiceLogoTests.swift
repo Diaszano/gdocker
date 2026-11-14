@@ -12,3 +12,15 @@ import Testing
     #expect(ServiceKind.from(image: "mailhog/mailhog") == .generic)
     #expect(ServiceKind.from(image: "") == .generic)
 }
+
+@Test func mapsDockerImagesToPenpotLogoSlugs() {
+    #expect(ServiceKind.logoSlug(for: "cndt-scraper-postgres") == "postgresql")
+    #expect(ServiceKind.logoSlug(for: "cndt-scraper-rabbitmq") == "rabbitmq")
+    #expect(ServiceKind.logoSlug(for: "ghcr.io/bitnami/redis:7-alpine") == "redis")
+    #expect(ServiceKind.logoSlug(for: "opensearchproject/opensearch:2") == "opensearch")
+    #expect(ServiceKind.logoSlug(for: "nodered/node-red:latest") == "node-red")
+    #expect(ServiceKind.logoSlug(for: "node:20-alpine") == "nodejs")
+    #expect(ServiceKind.logoSlug(for: "traefik:v3.0") == "traefik-proxy")
+    #expect(ServiceKind.logoSlug(for: "mailhog/mailhog") == nil)
+    #expect(ServiceKind.logoSlug(for: "") == nil)
+}

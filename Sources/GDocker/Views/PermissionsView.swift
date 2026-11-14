@@ -22,7 +22,9 @@ struct PermissionsView: View {
 
                 ServerCard(mcp: mcp, maskEnvVars: $maskEnvVars)
             }
-            .padding(20)
+            .padding(.horizontal, 20)
+            .padding(.top, 28)
+            .padding(.bottom, 20)
 
             tableHeader
             Divider().overlay(Color.ctp.muted.opacity(0.18))

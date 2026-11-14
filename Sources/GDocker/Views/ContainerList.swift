@@ -14,7 +14,7 @@ struct ContainerList: View {
     @State private var stateWidth: CGFloat = 118
     @State private var portsWidth: CGFloat = 96
     @State private var sizeWidth: CGFloat = 68
-    private let actionsWidth: CGFloat = 132
+    private let actionsWidth: CGFloat = 130
 
     private var visibleContainerIDs: [String] {
         store.visibleGroups.flatMap(\.containers).map(\.id)
@@ -235,7 +235,7 @@ struct ContainerList: View {
             }
         }
         .padding(.horizontal, 20)
-        .padding(.top, 16)
+        .padding(.top, 28)
         .padding(.bottom, 12)
     }
 

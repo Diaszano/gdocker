@@ -13,7 +13,7 @@ struct ComposeView: View {
     @State private var statusWidth: CGFloat = 132
     @State private var servicesWidth: CGFloat = 76
     @State private var dirWidth: CGFloat = 240
-    private let actionsWidth: CGFloat = 102
+    private let actionsWidth: CGFloat = 98
 
     private var minTableWidth: CGFloat {
         40 + 28 + nameMinWidth + statusWidth + servicesWidth + dirWidth + actionsWidth + 90
@@ -145,7 +145,7 @@ struct ComposeView: View {
             }
         }
         .padding(.horizontal, 20)
-        .padding(.top, 16)
+        .padding(.top, 28)
         .padding(.bottom, 12)
     }
 
