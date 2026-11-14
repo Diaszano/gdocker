@@ -8,10 +8,9 @@ struct ApprovalView: View {
         Group {
             if let request = model.current {
                 RequestCard(request: request, pendingCount: model.pending.count) { model.answer($0) }
-                    // A new request starts with "always allow" unchecked.
                     .id(request.id)
             } else {
-                Color.clear.frame(width: 440, height: 1)
+                Color.clear.frame(width: 460, height: 1)
             }
         }
     }
@@ -21,66 +20,108 @@ private struct RequestCard: View {
     let request: ApprovalRequest
     let pendingCount: Int
     let answer: (ApprovalDecision) -> Void
-    @State private var always = false
 
     var body: some View {
-        VStack(spacing: 14) {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .font(.system(size: 26))
+        VStack(alignment: .leading, spacing: 16) {
+            headerSection
+            details
+            actionsSection
+        }
+        .padding(22)
+        .frame(width: 460)
+        .background(Color.ctp.bg)
+    }
+
+    private var headerSection: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "exclamationmark.triangle")
+                .font(.system(size: 18, weight: .semibold))
                 .foregroundStyle(Color.ctp.warn)
-                .frame(width: 52, height: 52)
-                .background(RoundedRectangle(cornerRadius: 12).fill(Color.ctp.warn.opacity(0.15)))
-            Text(verbatim: title).font(.headline).multilineTextAlignment(.center)
+                .frame(width: 38, height: 38)
+                .background(RoundedRectangle(cornerRadius: 9).fill(Color.ctp.warn.opacity(0.16)))
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Approve AI call?", bundle: .l10n)
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundStyle(Color.ctp.text)
+                Text(verbatim: String(localized: "\(request.client) wants to execute a sensitive action", bundle: .l10n))
+                    .font(.system(size: 12))
+                    .foregroundStyle(Color.ctp.muted)
+            }
+            Spacer()
             if pendingCount > 1 {
                 Text(verbatim: String(localized: "\(String(1)) of \(String(pendingCount))", bundle: .l10n))
-                    .font(.caption).foregroundStyle(Color.ctp.muted)
+                    .font(.caption)
+                    .foregroundStyle(Color.ctp.muted)
             }
-            details
-            if request.allowsAlways {
-                Toggle(isOn: $always) { Text("Always allow this action", bundle: .l10n) }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
-            HStack {
-                // No keyboard shortcuts on purpose: see ApprovalPanelController. The user must click.
-                Button { answer(.deny) } label: { Text("Deny", bundle: .l10n).frame(maxWidth: .infinity) }
-                Button { answer(always ? .allowAlways : .allowOnce) } label: {
-                    (always ? Text("Allow always", bundle: .l10n) : Text("Allow once", bundle: .l10n))
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.borderedProminent)
-                .frame(maxWidth: .infinity)
-            }
-            .controlSize(.large)
         }
-        .padding(24)
-        .frame(width: 440)
+    }
+
+    private var actionsSection: some View {
+        HStack(spacing: 10) {
+            Spacer()
+            // No keyboard shortcuts on purpose: see ApprovalPanelController. The user must click.
+            Button { answer(.deny) } label: {
+                Text("Deny", bundle: .l10n)
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(Color.ctp.err)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 8)
+                    .background(RoundedRectangle(cornerRadius: 7).fill(Color.ctp.err.opacity(0.14)))
+            }
+            .buttonStyle(.plain)
+
+            Button { answer(.allowOnce) } label: {
+                Text("Allow once", bundle: .l10n)
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(Color.ctp.text)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 8)
+                    .background(RoundedRectangle(cornerRadius: 7).fill(Color.ctp.hover))
+            }
+            .buttonStyle(.plain)
+
+            if request.allowsAlways {
+                Button { answer(.allowAlways) } label: {
+                    Text("Allow always", bundle: .l10n)
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(Color.ctp.bg)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 8)
+                        .background(RoundedRectangle(cornerRadius: 7).fill(Color.ctp.accent))
+                }
+                .buttonStyle(.plain)
+            }
+        }
     }
 
     private var details: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(verbatim: request.tool).fontWeight(.semibold)
+        VStack(alignment: .leading, spacing: 8) {
+            detailRow(label: String(localized: "Tool", bundle: .l10n), value: request.tool)
             ForEach(request.arguments, id: \.name) { argument in
-                Text(verbatim: "\(argument.name): \(argument.value)")
-                    .foregroundStyle(Color.ctp.muted)
-                    .lineLimit(4)
-            }
-            if let reason = request.reason, !reason.isEmpty {
-                Divider().padding(.vertical, 2)
-                Text("Reason", bundle: .l10n).font(.caption).foregroundStyle(Color.ctp.muted)
-                Text(verbatim: reason).lineLimit(4)
+                detailRow(label: argument.name, value: argument.value)
             }
         }
-        .font(.system(size: 12, design: .monospaced))
         .textSelection(.enabled)
-        .padding(12)
+        .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(RoundedRectangle(cornerRadius: 8).fill(Color.ctp.muted.opacity(0.12)))
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color.ctp.side)
+                .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(Color.ctp.muted.opacity(0.2), lineWidth: 1))
+        )
     }
 
-    private var title: String {
-        let action = ToolCatalog.spec(named: request.tool).map {
-            Bundle.l10n.localizedString(forKey: $0.title, value: nil, table: nil)
-        } ?? request.tool
-        return String(localized: "\(request.client) wants to run: \(action)", bundle: .l10n)
+    private func detailRow(label: String, value: String) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            Text(verbatim: label)
+                .font(.system(size: 12))
+                .foregroundStyle(Color.ctp.muted)
+                .frame(width: 82, alignment: .leading)
+            Text(verbatim: value)
+                .font(.system(size: 12, design: .monospaced))
+                .foregroundStyle(Color.ctp.text)
+                .lineLimit(4)
+        }
     }
 }

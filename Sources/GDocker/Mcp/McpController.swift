@@ -17,6 +17,10 @@ final class McpController {
 
     private(set) var state = State.stopped
     private(set) var clientCount = 0
+
+    func showApprovals() {
+        approvalPanel?.focus()
+    }
     let permissions: PermissionStore
     let permissionsModel: PermissionsModel
     let activity: ActivityLog

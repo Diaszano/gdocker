@@ -1,3 +1,4 @@
+import GDockerCore
 import SwiftUI
 
 enum SidebarItem: Hashable { case containers, images, volumes, networks, compose, permissions, activity }
@@ -9,25 +10,36 @@ struct MainWindow: View {
     @Environment(NetworksStore.self) private var networksStore
     @Environment(ComposeStore.self) private var composeStore
     @Environment(McpController.self) private var mcp
-    @State private var section: SidebarItem? = .containers
+    @State private var section: SidebarItem = .containers
+    @State private var sidebarCollapsed = false
+    @State private var showInspector = true
+    @State private var inspectorTab = ContainerDetail.Tab.logs
     // Dynamic colors don't invalidate SwiftUI when only the flavor changes, so the theme keys the view tree.
     @AppStorage(SettingsKey.theme) private var theme = Theme.system
 
+    private var runningCount: Int {
+        store.all.filter { $0.statusKind == .running }.count
+    }
+
     var body: some View {
-        NavigationSplitView {
+        HStack(spacing: 0) {
             sidebar
-        } detail: {
-            switch section ?? .containers {
-            case .containers: containers
-            case .images: ImagesView()
-            case .volumes: VolumesView()
-            case .networks: NetworksView()
-            case .compose: ComposeView()
-            case .permissions: PermissionsView(mcp: mcp)
-            case .activity: ActivityView(model: mcp.activityModel)
+            Rectangle()
+                .fill(Color.ctp.muted.opacity(0.18))
+                .frame(width: 1)
+
+            VStack(spacing: 0) {
+                detailContent
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                StatusBar(
+                    connected: store.connected,
+                    runningCount: runningCount,
+                    totalCount: store.all.count,
+                    mcp: mcp
+                )
             }
+            .background(Color.ctp.bg)
         }
-        .scrollContentBackground(.hidden)
         .background(Color.ctp.bg)
         .tint(Color.ctp.accent)
         .id(theme)
@@ -66,102 +78,176 @@ struct MainWindow: View {
         }
     }
 
-    private var sidebar: some View {
-        List(selection: $section) {
-            Section(header: Text("Docker", bundle: .l10n)) {
-                HStack {
-                    Label {
-                        Text("Containers", bundle: .l10n)
-                    } icon: {
-                        Image(systemName: "shippingbox")
-                    }
-                    Spacer()
-                    Text(verbatim: "\(store.all.count)").foregroundStyle(Color.ctp.muted)
-                }
-                .tag(SidebarItem.containers)
-
-                HStack {
-                    Label {
-                        Text("Images", bundle: .l10n)
-                    } icon: {
-                        Image(systemName: "square.stack.3d.up")
-                    }
-                    Spacer()
-                    Text(verbatim: "\(imagesStore.count)").foregroundStyle(Color.ctp.muted)
-                }
-                .tag(SidebarItem.images)
-
-                HStack {
-                    Label {
-                        Text("Volumes", bundle: .l10n)
-                    } icon: {
-                        Image(systemName: "externaldrive")
-                    }
-                    Spacer()
-                    Text(verbatim: "\(volumesStore.count)").foregroundStyle(Color.ctp.muted)
-                }
-                .tag(SidebarItem.volumes)
-
-                HStack {
-                    Label {
-                        Text("Networks", bundle: .l10n)
-                    } icon: {
-                        Image(systemName: "network")
-                    }
-                    Spacer()
-                    Text(verbatim: "\(networksStore.count)").foregroundStyle(Color.ctp.muted)
-                }
-                .tag(SidebarItem.networks)
-
-                HStack {
-                    Label {
-                        Text("Compose", bundle: .l10n)
-                    } icon: {
-                        Image(systemName: "square.stack.3d.forward.dottedline")
-                    }
-                    Spacer()
-                    Text(verbatim: "\(composeStore.activeCount)").foregroundStyle(Color.ctp.muted)
-                }
-                .tag(SidebarItem.compose)
-            }
-            Section(header: Text("AI", bundle: .l10n)) {
-                McpStatusRow(mcp: mcp)
-                Text("Permissions", bundle: .l10n).tag(SidebarItem.permissions)
-                Text("AI activity", bundle: .l10n).tag(SidebarItem.activity)
-            }
+    @ViewBuilder private var detailContent: some View {
+        switch section {
+        case .containers: containers
+        case .images: ImagesView()
+        case .volumes: VolumesView()
+        case .networks: NetworksView()
+        case .compose: ComposeView()
+        case .permissions: PermissionsView(mcp: mcp)
+        case .activity: ActivityView(model: mcp.activityModel, approvalModel: mcp.approvalModel)
         }
-        .listStyle(.sidebar)
-        .scrollContentBackground(.hidden)
-        .background(Color.ctp.side)
-        .safeAreaInset(edge: .bottom) {
-            HStack(spacing: 6) {
-                Circle().fill(store.connected ? Color.ctp.ok : Color.ctp.err).frame(width: 8, height: 8)
-                store.connected
-                    ? Text("Docker connected", bundle: .l10n)
-                    : Text("Docker disconnected", bundle: .l10n)
-                Spacer()
-            }
-            .font(.caption)
-            .foregroundStyle(Color.ctp.muted)
-            .padding(10)
-        }
-        .navigationSplitViewColumnWidth(min: 170, ideal: 190, max: 240)
     }
 
-    /// The list and the detail side by side. A plain split view rather than a third navigation column, because the
-    /// permissions screen needs the whole width next to the sidebar.
-    private var containers: some View {
-        HSplitView {
-            ContainerList()
-                .frame(minWidth: 300, idealWidth: 380, maxWidth: 480)
-            Group {
-                if let selected = store.selected {
-                    ContainerDetail(container: selected).id(selected.id)
-                } else {
-                    Text("Select a container", bundle: .l10n).foregroundStyle(Color.ctp.muted)
+    private var sidebar: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            sidebarHeader
+            ScrollView {
+                VStack(alignment: .leading, spacing: 4) {
+                    if !sidebarCollapsed {
+                        sectionHeader("DOCKER")
+                    }
+                    navButton(.containers, title: "Containers", icon: "shippingbox", count: store.all.count)
+                    navButton(.images, title: "Images", icon: "square.stack.3d.up", count: imagesStore.count)
+                    navButton(.volumes, title: "Volumes", icon: "externaldrive", count: volumesStore.count)
+                    navButton(.networks, title: "Networks", icon: "network", count: networksStore.count)
+                    navButton(.compose, title: "Compose", icon: "square.stack.3d.forward.dottedline", count: composeStore.activeCount)
+
+                    if !sidebarCollapsed {
+                        sectionHeader("AI")
+                            .padding(.top, 10)
+                    } else {
+                        Divider().padding(.vertical, 8).padding(.horizontal, 10)
+                    }
+
+                    if !sidebarCollapsed {
+                        McpStatusRow(mcp: mcp)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                    }
+                    navButton(.activity, title: "AI activity", icon: "waveform.path.ecg")
+                    navButton(.permissions, title: "Permissions", icon: "checkmark.shield")
+                }
+                .padding(.horizontal, sidebarCollapsed ? 8 : 10)
+                .padding(.top, 8)
+            }
+            Spacer(minLength: 8)
+            RuntimeCard(
+                connected: store.connected,
+                runningCount: runningCount,
+                totalCount: store.all.count,
+                compact: sidebarCollapsed
+            )
+        }
+        .frame(width: sidebarCollapsed ? 60 : 220)
+        .background(Color.ctp.side)
+    }
+
+    private var sidebarHeader: some View {
+        HStack(spacing: 8) {
+            RoundedRectangle(cornerRadius: 7)
+                .fill(Color.ctp.accent)
+                .frame(width: 24, height: 24)
+                .overlay {
+                    Image(systemName: "shippingbox.fill")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundStyle(Color.ctp.bg)
+                }
+            if !sidebarCollapsed {
+                Text(verbatim: "GDocker")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(Color.ctp.text)
+                Spacer()
+                Button {
+                    withAnimation(.easeInOut(duration: 0.16)) { sidebarCollapsed = true }
+                } label: {
+                    Image(systemName: "sidebar.left")
+                        .font(.system(size: 12))
+                        .foregroundStyle(Color.ctp.muted)
+                        .frame(width: 24, height: 24)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: sidebarCollapsed ? .center : .leading)
+        .padding(.horizontal, sidebarCollapsed ? 0 : 14)
+        .padding(.vertical, 12)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            if sidebarCollapsed {
+                withAnimation(.easeInOut(duration: 0.16)) { sidebarCollapsed = false }
+            }
+        }
+    }
+
+    private func sectionHeader(_ title: LocalizedStringKey) -> some View {
+        Text(title, bundle: .l10n)
+            .font(.system(size: 10, weight: .semibold))
+            .foregroundStyle(Color.ctp.muted)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 4)
+    }
+
+    private func navButton(
+        _ item: SidebarItem,
+        title: LocalizedStringKey,
+        icon: String,
+        count: Int? = nil
+    ) -> some View {
+        let active = section == item
+        return Button {
+            section = item
+        } label: {
+            HStack(spacing: 10) {
+                Image(systemName: icon)
+                    .font(.system(size: 13, weight: active ? .semibold : .regular))
+                    .foregroundStyle(active ? Color.ctp.accent : Color.ctp.muted)
+                    .frame(width: 18)
+                if !sidebarCollapsed {
+                    Text(title, bundle: .l10n)
+                        .font(.system(size: 13, weight: active ? .semibold : .regular))
+                        .foregroundStyle(active ? Color.ctp.text : Color.ctp.muted)
+                    Spacer()
+                    if let count {
+                        Text(verbatim: "\(count)")
+                            .font(.system(size: 11, design: .monospaced))
+                            .foregroundStyle(Color.ctp.muted)
+                    }
                 }
             }
-            .frame(minWidth: 420, maxWidth: .infinity, maxHeight: .infinity)
+            .frame(maxWidth: .infinity, alignment: sidebarCollapsed ? .center : .leading)
+            .padding(.horizontal, sidebarCollapsed ? 0 : 10)
+            .padding(.vertical, 7)
+            .background(
+                RoundedRectangle(cornerRadius: 7)
+                    .fill(active ? Color.ctp.hover : Color.clear)
+            )
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .help(sidebarCollapsed ? Text(title, bundle: .l10n) : Text(verbatim: ""))
+    }
+
+    private var containers: some View {
+        HSplitView {
+            ContainerList(
+                showInspector: $showInspector,
+                onOpenTab: { containerID, tab in
+                    store.selectedID = containerID
+                    inspectorTab = tab
+                    showInspector = true
+                }
+            )
+            .frame(minWidth: 520, maxWidth: .infinity, maxHeight: .infinity)
+
+            if showInspector {
+                Group {
+                    if let selected = store.selected {
+                        ContainerDetail(
+                            container: selected,
+                            selectedTab: $inspectorTab,
+                            onClose: { showInspector = false }
+                        )
+                        .id(selected.id)
+                    } else {
+                        Text("Select a container", bundle: .l10n)
+                            .foregroundStyle(Color.ctp.muted)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    }
+                }
+                .frame(minWidth: 340, idealWidth: 420, maxWidth: 520, maxHeight: .infinity)
+            }
         }
     }
 }
@@ -172,10 +258,14 @@ private struct McpStatusRow: View {
 
     var body: some View {
         HStack(spacing: 8) {
-            Circle().fill(color).frame(width: 8, height: 8)
+            Circle().fill(color).frame(width: 7, height: 7)
             VStack(alignment: .leading, spacing: 2) {
                 Text("MCP server", bundle: .l10n)
-                Text(verbatim: detail).font(.caption).foregroundStyle(Color.ctp.muted)
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(Color.ctp.text)
+                Text(verbatim: detail)
+                    .font(.system(size: 11))
+                    .foregroundStyle(Color.ctp.muted)
             }
         }
     }
@@ -191,7 +281,6 @@ private struct McpStatusRow: View {
     private var detail: String {
         switch mcp.state {
         case .running(let port):
-            // Strings, not Ints: an Int interpolation is locale-formatted, and pt-BR would show port 7.391.
             String(localized: "localhost:\(String(port)) · clients: \(String(mcp.clientCount))", bundle: .l10n)
         case .starting: String(localized: "Starting…", bundle: .l10n)
         case .stopped: String(localized: "Stopped", bundle: .l10n)

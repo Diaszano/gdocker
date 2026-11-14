@@ -3,15 +3,17 @@ import SwiftUI
 
 struct ContainerDetail: View {
     let container: ContainerSummary
+    @Binding var selectedTab: Tab
+    var onClose: (() -> Void)? = nil
+
     @Environment(ContainersStore.self) private var store
-    @State private var tab = Tab.logs
     @State private var logs = LogsModel()
     @State private var details: ContainerDetails?
     @State private var rawJSON = ""
     @State private var confirmRemove = false
     @State private var terminal = TerminalSession()
 
-    enum Tab: CaseIterable {
+    enum Tab: CaseIterable, Hashable {
         case logs, stats, inspect, env, terminal
 
         var title: LocalizedStringKey {
@@ -23,21 +25,29 @@ struct ContainerDetail: View {
             case .terminal: "Terminal"
             }
         }
+
+        var systemImage: String {
+            switch self {
+            case .logs: return "doc.text"
+            case .stats: return "waveform.path.ecg"
+            case .inspect: return "magnifyingglass"
+            case .env: return "curlybraces"
+            case .terminal: return "terminal"
+            }
+        }
     }
 
     var body: some View {
         VStack(spacing: 0) {
             header
-            Picker(selection: $tab) {
-                ForEach(Tab.allCases, id: \.self) { Text($0.title, bundle: .l10n).tag($0) }
-            } label: { EmptyView() }
-            .pickerStyle(.segmented)
-            .labelsHidden()
-            .padding(.horizontal, 16)
-            .padding(.bottom, 8)
-            Divider()
+            TabStrip(
+                selection: $selectedTab,
+                items: Tab.allCases.map { .init(tab: $0, title: $0.title, systemImage: $0.systemImage) }
+            )
+            Divider().overlay(Color.ctp.muted.opacity(0.18))
             content
         }
+        .background(Color.ctp.bg)
         // Re-run when the container changes state or an action ran, so the log stream reconnects after a restart.
         .task(id: "\(container.id)|\(container.state)|\(store.revision)") { await load() }
         .onChange(of: logs.showTimestamps) { logs.restart() }
@@ -57,32 +67,48 @@ struct ContainerDetail: View {
     }
 
     private var header: some View {
-        HStack(alignment: .top, spacing: 10) {
-            StatusDot(kind: container.statusKind).padding(.top, 7)
-            VStack(alignment: .leading, spacing: 3) {
-                Text(verbatim: container.name).font(.title2.bold())
-                Text(verbatim: subtitle).font(.caption).foregroundStyle(Color.ctp.muted)
-            }
-            Spacer()
-            Button { Task { await store.perform(.restart, on: container.id) } } label: {
-                Text("Restart", bundle: .l10n)
-            }
-            if container.isActive {
-                Button { Task { await store.perform(.stop, on: container.id) } } label: {
-                    Text("Stop", bundle: .l10n)
-                }
-            } else {
-                Button { Task { await store.perform(.start, on: container.id) } } label: {
-                    Text("Start", bundle: .l10n)
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 8) {
+                StatusDot(kind: container.statusKind)
+                Text(verbatim: container.name)
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundStyle(Color.ctp.text)
+                    .lineLimit(1)
+                Spacer()
+                if let onClose {
+                    IconActionButton(systemImage: "sidebar.right", tint: Color.ctp.muted, help: "Hide inspector", action: onClose)
                 }
             }
-            Button(role: .destructive) { confirmRemove = true } label: { Text("Remove", bundle: .l10n) }
+
+            Text(verbatim: subtitle)
+                .font(.system(size: 11, design: .monospaced))
+                .foregroundStyle(Color.ctp.muted)
+                .lineLimit(1)
+
+            HStack(spacing: 8) {
+                StatusBadge(kind: container.statusKind, label: statusLabel)
+                Text(verbatim: container.status)
+                    .font(.system(size: 11))
+                    .foregroundStyle(Color.ctp.muted)
+                Spacer()
+            }
         }
-        .padding(16)
+        .padding(.horizontal, 16)
+        .padding(.top, 16)
+        .padding(.bottom, 10)
+    }
+
+    private var statusLabel: LocalizedStringKey {
+        switch container.statusKind {
+        case .running: "Running"
+        case .transitioning: "Restarting"
+        case .stopped: "Stopped"
+        case .failed: "Failed"
+        }
     }
 
     @ViewBuilder private var content: some View {
-        switch tab {
+        switch selectedTab {
         case .logs: LogsTab(model: logs)
         case .stats: StatsTab(client: store.client, id: container.id)
         case .inspect: InspectTab(rawJSON: rawJSON)
@@ -96,7 +122,7 @@ struct ContainerDetail: View {
         let ports = Set(container.ports.compactMap { port in
             port.publicPort.map { ":\($0)→\(port.privatePort)" }
         }).sorted()
-        return ([container.image] + ports + [container.status]).joined(separator: " · ")
+        return ([container.image] + ports).joined(separator: " · ")
     }
 
     private func load() async {

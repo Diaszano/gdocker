@@ -13,6 +13,10 @@ final class ApprovalPanelController {
 
     func start() { observe() }
 
+    func focus() {
+        update()
+    }
+
     private func observe() {
         withObservationTracking {
             _ = model.pending.map(\.id)

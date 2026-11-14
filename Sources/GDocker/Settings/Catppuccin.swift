@@ -52,6 +52,9 @@ extension Color {
     enum ctp {
         static let bg = Color(nsColor: .ctp(\.bg))
         static let side = Color(nsColor: .ctp(\.side))
+        static let code = Color(nsColor: .ctp(\.code))
+        static let line = Color(nsColor: .ctp(\.line))
+        static let hover = Color(nsColor: .ctp(\.hover))
         static let text = Color(nsColor: .ctp(\.text))
         static let muted = Color(nsColor: .ctp(\.muted))
         static let accent = Color(nsColor: .ctp(\.accent))

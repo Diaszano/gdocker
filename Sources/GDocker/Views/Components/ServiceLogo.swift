@@ -25,19 +25,19 @@ struct ServiceLogo: View {
 
     private var symbolName: String {
         switch kind {
-        case .postgres: "cylinder.split.1x2"
-        case .redis: "bolt.horizontal.circle"
-        case .nginx: "network"
-        case .rabbitmq: "tray.2"
-        case .mongodb: "leaf"
-        case .mysql: "cylinder"
-        case .elasticsearch: "magnifyingglass.circle"
-        case .kafka: "arrow.left.arrow.right.circle"
-        case .traefik: "arrow.triangle.branch"
-        case .grafana: "chart.xyaxis.line"
-        case .prometheus: "flame"
-        case .minio: "externaldrive.badge.icloud"
-        case .generic: "shippingbox"
+        case .postgres: return "cylinder.split.1x2"
+        case .redis: return "bolt.horizontal.circle"
+        case .nginx: return "network"
+        case .rabbitmq: return "tray.2"
+        case .mongodb: return "leaf"
+        case .mysql: return "cylinder"
+        case .elasticsearch: return "magnifyingglass.circle"
+        case .kafka: return "arrow.left.arrow.right.circle"
+        case .traefik: return "arrow.triangle.branch"
+        case .grafana: return "chart.xyaxis.line"
+        case .prometheus: return "flame"
+        case .minio: return "externaldrive.badge.icloud"
+        case .generic: return "shippingbox"
         }
     }
 
