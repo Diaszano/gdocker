@@ -7,54 +7,103 @@ struct ContainerList: View {
     var onOpenTab: (String, ContainerDetail.Tab) -> Void
 
     @State private var confirmRemoveID: String?
+    @State private var confirmBulkRemove = false
+    @State private var confirmPruneStopped = false
+
+    @State private var nameMinWidth: CGFloat = 200
+    @State private var stateWidth: CGFloat = 118
+    @State private var portsWidth: CGFloat = 96
+    @State private var sizeWidth: CGFloat = 68
+    private let actionsWidth: CGFloat = 132
+
+    private var visibleContainerIDs: [String] {
+        store.visibleGroups.flatMap(\.containers).map(\.id)
+    }
+
+    private var selectAllState: TableCheckState {
+        let visible = visibleContainerIDs
+        guard !visible.isEmpty else { return .unchecked }
+        let selectedVisible = visible.filter { store.selectedIDs.contains($0) }.count
+        if selectedVisible == 0 { return .unchecked }
+        return selectedVisible == visible.count ? .checked : .indeterminate
+    }
+
+    private var minTableWidth: CGFloat {
+        // checkbox(22) + logo(28) + columns + dividers(4*10) + gaps + horizontal padding(40)
+        40 + 22 + 28 + nameMinWidth + stateWidth + portsWidth + sizeWidth + actionsWidth + 96
+    }
 
     var body: some View {
-        VStack(spacing: 0) {
-            header
-            GeometryReader { geo in
-                ScrollView(.horizontal) {
-                    VStack(spacing: 0) {
-                        tableHeader
-                        Divider().overlay(Color.ctp.muted.opacity(0.18))
-                        ScrollView(.vertical) {
-                            LazyVStack(spacing: 0) {
-                                ForEach(store.visibleGroups) { group in
-                                    GroupHeader(group: group)
-                                    ForEach(group.containers) { container in
-                                        ContainerRow(
-                                            container: container,
-                                            isSelected: store.selectedID == container.id,
-                                            isChecked: store.selectedIDs.contains(container.id),
-                                            onSelect: { store.selectedID = container.id },
-                                            onToggleCheck: {
-                                                if store.selectedIDs.contains(container.id) {
-                                                    store.selectedIDs.remove(container.id)
-                                                } else {
-                                                    store.selectedIDs.insert(container.id)
+        ZStack(alignment: .bottom) {
+            VStack(spacing: 0) {
+                header
+                GeometryReader { geo in
+                    ScrollView(.horizontal) {
+                        VStack(spacing: 0) {
+                            tableHeader
+                            Divider().overlay(Color.ctp.muted.opacity(0.18))
+                            ScrollView(.vertical) {
+                                LazyVStack(spacing: 0) {
+                                    ForEach(store.visibleGroups) { group in
+                                        GroupHeader(group: group)
+                                        ForEach(group.containers) { container in
+                                            ContainerRow(
+                                                container: container,
+                                                isSelected: store.selectedID == container.id,
+                                                isChecked: store.selectedIDs.contains(container.id),
+                                                nameMinWidth: nameMinWidth,
+                                                stateWidth: stateWidth,
+                                                portsWidth: portsWidth,
+                                                sizeWidth: sizeWidth,
+                                                actionsWidth: actionsWidth,
+                                                onSelect: { store.selectedID = container.id },
+                                                onToggleCheck: { toggleCheck(container.id) },
+                                                onAction: { action in
+                                                    if action == .remove {
+                                                        confirmRemoveID = container.id
+                                                    } else {
+                                                        Task { await store.perform(action, on: container.id) }
+                                                    }
+                                                },
+                                                onOpenTab: { tab in
+                                                    onOpenTab(container.id, tab)
                                                 }
-                                            },
-                                            onAction: { action in
-                                                if action == .remove {
-                                                    confirmRemoveID = container.id
-                                                } else {
-                                                    Task { await store.perform(action, on: container.id) }
-                                                }
-                                            },
-                                            onOpenTab: { tab in
-                                                onOpenTab(container.id, tab)
-                                            }
-                                        )
-                                        Divider().overlay(Color.ctp.muted.opacity(0.1))
+                                            )
+                                            Divider().overlay(Color.ctp.muted.opacity(0.1))
+                                        }
                                     }
                                 }
+                                .padding(.bottom, store.selectedIDs.isEmpty ? 0 : 72)
                             }
                         }
+                        .frame(minWidth: max(geo.size.width, minTableWidth), maxHeight: .infinity, alignment: .topLeading)
                     }
-                    .frame(minWidth: max(geo.size.width, 780), maxHeight: .infinity, alignment: .topLeading)
                 }
             }
+            .background(Color.ctp.bg)
+
+            if !store.selectedIDs.isEmpty {
+                BulkActionBar(selectedCount: store.selectedIDs.count, onClear: { store.selectedIDs.removeAll() }) {
+                    BulkPillButton(title: "Start", systemImage: "play.fill", tint: Color.ctp.ok) {
+                        let ids = store.selectedIDs
+                        Task { await store.performBulk(.start, on: ids) }
+                    }
+                    BulkPillButton(title: "Stop", systemImage: "stop.fill", tint: Color.ctp.text) {
+                        let ids = store.selectedIDs
+                        Task { await store.performBulk(.stop, on: ids) }
+                    }
+                    BulkPillButton(title: "Restart", systemImage: "arrow.clockwise", tint: Color.ctp.accent) {
+                        let ids = store.selectedIDs
+                        Task { await store.performBulk(.restart, on: ids) }
+                    }
+                    BulkPillButton(title: "Remove", systemImage: "trash", tint: Color.ctp.err) {
+                        confirmBulkRemove = true
+                    }
+                }
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
         }
-        .background(Color.ctp.bg)
+        .animation(.easeInOut(duration: 0.16), value: store.selectedIDs.isEmpty)
         .confirmationDialog(
             Text("Remove container?", bundle: .l10n),
             isPresented: Binding(get: { confirmRemoveID != nil }, set: { if !$0 { confirmRemoveID = nil } }),
@@ -69,34 +118,94 @@ struct ContainerList: View {
         } message: {
             Text("The container will be deleted permanently.", bundle: .l10n)
         }
+        .confirmationDialog(
+            Text("Remove selected containers?", bundle: .l10n),
+            isPresented: $confirmBulkRemove,
+            titleVisibility: .visible
+        ) {
+            Button(role: .destructive) {
+                let ids = store.selectedIDs
+                Task { await store.performBulk(.remove, on: ids) }
+            } label: { Text("Remove", bundle: .l10n) }
+        } message: {
+            Text(verbatim: String(localized: "\(String(store.selectedIDs.count)) selected containers will be removed permanently.", bundle: .l10n))
+        }
+        .confirmationDialog(
+            Text("Prune stopped containers?", bundle: .l10n),
+            isPresented: $confirmPruneStopped,
+            titleVisibility: .visible
+        ) {
+            Button(role: .destructive) {
+                Task { await store.pruneStopped() }
+            } label: { Text("Prune", bundle: .l10n) }
+        } message: {
+            Text("All stopped containers will be removed permanently.", bundle: .l10n)
+        }
+    }
+
+    private func toggleCheck(_ id: String) {
+        if store.selectedIDs.contains(id) {
+            store.selectedIDs.remove(id)
+        } else {
+            store.selectedIDs.insert(id)
+        }
+    }
+
+    private func toggleSelectAll() {
+        let visible = visibleContainerIDs
+        if selectAllState == .checked {
+            store.selectedIDs.subtract(visible)
+        } else {
+            store.selectedIDs.formUnion(visible)
+        }
     }
 
     private var header: some View {
         @Bindable var store = store
         return VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 12) {
+            HStack(spacing: 10) {
                 Text("Containers", bundle: .l10n)
                     .font(.system(size: 20, weight: .bold))
                     .foregroundStyle(Color.ctp.text)
                 Spacer()
-                HStack(spacing: 6) {
-                    Image(systemName: "magnifyingglass")
-                        .font(.system(size: 12))
-                        .foregroundStyle(Color.ctp.muted)
-                    TextField(text: $store.searchText, prompt: Text("Search containers", bundle: .l10n)) {
-                        EmptyView()
-                    }
-                    .textFieldStyle(.plain)
-                    .font(.system(size: 12))
-                    .frame(width: 190)
+
+                TableSearchField(text: $store.searchText, prompt: String(localized: "Search containers", bundle: .l10n), width: 230)
+
+                IconActionButton(
+                    systemImage: "arrow.clockwise",
+                    help: LocalizedStringKey(String(localized: "Refresh", bundle: .l10n))
+                ) {
+                    Task { await store.refresh() }
                 }
-                .padding(.horizontal, 10)
-                .padding(.vertical, 6)
-                .background(
-                    RoundedRectangle(cornerRadius: 7)
-                        .fill(Color.ctp.side)
-                        .overlay(RoundedRectangle(cornerRadius: 7).strokeBorder(Color.ctp.muted.opacity(0.24), lineWidth: 1))
-                )
+
+                IconActionButton(
+                    systemImage: "trash.slash",
+                    tint: Color.ctp.err,
+                    help: LocalizedStringKey(String(localized: "Prune stopped containers", bundle: .l10n))
+                ) {
+                    confirmPruneStopped = true
+                }
+
+                SectionMenuButton(help: LocalizedStringKey(String(localized: "Section actions", bundle: .l10n))) {
+                    Button {
+                        Task { await store.refresh() }
+                    } label: {
+                        Label { Text("Refresh", bundle: .l10n) } icon: { Image(systemName: "arrow.clockwise") }
+                    }
+                    Button(role: .destructive) {
+                        confirmPruneStopped = true
+                    } label: {
+                        Label { Text("Prune stopped containers", bundle: .l10n) } icon: { Image(systemName: "trash.slash") }
+                    }
+                    if !store.selectedIDs.isEmpty {
+                        Divider()
+                        Button {
+                            store.selectedIDs.removeAll()
+                        } label: {
+                            Label { Text("Clear", bundle: .l10n) } icon: { Image(systemName: "xmark.circle") }
+                        }
+                    }
+                }
 
                 IconActionButton(
                     systemImage: showInspector ? "sidebar.right" : "sidebar.trailing",
@@ -131,20 +240,39 @@ struct ContainerList: View {
     }
 
     private var tableHeader: some View {
-        HStack(spacing: 12) {
-            Spacer().frame(width: 56) // checkbox + logo
-            Text("Name", bundle: .l10n).frame(minWidth: 160, maxWidth: .infinity, alignment: .leading)
-            Text("State", bundle: .l10n).frame(width: 118, alignment: .leading)
-            Text("Ports", bundle: .l10n).frame(width: 96, alignment: .leading)
-            Text("Size", bundle: .l10n).frame(width: 68, alignment: .leading)
-            Text("Actions", bundle: .l10n).frame(width: 132, alignment: .leading)
+        HStack(spacing: 6) {
+            TableCheckbox(
+                state: selectAllState,
+                help: LocalizedStringKey(String(localized: "Select all", bundle: .l10n)),
+                action: toggleSelectAll
+            )
+            Spacer().frame(width: 30) // logo(28) alignment
+
+            Text("Name", bundle: .l10n)
+                .frame(minWidth: nameMinWidth, maxWidth: .infinity, alignment: .leading)
+            ColumnResizeDivider(width: $nameMinWidth, minWidth: 180)
+
+            Text("State", bundle: .l10n)
+                .frame(width: stateWidth, alignment: .leading)
+            ColumnResizeDivider(width: $stateWidth, minWidth: 100)
+
+            Text("Ports", bundle: .l10n)
+                .frame(width: portsWidth, alignment: .leading)
+            ColumnResizeDivider(width: $portsWidth, minWidth: 76)
+
+            Text("Size", bundle: .l10n)
+                .frame(width: sizeWidth, alignment: .leading)
+            ColumnResizeDivider(width: $sizeWidth, minWidth: 64)
+
+            Text("Actions", bundle: .l10n)
+                .frame(width: actionsWidth, alignment: .leading)
         }
         .textCase(.uppercase)
-        .font(.system(size: 10, weight: .semibold))
+        .font(.system(size: 11, weight: .semibold))
         .foregroundStyle(Color.ctp.muted)
         .padding(.horizontal, 20)
-        .padding(.vertical, 8)
-        .background(Color.ctp.side.opacity(0.6))
+        .padding(.vertical, 7)
+        .background(Color.ctp.side.opacity(0.65))
     }
 }
 
@@ -184,6 +312,11 @@ private struct ContainerRow: View {
     let container: ContainerSummary
     let isSelected: Bool
     let isChecked: Bool
+    let nameMinWidth: CGFloat
+    let stateWidth: CGFloat
+    let portsWidth: CGFloat
+    let sizeWidth: CGFloat
+    let actionsWidth: CGFloat
     let onSelect: () -> Void
     let onToggleCheck: () -> Void
     let onAction: (ContainerAction) -> Void
@@ -192,21 +325,8 @@ private struct ContainerRow: View {
     @State private var hovered = false
 
     var body: some View {
-        HStack(spacing: 12) {
-            Button(action: onToggleCheck) {
-                RoundedRectangle(cornerRadius: 4)
-                    .strokeBorder(isChecked ? Color.ctp.accent : Color.ctp.muted.opacity(0.45), lineWidth: 1.2)
-                    .background(RoundedRectangle(cornerRadius: 4).fill(isChecked ? Color.ctp.accent : Color.clear))
-                    .overlay {
-                        if isChecked {
-                            Image(systemName: "checkmark")
-                                .font(.system(size: 9, weight: .bold))
-                                .foregroundStyle(Color.ctp.bg)
-                        }
-                    }
-                    .frame(width: 15, height: 15)
-            }
-            .buttonStyle(.plain)
+        HStack(spacing: 6) {
+            TableCheckbox(state: isChecked ? .checked : .unchecked, action: onToggleCheck)
 
             ServiceLogo(image: container.image, size: 28)
 
@@ -220,23 +340,31 @@ private struct ContainerRow: View {
                     .foregroundStyle(Color.ctp.muted)
                     .lineLimit(1)
             }
-            .frame(minWidth: 160, maxWidth: .infinity, alignment: .leading)
+            .frame(minWidth: nameMinWidth, maxWidth: .infinity, alignment: .leading)
+
+            Spacer().frame(width: 10)
 
             StatusBadge(kind: container.statusKind, label: statusLabel)
                 .fixedSize(horizontal: true, vertical: false)
-                .frame(width: 118, alignment: .leading)
+                .frame(width: stateWidth, alignment: .leading)
+
+            Spacer().frame(width: 10)
 
             Text(verbatim: formattedPorts)
                 .font(.system(size: 11, design: .monospaced))
                 .foregroundStyle(Color.ctp.muted)
                 .lineLimit(1)
-                .frame(width: 96, alignment: .leading)
+                .frame(width: portsWidth, alignment: .leading)
+
+            Spacer().frame(width: 10)
 
             Text(verbatim: formattedSize)
                 .font(.system(size: 11, design: .monospaced))
                 .foregroundStyle(Color.ctp.muted)
                 .lineLimit(1)
-                .frame(width: 68, alignment: .leading)
+                .frame(width: sizeWidth, alignment: .leading)
+
+            Spacer().frame(width: 10)
 
             HStack(spacing: 6) {
                 IconActionButton(systemImage: "arrow.clockwise", help: "Restart") {
@@ -271,7 +399,7 @@ private struct ContainerRow: View {
                 .menuIndicator(.hidden)
                 .frame(width: 28, height: 28)
             }
-            .frame(width: 132, alignment: .leading)
+            .frame(width: actionsWidth, alignment: .leading)
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 10)

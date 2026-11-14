@@ -2,11 +2,16 @@ import Foundation
 import GDockerCore
 import Observation
 
+enum ComposeFilter: String, CaseIterable, Sendable {
+    case all, running, partial, stopped
+}
+
 @MainActor @Observable
 final class ComposeStore {
     private(set) var projects: [ComposeProject] = []
     var selectedProjectName: String?
     var searchText = ""
+    var filter: ComposeFilter = .all
     var lastError: String?
     var isPerformingAction = false
     private(set) var isComposeAvailable = true
@@ -38,7 +43,31 @@ final class ComposeStore {
         return projects.first { $0.name == selectedProjectName }
     }
 
-    var filteredProjects: [ComposeProject] { projects.filter { $0.matches(searchText) } }
+    var filteredProjects: [ComposeProject] {
+        projects.filter { project in
+            switch filter {
+            case .all: break
+            case .running:
+                if project.status != .running { return false }
+            case .partial:
+                if project.status != .partiallyRunning { return false }
+            case .stopped:
+                if project.status != .stopped && project.status != .down { return false }
+            }
+            return project.matches(searchText)
+        }
+    }
+
+    var downCount: Int {
+        projects.filter { $0.status == .down }.count
+    }
+
+    func cleanDownProjects() async {
+        for project in projects where project.status == .down {
+            await registry.removeProject(named: project.name)
+        }
+        await refresh()
+    }
 
     func refresh() async {
         isComposeAvailable = await runner.isComposeAvailable()

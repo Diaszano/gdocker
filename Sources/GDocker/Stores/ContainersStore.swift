@@ -46,22 +46,47 @@ final class ContainersStore {
     }
 
     func perform(_ action: ContainerAction, on id: String) async {
-        guard let client else { return }
-        do {
-            switch action {
-            case .start: try await client.start(id)
-            case .stop: try await client.stop(id)
-            case .restart: try await client.restart(id)
-            case .remove:
-                let running = all.first { $0.id == id }?.statusKind == .running
-                try await client.remove(id, force: running)
+        await performBulk(action, on: [id])
+    }
+
+    func performBulk(_ action: ContainerAction, on ids: Set<String>) async {
+        guard let client, !ids.isEmpty else { return }
+        var errors: [String] = []
+        for id in ids {
+            do {
+                switch action {
+                case .start: try await client.start(id)
+                case .stop: try await client.stop(id)
+                case .restart: try await client.restart(id)
+                case .remove:
+                    let running = all.first { $0.id == id }?.statusKind == .running
+                    try await client.remove(id, force: running)
+                }
+            } catch {
+                errors.append(error.localizedDescription)
             }
-            lastError = nil
-        } catch {
-            lastError = error.localizedDescription
         }
+        if action == .remove {
+            selectedIDs.subtract(ids)
+        }
+        lastError = errors.isEmpty ? nil : errors.joined(separator: "\n")
         revision += 1
         await refresh()
+    }
+
+    @discardableResult
+    func pruneStopped() async -> (deletedCount: Int, spaceReclaimed: Int64)? {
+        guard let client else { return nil }
+        do {
+            let report = try await client.pruneContainers()
+            lastError = nil
+            revision += 1
+            await refresh()
+            return (report.deleted.count, report.spaceReclaimed)
+        } catch {
+            lastError = error.localizedDescription
+            return nil
+        }
     }
 
     func refresh() async {
@@ -83,6 +108,7 @@ final class ContainersStore {
                 }
             }
             connected = true
+            selectedIDs.formIntersection(Set(all.map(\.id)))
             if let selectedID, !all.contains(where: { $0.id == selectedID }) { self.selectedID = nil }
         } catch {
             connected = false

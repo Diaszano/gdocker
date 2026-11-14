@@ -6,20 +6,28 @@ struct ComposeView: View {
     @Environment(ComposeStore.self) private var store
     @Environment(ContainersStore.self) private var containersStore
     @State private var confirmDown = false
+    @State private var confirmCleanDown = false
     @State private var projectForDown: ComposeProject?
 
+    @State private var nameMinWidth: CGFloat = 200
+    @State private var statusWidth: CGFloat = 132
+    @State private var servicesWidth: CGFloat = 76
+    @State private var dirWidth: CGFloat = 240
+    private let actionsWidth: CGFloat = 102
+
+    private var minTableWidth: CGFloat {
+        40 + 28 + nameMinWidth + statusWidth + servicesWidth + dirWidth + actionsWidth + 90
+    }
+
     var body: some View {
-        @Bindable var store = store
         VStack(spacing: 0) {
             header
             if !store.isComposeAvailable {
                 unavailableBanner
             }
-            Divider()
             content
         }
-        .searchable(text: $store.searchText, prompt: Text("Search compose projects", bundle: .l10n))
-        .navigationTitle(Text("Compose", bundle: .l10n))
+        .background(Color.ctp.bg)
         .task { await store.refresh() }
         .task(id: containersStore.revision) { await store.refresh() }
         .confirmationDialog(
@@ -43,6 +51,19 @@ struct ComposeView: View {
         } message: {
             Text("This will stop and remove containers for this project.", bundle: .l10n)
         }
+        .confirmationDialog(
+            Text("Clean stopped compose projects?", bundle: .l10n),
+            isPresented: $confirmCleanDown,
+            titleVisibility: .visible
+        ) {
+            Button(role: .destructive) {
+                Task { await store.cleanDownProjects() }
+            } label: {
+                Text("Clean Stopped", bundle: .l10n)
+            }
+        } message: {
+            Text("Down projects with no remaining containers will be removed from the Compose list.", bundle: .l10n)
+        }
         .alert(
             Text("Compose error", bundle: .l10n),
             isPresented: Binding(get: { store.lastError != nil }, set: { if !$0 { store.lastError = nil } })
@@ -61,25 +82,71 @@ struct ComposeView: View {
     }
 
     private var header: some View {
-        HStack(alignment: .center, spacing: 12) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text("Compose", bundle: .l10n).font(.title2.bold())
-                Text(verbatim: subtitle).font(.caption).foregroundStyle(Color.ctp.muted)
-            }
-            Spacer()
-            Button {
-                Task { await store.refresh() }
-            } label: {
-                Label {
-                    Text("Refresh", bundle: .l10n)
-                } icon: {
-                    Image(systemName: "arrow.clockwise")
+        @Bindable var store = store
+        return VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 10) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Compose", bundle: .l10n)
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundStyle(Color.ctp.text)
+                    Text(verbatim: subtitle)
+                        .font(.system(size: 12))
+                        .foregroundStyle(Color.ctp.muted)
+                }
+                Spacer()
+
+                TableSearchField(text: $store.searchText, prompt: String(localized: "Search compose projects", bundle: .l10n), width: 230)
+
+                IconActionButton(
+                    systemImage: "arrow.clockwise",
+                    help: LocalizedStringKey(String(localized: "Refresh compose projects", bundle: .l10n))
+                ) {
+                    Task { await store.refresh() }
+                }
+
+                IconActionButton(
+                    systemImage: "trash.slash",
+                    tint: store.downCount > 0 ? Color.ctp.err : Color.ctp.muted,
+                    help: LocalizedStringKey(String(localized: "Clean stopped compose projects", bundle: .l10n))
+                ) {
+                    confirmCleanDown = true
+                }
+                .disabled(store.downCount == 0)
+
+                SectionMenuButton(help: LocalizedStringKey(String(localized: "Section actions", bundle: .l10n))) {
+                    Button {
+                        Task { await store.refresh() }
+                    } label: {
+                        Label { Text("Refresh", bundle: .l10n) } icon: { Image(systemName: "arrow.clockwise") }
+                    }
+                    Button(role: .destructive) {
+                        confirmCleanDown = true
+                    } label: {
+                        Label { Text("Clean stopped compose projects", bundle: .l10n) } icon: { Image(systemName: "trash.slash") }
+                    }
+                    .disabled(store.downCount == 0)
                 }
             }
-            .help(Text("Refresh compose projects", bundle: .l10n))
+
+            HStack(spacing: 8) {
+                FilterPill(title: LocalizedStringKey(String(localized: "All", bundle: .l10n)), dotColor: nil, isSelected: store.filter == .all) {
+                    store.filter = .all
+                }
+                FilterPill(title: "Running", dotColor: Color.ctp.ok, isSelected: store.filter == .running) {
+                    store.filter = .running
+                }
+                FilterPill(title: "Partially running", dotColor: Color.ctp.warn, isSelected: store.filter == .partial) {
+                    store.filter = .partial
+                }
+                FilterPill(title: "Stopped", dotColor: Color.ctp.muted, isSelected: store.filter == .stopped) {
+                    store.filter = .stopped
+                }
+                Spacer()
+            }
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
+        .padding(.horizontal, 20)
+        .padding(.top, 16)
+        .padding(.bottom, 12)
     }
 
     private var subtitle: String {
@@ -103,9 +170,8 @@ struct ComposeView: View {
 
     @ViewBuilder
     private var content: some View {
-        @Bindable var store = store
         if store.filteredProjects.isEmpty {
-            if store.searchText.isEmpty {
+            if store.projects.isEmpty && store.searchText.isEmpty {
                 ContentUnavailableView {
                     Label {
                         Text("No Compose Projects", bundle: .l10n)
@@ -128,49 +194,37 @@ struct ComposeView: View {
             }
         } else {
             VSplitView {
-                Table(store.filteredProjects, selection: $store.selectedProjectName) {
-                    TableColumn(String(localized: "Name", bundle: .l10n)) { project in
-                        Text(verbatim: project.name).fontWeight(.medium)
-                    }
-                    TableColumn(String(localized: "Status", bundle: .l10n)) { project in
-                        ComposeStatusBadge(status: project.status)
-                    }
-                    .width(min: 110, ideal: 130, max: 160)
-                    TableColumn(String(localized: "Services", bundle: .l10n)) { project in
-                        Text(verbatim: "\(project.services.count)").monospacedDigit()
-                    }
-                    .width(min: 60, ideal: 80, max: 100)
-                    TableColumn(String(localized: "Working Directory", bundle: .l10n)) { project in
-                        Text(verbatim: project.workingDir)
-                            .foregroundStyle(Color.ctp.muted)
-                            .lineLimit(1)
-                            .truncationMode(.middle)
-                    }
-                }
-                .contextMenu(forSelectionType: String.self) { names in
-                    if let name = names.first, let project = store.projects.first(where: { $0.name == name }) {
-                        Button {
-                            Task { await store.up(project: project) }
-                        } label: {
-                            Text("Start stack", bundle: .l10n)
-                        }
-                        .disabled(!canAct)
-                        Button(role: .destructive) {
-                            askDown(project)
-                        } label: {
-                            Text("Stop stack", bundle: .l10n)
-                        }
-                        .disabled(!canAct || project.status == .down)
-                        if project.status == .down {
-                            Button {
-                                Task { await store.forget(project: project) }
-                            } label: {
-                                Text("Forget Project", bundle: .l10n)
+                GeometryReader { geo in
+                    ScrollView(.horizontal) {
+                        VStack(spacing: 0) {
+                            tableHeader
+                            Divider().overlay(Color.ctp.muted.opacity(0.18))
+                            ScrollView(.vertical) {
+                                LazyVStack(spacing: 0) {
+                                    ForEach(store.filteredProjects) { project in
+                                        ComposeRow(
+                                            project: project,
+                                            isSelected: store.selectedProjectName == project.name,
+                                            canAct: canAct,
+                                            nameMinWidth: nameMinWidth,
+                                            statusWidth: statusWidth,
+                                            servicesWidth: servicesWidth,
+                                            dirWidth: dirWidth,
+                                            actionsWidth: actionsWidth,
+                                            onSelect: { store.selectedProjectName = project.name },
+                                            onUp: { Task { await store.up(project: project) } },
+                                            onDown: { askDown(project) },
+                                            onForget: { Task { await store.forget(project: project) } }
+                                        )
+                                        Divider().overlay(Color.ctp.muted.opacity(0.1))
+                                    }
+                                }
                             }
                         }
+                        .frame(minWidth: max(geo.size.width, minTableWidth), maxHeight: .infinity, alignment: .topLeading)
                     }
                 }
-                .frame(minHeight: 140)
+                .frame(minHeight: 160)
 
                 Group {
                     if let selected = store.selected {
@@ -182,6 +236,37 @@ struct ComposeView: View {
                 .frame(maxWidth: .infinity, minHeight: 160, maxHeight: .infinity)
             }
         }
+    }
+
+    private var tableHeader: some View {
+        HStack(spacing: 6) {
+            Spacer().frame(width: 30)
+
+            Text("Project", bundle: .l10n)
+                .frame(minWidth: nameMinWidth, maxWidth: .infinity, alignment: .leading)
+            ColumnResizeDivider(width: $nameMinWidth, minWidth: 160)
+
+            Text("Status", bundle: .l10n)
+                .frame(width: statusWidth, alignment: .leading)
+            ColumnResizeDivider(width: $statusWidth, minWidth: 108)
+
+            Text("Services", bundle: .l10n)
+                .frame(width: servicesWidth, alignment: .leading)
+            ColumnResizeDivider(width: $servicesWidth, minWidth: 68)
+
+            Text("Working Directory", bundle: .l10n)
+                .frame(width: dirWidth, alignment: .leading)
+            ColumnResizeDivider(width: $dirWidth, minWidth: 140)
+
+            Text("Actions", bundle: .l10n)
+                .frame(width: actionsWidth, alignment: .leading)
+        }
+        .textCase(.uppercase)
+        .font(.system(size: 11, weight: .semibold))
+        .foregroundStyle(Color.ctp.muted)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 7)
+        .background(Color.ctp.side.opacity(0.65))
     }
 
     private func detail(_ project: ComposeProject) -> some View {
@@ -247,26 +332,137 @@ struct ComposeView: View {
     }
 }
 
+private struct ComposeRow: View {
+    let project: ComposeProject
+    let isSelected: Bool
+    let canAct: Bool
+    let nameMinWidth: CGFloat
+    let statusWidth: CGFloat
+    let servicesWidth: CGFloat
+    let dirWidth: CGFloat
+    let actionsWidth: CGFloat
+    let onSelect: () -> Void
+    let onUp: () -> Void
+    let onDown: () -> Void
+    let onForget: () -> Void
+
+    @State private var hovered = false
+
+    private var activeServicesCount: Int {
+        project.services.filter { $0.statusKind == .running }.count
+    }
+
+    var body: some View {
+        HStack(spacing: 6) {
+            ResourceRowIcon(
+                systemImage: "square.stack.3d.forward.dottedline",
+                tint: project.isActive ? Color.ctp.accent : Color.ctp.muted
+            )
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(verbatim: project.name)
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(Color.ctp.text)
+                    .lineLimit(1)
+                Text(verbatim: String(localized: "\(String(activeServicesCount)) of \(String(project.services.count)) services active", bundle: .l10n))
+                    .font(.system(size: 11))
+                    .foregroundStyle(Color.ctp.muted)
+                    .lineLimit(1)
+            }
+            .frame(minWidth: nameMinWidth, maxWidth: .infinity, alignment: .leading)
+
+            Spacer().frame(width: 10)
+
+            ComposeStatusBadge(status: project.status)
+                .fixedSize(horizontal: true, vertical: false)
+                .frame(width: statusWidth, alignment: .leading)
+
+            Spacer().frame(width: 10)
+
+            Text(verbatim: "\(project.services.count)")
+                .font(.system(size: 12, design: .monospaced))
+                .foregroundStyle(Color.ctp.text)
+                .frame(width: servicesWidth, alignment: .leading)
+
+            Spacer().frame(width: 10)
+
+            Text(verbatim: project.workingDir)
+                .font(.system(size: 11, design: .monospaced))
+                .foregroundStyle(Color.ctp.muted)
+                .lineLimit(1)
+                .truncationMode(.middle)
+                .frame(width: dirWidth, alignment: .leading)
+
+            Spacer().frame(width: 10)
+
+            HStack(spacing: 6) {
+                IconActionButton(
+                    systemImage: project.isActive ? "arrow.clockwise" : "play.fill",
+                    help: LocalizedStringKey(String(localized: "Start stack", bundle: .l10n)),
+                    action: onUp
+                )
+                .disabled(!canAct)
+
+                if project.status == .down {
+                    IconActionButton(
+                        systemImage: "trash",
+                        tint: Color.ctp.err,
+                        help: LocalizedStringKey(String(localized: "Forget Project", bundle: .l10n)),
+                        action: onForget
+                    )
+                } else {
+                    IconActionButton(
+                        systemImage: "stop.fill",
+                        help: LocalizedStringKey(String(localized: "Stop stack", bundle: .l10n)),
+                        action: onDown
+                    )
+                    .disabled(!canAct)
+                }
+
+                SectionMenuButton {
+                    Button(action: onUp) {
+                        Label { Text("Start stack", bundle: .l10n) } icon: { Image(systemName: "play.fill") }
+                    }
+                    .disabled(!canAct)
+                    Button(role: .destructive, action: onDown) {
+                        Label { Text("Stop stack", bundle: .l10n) } icon: { Image(systemName: "stop.fill") }
+                    }
+                    .disabled(!canAct || project.status == .down)
+                    Divider()
+                    Button { copyToPasteboard(project.workingDir) } label: {
+                        Label { Text("Copy path", bundle: .l10n) } icon: { Image(systemName: "doc.on.doc") }
+                    }
+                    if project.status == .down {
+                        Button(role: .destructive, action: onForget) {
+                            Label { Text("Forget Project", bundle: .l10n) } icon: { Image(systemName: "trash") }
+                        }
+                    }
+                }
+            }
+            .frame(width: actionsWidth, alignment: .leading)
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 10)
+        .background(isSelected ? Color.ctp.hover : (hovered ? Color.ctp.hover.opacity(0.45) : Color.clear))
+        .contentShape(Rectangle())
+        .onHover { hovered = $0 }
+        .onTapGesture(perform: onSelect)
+    }
+}
+
 private struct ComposeStatusBadge: View {
     let status: ComposeStatus
 
     var body: some View {
-        label
-            .font(.caption)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 2)
-            .background(color.opacity(0.18))
-            .foregroundStyle(color)
-            .clipShape(Capsule())
+        StatusBadge(color: color, label: labelKey)
     }
 
-    @ViewBuilder
-    private var label: some View {
+    private var labelKey: LocalizedStringKey {
         switch status {
-        case .running: Text("Running", bundle: .l10n)
-        case .partiallyRunning: Text("Partially running", bundle: .l10n)
-        case .stopped: Text("Stopped", bundle: .l10n)
-        case .down: Text("Down", bundle: .l10n)
+        case .running: "Running"
+        case .partiallyRunning: "Partially running"
+        case .stopped: "Stopped"
+        case .down: "Down"
         }
     }
 

@@ -20,39 +20,76 @@ private enum VolumeDateFormatters {
 struct VolumesView: View {
     @Environment(VolumesStore.self) private var store
     @Environment(ContainersStore.self) private var containersStore
-    @State private var confirmRemove = false
+    @State private var confirmRemoveTarget: VolumeSummary?
+    @State private var confirmBulkRemove = false
     @State private var confirmPrune = false
 
+    @State private var nameMinWidth: CGFloat = 220
+    @State private var driverWidth: CGFloat = 88
+    @State private var scopeWidth: CGFloat = 84
+    @State private var createdWidth: CGFloat = 136
+    private let actionsWidth: CGFloat = 68
+
+    private var selectAllState: TableCheckState {
+        let visible = store.filteredVolumes.map(\.name)
+        guard !visible.isEmpty else { return .unchecked }
+        let checked = visible.filter { store.selectedIDs.contains($0) }.count
+        if checked == 0 { return .unchecked }
+        return checked == visible.count ? .checked : .indeterminate
+    }
+
+    private var minTableWidth: CGFloat {
+        40 + 22 + 28 + nameMinWidth + driverWidth + scopeWidth + createdWidth + actionsWidth + 96
+    }
+
     var body: some View {
-        @Bindable var store = store
-        VStack(spacing: 0) {
-            header
-            Divider()
-            content
+        ZStack(alignment: .bottom) {
+            VStack(spacing: 0) {
+                header
+                content
+            }
+            .background(Color.ctp.bg)
+
+            if !store.selectedIDs.isEmpty {
+                BulkActionBar(selectedCount: store.selectedIDs.count, onClear: { store.selectedIDs.removeAll() }) {
+                    BulkPillButton(title: "Remove", systemImage: "trash", tint: Color.ctp.err) {
+                        confirmBulkRemove = true
+                    }
+                }
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
         }
-        .searchable(text: $store.searchText, prompt: Text("Search volumes", bundle: .l10n))
-        .navigationTitle(Text("Volumes", bundle: .l10n))
-        .task {
-            await store.refresh()
-        }
+        .animation(.easeInOut(duration: 0.16), value: store.selectedIDs.isEmpty)
+        .task { await store.refresh() }
         .confirmationDialog(
             Text("Remove volume?", bundle: .l10n),
-            isPresented: $confirmRemove,
+            isPresented: Binding(get: { confirmRemoveTarget != nil }, set: { if !$0 { confirmRemoveTarget = nil } }),
             titleVisibility: .visible
         ) {
             Button(role: .destructive) {
-                if let selected = store.selected {
-                    Task { await store.remove(name: selected.name) }
+                if let target = confirmRemoveTarget {
+                    confirmRemoveTarget = nil
+                    Task { await store.remove(name: target.name) }
                 }
-            } label: {
-                Text("Remove", bundle: .l10n)
-            }
+            } label: { Text("Remove", bundle: .l10n) }
         } message: {
-            if let selected = store.selected {
-                Text(verbatim: String(localized: "The volume '\(selected.name)' will be removed permanently. Any stored data will be lost.", bundle: .l10n))
+            if let target = confirmRemoveTarget {
+                Text(verbatim: String(localized: "The volume '\(target.name)' will be removed permanently. Any stored data will be lost.", bundle: .l10n))
             } else {
                 Text("The selected volume will be removed permanently.", bundle: .l10n)
             }
+        }
+        .confirmationDialog(
+            Text("Remove selected volumes?", bundle: .l10n),
+            isPresented: $confirmBulkRemove,
+            titleVisibility: .visible
+        ) {
+            Button(role: .destructive) {
+                let names = store.selectedIDs
+                Task { await store.remove(names: names) }
+            } label: { Text("Remove", bundle: .l10n) }
+        } message: {
+            Text(verbatim: String(localized: "\(String(store.selectedIDs.count)) selected volumes will be removed permanently. Any stored data will be lost.", bundle: .l10n))
         }
         .confirmationDialog(
             Text("Prune unused volumes?", bundle: .l10n),
@@ -61,9 +98,7 @@ struct VolumesView: View {
         ) {
             Button(role: .destructive) {
                 Task { await store.prune() }
-            } label: {
-                Text("Prune Volumes", bundle: .l10n)
-            }
+            } label: { Text("Prune Volumes", bundle: .l10n) }
         } message: {
             Text("All unused volumes will be removed permanently. Any data in unused volumes will be lost.", bundle: .l10n)
         }
@@ -78,54 +113,170 @@ struct VolumesView: View {
     }
 
     private var header: some View {
-        HStack(alignment: .center, spacing: 12) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text("Volumes", bundle: .l10n)
-                    .font(.title2.bold())
-                Text(verbatim: subtitle)
-                    .font(.caption)
-                    .foregroundStyle(Color.ctp.muted)
-            }
-            Spacer()
-            Button {
-                Task { await store.refresh() }
-            } label: {
-                Label {
-                    Text("Refresh", bundle: .l10n)
-                } icon: {
-                    Image(systemName: "arrow.clockwise")
+        @Bindable var store = store
+        return VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 10) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Volumes", bundle: .l10n)
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundStyle(Color.ctp.text)
+                    Text(verbatim: subtitle)
+                        .font(.system(size: 12))
+                        .foregroundStyle(Color.ctp.muted)
                 }
-            }
-            .help(Text("Refresh volumes", bundle: .l10n))
+                Spacer()
 
-            Button {
-                confirmPrune = true
-            } label: {
-                Label {
-                    Text("Prune Volumes", bundle: .l10n)
-                } icon: {
-                    Image(systemName: "trash.slash")
+                TableSearchField(text: $store.searchText, prompt: String(localized: "Search volumes", bundle: .l10n), width: 230)
+
+                IconActionButton(
+                    systemImage: "arrow.clockwise",
+                    help: LocalizedStringKey(String(localized: "Refresh volumes", bundle: .l10n))
+                ) {
+                    Task { await store.refresh() }
+                }
+
+                IconActionButton(
+                    systemImage: "trash.slash",
+                    tint: Color.ctp.err,
+                    help: LocalizedStringKey(String(localized: "Prune Volumes", bundle: .l10n))
+                ) {
+                    confirmPrune = true
+                }
+
+                SectionMenuButton(help: LocalizedStringKey(String(localized: "Section actions", bundle: .l10n))) {
+                    Button {
+                        Task { await store.refresh() }
+                    } label: {
+                        Label { Text("Refresh", bundle: .l10n) } icon: { Image(systemName: "arrow.clockwise") }
+                    }
+                    Button(role: .destructive) {
+                        confirmPrune = true
+                    } label: {
+                        Label { Text("Prune Volumes", bundle: .l10n) } icon: { Image(systemName: "trash.slash") }
+                    }
                 }
             }
 
-            Button(role: .destructive) {
-                confirmRemove = true
-            } label: {
-                Label {
-                    Text("Remove", bundle: .l10n)
-                } icon: {
-                    Image(systemName: "trash")
+            HStack(spacing: 8) {
+                FilterPill(title: LocalizedStringKey(String(localized: "All", bundle: .l10n)), dotColor: nil, isSelected: store.filter == .all) {
+                    store.filter = .all
                 }
+                FilterPill(title: LocalizedStringKey(String(localized: "Named", bundle: .l10n)), dotColor: Color.ctp.accent, isSelected: store.filter == .named) {
+                    store.filter = .named
+                }
+                FilterPill(title: LocalizedStringKey(String(localized: "Anonymous", bundle: .l10n)), dotColor: Color.ctp.muted, isSelected: store.filter == .anonymous) {
+                    store.filter = .anonymous
+                }
+                Spacer()
             }
-            .disabled(store.selected == nil)
-            .keyboardShortcut(.delete, modifiers: [])
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
+        .padding(.horizontal, 20)
+        .padding(.top, 16)
+        .padding(.bottom, 12)
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        let items = store.filteredVolumes
+        if !containersStore.connected || store.all.isEmpty || items.isEmpty {
+            ResourceEmptyState(
+                connected: containersStore.connected,
+                isAllEmpty: store.all.isEmpty,
+                searchText: store.searchText,
+                emptyTitle: String(localized: "No Volumes", bundle: .l10n),
+                emptySystemImage: "externaldrive",
+                emptyDescription: String(localized: "No Docker volumes found.", bundle: .l10n)
+            )
+        } else {
+            GeometryReader { geo in
+                ScrollView(.horizontal) {
+                    VStack(spacing: 0) {
+                        tableHeader
+                        Divider().overlay(Color.ctp.muted.opacity(0.18))
+                        ScrollView(.vertical) {
+                            LazyVStack(spacing: 0) {
+                                ForEach(items) { volume in
+                                    VolumeRow(
+                                        volume: volume,
+                                        isSelected: store.selectedID == volume.name,
+                                        isChecked: store.selectedIDs.contains(volume.name),
+                                        nameMinWidth: nameMinWidth,
+                                        driverWidth: driverWidth,
+                                        scopeWidth: scopeWidth,
+                                        createdWidth: createdWidth,
+                                        actionsWidth: actionsWidth,
+                                        onSelect: { store.selectedID = volume.name },
+                                        onToggleCheck: { toggleCheck(volume.name) },
+                                        onRemove: { confirmRemoveTarget = volume },
+                                        onForceRemove: { Task { await store.remove(name: volume.name, force: true) } }
+                                    )
+                                    Divider().overlay(Color.ctp.muted.opacity(0.1))
+                                }
+                            }
+                            .padding(.bottom, store.selectedIDs.isEmpty ? 0 : 72)
+                        }
+                    }
+                    .frame(minWidth: max(geo.size.width, minTableWidth), maxHeight: .infinity, alignment: .topLeading)
+                }
+            }
+        }
+    }
+
+    private var tableHeader: some View {
+        HStack(spacing: 6) {
+            TableCheckbox(
+                state: selectAllState,
+                help: LocalizedStringKey(String(localized: "Select all", bundle: .l10n)),
+                action: toggleSelectAll
+            )
+            Spacer().frame(width: 30)
+
+            Text("Name", bundle: .l10n)
+                .frame(minWidth: nameMinWidth, maxWidth: .infinity, alignment: .leading)
+            ColumnResizeDivider(width: $nameMinWidth, minWidth: 180)
+
+            Text("Driver", bundle: .l10n)
+                .frame(width: driverWidth, alignment: .leading)
+            ColumnResizeDivider(width: $driverWidth, minWidth: 70)
+
+            Text("Scope", bundle: .l10n)
+                .frame(width: scopeWidth, alignment: .leading)
+            ColumnResizeDivider(width: $scopeWidth, minWidth: 70)
+
+            Text("Created", bundle: .l10n)
+                .frame(width: createdWidth, alignment: .leading)
+            ColumnResizeDivider(width: $createdWidth, minWidth: 100)
+
+            Text("Actions", bundle: .l10n)
+                .frame(width: actionsWidth, alignment: .leading)
+        }
+        .textCase(.uppercase)
+        .font(.system(size: 11, weight: .semibold))
+        .foregroundStyle(Color.ctp.muted)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 7)
+        .background(Color.ctp.side.opacity(0.65))
+    }
+
+    private func toggleCheck(_ name: String) {
+        if store.selectedIDs.contains(name) {
+            store.selectedIDs.remove(name)
+        } else {
+            store.selectedIDs.insert(name)
+        }
+    }
+
+    private func toggleSelectAll() {
+        let visible = store.filteredVolumes.map(\.name)
+        if selectAllState == .checked {
+            store.selectedIDs.subtract(visible)
+        } else {
+            store.selectedIDs.formUnion(visible)
+        }
     }
 
     private var subtitle: String {
-        if store.searchText.isEmpty {
+        if store.searchText.isEmpty && store.filter == .all {
             if store.count == 1 {
                 return String(localized: "\(String(store.count)) volume", bundle: .l10n)
             } else {
@@ -135,72 +286,97 @@ struct VolumesView: View {
             return String(localized: "\(String(store.filteredVolumes.count)) of \(String(store.count))", bundle: .l10n)
         }
     }
+}
 
-    @ViewBuilder
-    private var content: some View {
-        @Bindable var store = store
-        if !containersStore.connected {
-            ContentUnavailableView {
-                Label {
-                    Text("Docker disconnected", bundle: .l10n)
-                } icon: {
-                    Image(systemName: "bolt.slash")
-                }
-            } description: {
-                Text("Docker is not reachable. Ensure Docker Desktop or Docker Engine is running.", bundle: .l10n)
+private struct VolumeRow: View {
+    let volume: VolumeSummary
+    let isSelected: Bool
+    let isChecked: Bool
+    let nameMinWidth: CGFloat
+    let driverWidth: CGFloat
+    let scopeWidth: CGFloat
+    let createdWidth: CGFloat
+    let actionsWidth: CGFloat
+    let onSelect: () -> Void
+    let onToggleCheck: () -> Void
+    let onRemove: () -> Void
+    let onForceRemove: () -> Void
+
+    @State private var hovered = false
+
+    private var isAnonymous: Bool { VolumesStore.isAnonymousVolume(volume.name) }
+
+    var body: some View {
+        HStack(spacing: 6) {
+            TableCheckbox(state: isChecked ? .checked : .unchecked, action: onToggleCheck)
+
+            ResourceRowIcon(
+                systemImage: "externaldrive",
+                tint: isAnonymous ? Color.ctp.muted : Color.ctp.accent
+            )
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(verbatim: volume.name)
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(Color.ctp.text)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+                Text(verbatim: isAnonymous ? String(localized: "Anonymous volume", bundle: .l10n) : String(localized: "Named volume", bundle: .l10n))
+                    .font(.system(size: 11))
+                    .foregroundStyle(Color.ctp.muted)
+                    .lineLimit(1)
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-        } else if store.all.isEmpty {
-            ContentUnavailableView {
-                Label {
-                    Text("No Volumes", bundle: .l10n)
-                } icon: {
-                    Image(systemName: "externaldrive")
-                }
-            } description: {
-                Text("No Docker volumes found.", bundle: .l10n)
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-        } else if store.filteredVolumes.isEmpty {
-            ContentUnavailableView.search(text: store.searchText)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-        } else {
-            Table(store.filteredVolumes, selection: $store.selectedID) {
-                TableColumn(String(localized: "Name", bundle: .l10n)) { volume in
-                    HStack(spacing: 8) {
-                        Image(systemName: "externaldrive")
-                            .foregroundStyle(Color.ctp.accent)
-                        Text(verbatim: volume.name)
-                            .fontWeight(.medium)
+            .frame(minWidth: nameMinWidth, maxWidth: .infinity, alignment: .leading)
+
+            Spacer().frame(width: 10)
+
+            Text(verbatim: volume.driver)
+                .font(.system(size: 12))
+                .foregroundStyle(Color.ctp.muted)
+                .lineLimit(1)
+                .frame(width: driverWidth, alignment: .leading)
+
+            Spacer().frame(width: 10)
+
+            Text(verbatim: volume.scope)
+                .font(.system(size: 12))
+                .foregroundStyle(Color.ctp.muted)
+                .lineLimit(1)
+                .frame(width: scopeWidth, alignment: .leading)
+
+            Spacer().frame(width: 10)
+
+            Text(verbatim: volume.formattedCreated)
+                .font(.system(size: 11))
+                .foregroundStyle(Color.ctp.muted)
+                .lineLimit(1)
+                .frame(width: createdWidth, alignment: .leading)
+
+            Spacer().frame(width: 10)
+
+            HStack(spacing: 6) {
+                IconActionButton(systemImage: "trash", tint: Color.ctp.err, help: "Remove", action: onRemove)
+                SectionMenuButton {
+                    Button { copyToPasteboard(volume.name) } label: {
+                        Label { Text("Copy Name", bundle: .l10n) } icon: { Image(systemName: "doc.on.doc") }
+                    }
+                    Divider()
+                    Button(role: .destructive, action: onRemove) {
+                        Label { Text("Remove", bundle: .l10n) } icon: { Image(systemName: "trash") }
+                    }
+                    Button(role: .destructive, action: onForceRemove) {
+                        Label { Text("Force remove", bundle: .l10n) } icon: { Image(systemName: "trash.fill") }
                     }
                 }
-                TableColumn(String(localized: "Driver", bundle: .l10n)) { volume in
-                    Text(verbatim: volume.driver)
-                        .foregroundStyle(Color.ctp.muted)
-                }
-                .width(min: 80, ideal: 100, max: 120)
-                TableColumn(String(localized: "Scope", bundle: .l10n)) { volume in
-                    Text(verbatim: volume.scope)
-                        .foregroundStyle(Color.ctp.muted)
-                }
-                .width(min: 70, ideal: 90, max: 110)
-                TableColumn(String(localized: "Created", bundle: .l10n)) { volume in
-                    Text(verbatim: volume.formattedCreated)
-                        .foregroundStyle(Color.ctp.muted)
-                }
-                .width(min: 120, ideal: 150, max: 200)
             }
-            .contextMenu(forSelectionType: String.self) { selectedIDs in
-                if let id = selectedIDs.first, let volume = store.all.first(where: { $0.name == id }) {
-                    Button(role: .destructive) {
-                        store.selectedID = volume.name
-                        confirmRemove = true
-                    } label: {
-                        Text("Remove", bundle: .l10n)
-                    }
-                }
-            }
+            .frame(width: actionsWidth, alignment: .leading)
         }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 10)
+        .background(isSelected ? Color.ctp.hover : (hovered ? Color.ctp.hover.opacity(0.45) : Color.clear))
+        .contentShape(Rectangle())
+        .onHover { hovered = $0 }
+        .onTapGesture(perform: onSelect)
     }
 }
 
