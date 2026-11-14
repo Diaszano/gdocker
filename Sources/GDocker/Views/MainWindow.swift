@@ -114,11 +114,11 @@ struct MainWindow: View {
 
                     if !sidebarCollapsed {
                         McpStatusRow(mcp: mcp)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 6)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 7)
                     }
-                    navButton(.activity, title: "AI activity", icon: "waveform.path.ecg")
-                    navButton(.permissions, title: "Permissions", icon: "checkmark.shield")
+                    navButton(.activity, title: "AI activity", icon: "waveform.path.ecg", indented: true)
+                    navButton(.permissions, title: "Permissions", icon: "checkmark.shield", indented: true)
                 }
                 .padding(.horizontal, sidebarCollapsed ? 8 : 10)
                 .padding(.top, 8)
@@ -185,7 +185,8 @@ struct MainWindow: View {
         _ item: SidebarItem,
         title: LocalizedStringKey,
         icon: String,
-        count: Int? = nil
+        count: Int? = nil,
+        indented: Bool = false
     ) -> some View {
         let active = section == item
         return Button {
@@ -209,7 +210,8 @@ struct MainWindow: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: sidebarCollapsed ? .center : .leading)
-            .padding(.horizontal, sidebarCollapsed ? 0 : 10)
+            .padding(.leading, indented && !sidebarCollapsed ? 26 : (sidebarCollapsed ? 0 : 10))
+            .padding(.trailing, sidebarCollapsed ? 0 : 10)
             .padding(.vertical, 7)
             .background(
                 RoundedRectangle(cornerRadius: 7)
@@ -254,22 +256,25 @@ struct MainWindow: View {
     }
 }
 
-/// The MCP server's state in the sidebar: a colored dot, its name, and where it listens or what went wrong.
+/// The MCP server's state in the sidebar: icon, title, and a subtle status dot.
 private struct McpStatusRow: View {
     let mcp: McpController
 
     var body: some View {
-        HStack(spacing: 8) {
-            Circle().fill(color).frame(width: 7, height: 7)
-            VStack(alignment: .leading, spacing: 2) {
-                Text("MCP server", bundle: .l10n)
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundStyle(Color.ctp.text)
-                Text(verbatim: detail)
-                    .font(.system(size: 11))
-                    .foregroundStyle(Color.ctp.muted)
-            }
+        HStack(spacing: 10) {
+            Image(systemName: "server.rack")
+                .font(.system(size: 13))
+                .foregroundStyle(Color.ctp.text)
+                .frame(width: 18)
+            Text("MCP server", bundle: .l10n)
+                .font(.system(size: 13, weight: .medium))
+                .foregroundStyle(Color.ctp.text)
+            Spacer()
+            Circle()
+                .fill(color)
+                .frame(width: 6, height: 6)
         }
+        .help(detail)
     }
 
     private var color: Color {
