@@ -13,6 +13,8 @@ final class ContainersStore {
     /// has already closed the container's log stream; views key their streams on this to reopen them.
     private(set) var revision = 0
     var searchText = ""
+    var statusFilter: ContainerStatusFilter = .all
+    var selectedIDs: Set<String> = []
 
     private(set) var all: [ContainerSummary] = []
     private var loop: Task<Void, Never>?
@@ -21,8 +23,11 @@ final class ContainersStore {
 
     var visibleGroups: [ContainerGroup] {
         let query = searchText.trimmingCharacters(in: .whitespaces)
-        let matching = query.isEmpty ? all : all.filter {
-            $0.name.localizedCaseInsensitiveContains(query) || $0.image.localizedCaseInsensitiveContains(query)
+        let matching = all.filter { container in
+            guard statusFilter.matches(container) else { return false }
+            if query.isEmpty { return true }
+            return container.name.localizedCaseInsensitiveContains(query)
+                || container.image.localizedCaseInsensitiveContains(query)
         }
         return groupByCompose(matching)
     }

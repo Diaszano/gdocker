@@ -21,18 +21,19 @@ public struct ContainerSummary: Decodable, Identifiable, Hashable, Sendable {
     public let status: String
     public let labels: [String: String]
     public let ports: [PortBinding]
+    public let sizeRw: Int64?
 
     enum CodingKeys: String, CodingKey {
         case id = "Id", names = "Names", image = "Image", state = "State", status = "Status"
-        case labels = "Labels", ports = "Ports"
+        case labels = "Labels", ports = "Ports", sizeRw = "SizeRw"
     }
 
     public init(
         id: String, names: [String], image: String, state: String, status: String,
-        labels: [String: String], ports: [PortBinding]
+        labels: [String: String], ports: [PortBinding], sizeRw: Int64? = nil
     ) {
         self.id = id; self.names = names; self.image = image; self.state = state
-        self.status = status; self.labels = labels; self.ports = ports
+        self.status = status; self.labels = labels; self.ports = ports; self.sizeRw = sizeRw
     }
 
     public init(from decoder: Decoder) throws {
@@ -44,6 +45,7 @@ public struct ContainerSummary: Decodable, Identifiable, Hashable, Sendable {
         status = try c.decode(String.self, forKey: .status)
         labels = try c.decodeIfPresent([String: String].self, forKey: .labels) ?? [:]
         ports = try c.decodeIfPresent([PortBinding].self, forKey: .ports) ?? []
+        sizeRw = try c.decodeIfPresent(Int64.self, forKey: .sizeRw)
     }
 
     public var name: String {
@@ -68,6 +70,19 @@ public struct ContainerSummary: Decodable, Identifiable, Hashable, Sendable {
     private var exitCode: Int? {
         guard let range = status.range(of: #"Exited \((\d+)\)"#, options: .regularExpression) else { return nil }
         return Int(status[range].filter(\.isNumber))
+    }
+}
+
+public enum ContainerStatusFilter: String, CaseIterable, Sendable {
+    case all, running, stopped, failed
+
+    public func matches(_ container: ContainerSummary) -> Bool {
+        switch self {
+        case .all: true
+        case .running: container.statusKind == .running || container.statusKind == .transitioning
+        case .stopped: container.statusKind == .stopped
+        case .failed: container.statusKind == .failed
+        }
     }
 }
 

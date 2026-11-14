@@ -55,3 +55,27 @@ func isActiveDecidesStopVersusStart(state: String, expected: Bool) {
     #expect(groups.map(\.project) == ["blog", "myapp", nil])
     #expect(groups[1].containers.map(\.name) == ["api", "postgres"])
 }
+
+@Test func decodeSizeRwWhenPresentAndAbsent() throws {
+    let json = """
+    [
+      { "Id": "a", "Names": ["/a"], "Image": "img", "State": "running", "Status": "Up", "SizeRw": 222298112 },
+      { "Id": "b", "Names": ["/b"], "Image": "img", "State": "exited", "Status": "Exited (0)", "Labels": {} }
+    ]
+    """
+    let list = try JSONDecoder().decode([ContainerSummary].self, from: Data(json.utf8))
+    #expect(list[0].sizeRw == 222298112)
+    #expect(list[1].sizeRw == nil)
+}
+
+@Test func statusFilterMatchesExpectedContainers() {
+    let items = [
+        summary("r", state: "running", status: "Up"),
+        summary("s", state: "exited", status: "Exited (0) 1m ago"),
+        summary("f", state: "exited", status: "Exited (1) 1m ago"),
+    ]
+    #expect(items.filter { ContainerStatusFilter.all.matches($0) }.map(\.name) == ["r", "s", "f"])
+    #expect(items.filter { ContainerStatusFilter.running.matches($0) }.map(\.name) == ["r"])
+    #expect(items.filter { ContainerStatusFilter.stopped.matches($0) }.map(\.name) == ["s"])
+    #expect(items.filter { ContainerStatusFilter.failed.matches($0) }.map(\.name) == ["f"])
+}

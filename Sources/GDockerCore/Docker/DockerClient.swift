@@ -36,7 +36,7 @@ public actor DockerClient {
     }
 
     public func listContainers() async throws -> [ContainerSummary] {
-        let data = try await send(.GET, "/containers/json?all=1")
+        let data = try await send(.GET, "/containers/json?all=1&size=1")
         return try JSONDecoder().decode([ContainerSummary].self, from: data)
     }
 
