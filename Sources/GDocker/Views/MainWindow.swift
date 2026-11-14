@@ -12,7 +12,7 @@ struct MainWindow: View {
     @Environment(McpController.self) private var mcp
     @State private var section: SidebarItem = .containers
     @State private var sidebarCollapsed = false
-    @State private var showInspector = true
+    @State private var showInspector = false
     @State private var inspectorTab = ContainerDetail.Tab.logs
     // Dynamic colors don't invalidate SwiftUI when only the flavor changes, so the theme keys the view tree.
     @AppStorage(SettingsKey.theme) private var theme = Theme.system
@@ -231,7 +231,7 @@ struct MainWindow: View {
                     showInspector = true
                 }
             )
-            .frame(minWidth: 620, maxWidth: .infinity, maxHeight: .infinity)
+            .frame(minWidth: 460, maxWidth: .infinity, maxHeight: .infinity)
 
             if showInspector {
                 Group {

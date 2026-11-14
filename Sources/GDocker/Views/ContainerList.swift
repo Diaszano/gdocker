@@ -11,39 +11,46 @@ struct ContainerList: View {
     var body: some View {
         VStack(spacing: 0) {
             header
-            tableHeader
-            Divider().overlay(Color.ctp.muted.opacity(0.18))
-            ScrollView {
-                LazyVStack(spacing: 0) {
-                    ForEach(store.visibleGroups) { group in
-                        GroupHeader(group: group)
-                        ForEach(group.containers) { container in
-                            ContainerRow(
-                                container: container,
-                                isSelected: store.selectedID == container.id,
-                                isChecked: store.selectedIDs.contains(container.id),
-                                onSelect: { store.selectedID = container.id },
-                                onToggleCheck: {
-                                    if store.selectedIDs.contains(container.id) {
-                                        store.selectedIDs.remove(container.id)
-                                    } else {
-                                        store.selectedIDs.insert(container.id)
+            GeometryReader { geo in
+                ScrollView(.horizontal) {
+                    VStack(spacing: 0) {
+                        tableHeader
+                        Divider().overlay(Color.ctp.muted.opacity(0.18))
+                        ScrollView(.vertical) {
+                            LazyVStack(spacing: 0) {
+                                ForEach(store.visibleGroups) { group in
+                                    GroupHeader(group: group)
+                                    ForEach(group.containers) { container in
+                                        ContainerRow(
+                                            container: container,
+                                            isSelected: store.selectedID == container.id,
+                                            isChecked: store.selectedIDs.contains(container.id),
+                                            onSelect: { store.selectedID = container.id },
+                                            onToggleCheck: {
+                                                if store.selectedIDs.contains(container.id) {
+                                                    store.selectedIDs.remove(container.id)
+                                                } else {
+                                                    store.selectedIDs.insert(container.id)
+                                                }
+                                            },
+                                            onAction: { action in
+                                                if action == .remove {
+                                                    confirmRemoveID = container.id
+                                                } else {
+                                                    Task { await store.perform(action, on: container.id) }
+                                                }
+                                            },
+                                            onOpenTab: { tab in
+                                                onOpenTab(container.id, tab)
+                                            }
+                                        )
+                                        Divider().overlay(Color.ctp.muted.opacity(0.1))
                                     }
-                                },
-                                onAction: { action in
-                                    if action == .remove {
-                                        confirmRemoveID = container.id
-                                    } else {
-                                        Task { await store.perform(action, on: container.id) }
-                                    }
-                                },
-                                onOpenTab: { tab in
-                                    onOpenTab(container.id, tab)
                                 }
-                            )
-                            Divider().overlay(Color.ctp.muted.opacity(0.1))
+                            }
                         }
                     }
+                    .frame(minWidth: max(geo.size.width, 780), maxHeight: .infinity, alignment: .topLeading)
                 }
             }
         }
