@@ -19,6 +19,7 @@ final class ContainersStore {
 
     private(set) var all: [ContainerSummary] = []
     private var loop: Task<Void, Never>?
+    private var usageTask: Task<Void, Never>?
 
     var selected: ContainerSummary? { all.first { $0.id == selectedID } }
 
@@ -70,6 +71,16 @@ final class ContainersStore {
             all = try await client.listContainers()
             if hostInfo == nil {
                 hostInfo = try? await client.hostInfo()
+            }
+            if usageTask == nil {
+                let runningIDs = all.filter { $0.statusKind == .running }.map(\.id)
+                usageTask = Task { [weak self] in
+                    defer { self?.usageTask = nil }
+                    let usage = await client.hostUsage(runningIDs: runningIDs)
+                    if let current = self?.hostInfo {
+                        self?.hostInfo = current.withUsage(cpuPercent: usage.cpuPercent, memUsed: usage.memUsed)
+                    }
+                }
             }
             connected = true
             if let selectedID, !all.contains(where: { $0.id == selectedID }) { self.selectedID = nil }

@@ -76,18 +76,44 @@ public struct ContainerSummary: Decodable, Identifiable, Hashable, Sendable {
 public struct DockerHostInfo: Sendable, Equatable {
     public let name: String
     public let cpus: Int
+    public let cpuPercent: Double?
+    public let memUsed: Int64?
     public let memTotal: Int64
     public let diskUsed: Int64?
     public let diskTotal: Int64?
     public let isColima: Bool
 
-    public init(name: String, cpus: Int, memTotal: Int64, diskUsed: Int64? = nil, diskTotal: Int64? = nil, isColima: Bool = false) {
+    public init(
+        name: String,
+        cpus: Int,
+        cpuPercent: Double? = nil,
+        memUsed: Int64? = nil,
+        memTotal: Int64,
+        diskUsed: Int64? = nil,
+        diskTotal: Int64? = nil,
+        isColima: Bool = false
+    ) {
         self.name = name
         self.cpus = cpus
+        self.cpuPercent = cpuPercent
+        self.memUsed = memUsed
         self.memTotal = memTotal
         self.diskUsed = diskUsed
         self.diskTotal = diskTotal
         self.isColima = isColima
+    }
+
+    public func withUsage(cpuPercent: Double?, memUsed: Int64?) -> DockerHostInfo {
+        DockerHostInfo(
+            name: name,
+            cpus: cpus,
+            cpuPercent: cpuPercent,
+            memUsed: memUsed,
+            memTotal: memTotal,
+            diskUsed: diskUsed,
+            diskTotal: diskTotal,
+            isColima: isColima
+        )
     }
 }
 

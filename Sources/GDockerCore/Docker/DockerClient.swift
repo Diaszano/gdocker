@@ -77,6 +77,68 @@ public actor DockerClient {
         )
     }
 
+    /// Aggregates CPU % and memory used across running containers using one-shot stats.
+    public func hostUsage(runningIDs: [String]) async -> (cpuPercent: Double?, memUsed: Int64?) {
+        guard !runningIDs.isEmpty else { return (0, 0) }
+        struct OneShotStats: Decodable {
+            struct CPU: Decodable {
+                struct Usage: Decodable { let totalUsage: UInt64? ; enum CodingKeys: String, CodingKey { case totalUsage = "total_usage" } }
+                let cpuUsage: Usage?
+                let systemCpuUsage: UInt64?
+                let onlineCpus: Int?
+                enum CodingKeys: String, CodingKey {
+                    case cpuUsage = "cpu_usage", systemCpuUsage = "system_cpu_usage", onlineCpus = "online_cpus"
+                }
+            }
+            struct Mem: Decodable {
+                struct Stats: Decodable {
+                    let inactiveFile: UInt64?
+                    let cache: UInt64?
+                    enum CodingKeys: String, CodingKey { case inactiveFile = "inactive_file", cache }
+                }
+                let usage: UInt64?
+                let stats: Stats?
+            }
+            let cpuStats: CPU?
+            let precpuStats: CPU?
+            let memoryStats: Mem?
+            enum CodingKeys: String, CodingKey {
+                case cpuStats = "cpu_stats", precpuStats = "precpu_stats", memoryStats = "memory_stats"
+            }
+        }
+
+        return await withTaskGroup(of: (Double, Int64)?.self) { group in
+            for id in runningIDs {
+                group.addTask {
+                    guard let data = try? await self.send(.GET, "/containers/\(Self.pathSegment(id))/stats?stream=false"),
+                          let s = try? JSONDecoder().decode(OneShotStats.self, from: data) else {
+                        return nil
+                    }
+                    let cpuDelta = Double((s.cpuStats?.cpuUsage?.totalUsage ?? 0) &- (s.precpuStats?.cpuUsage?.totalUsage ?? 0))
+                    let sysDelta = Double((s.cpuStats?.systemCpuUsage ?? 0) &- (s.precpuStats?.systemCpuUsage ?? 0))
+                    let cpus = Double(s.cpuStats?.onlineCpus ?? 1)
+                    let cpu = (sysDelta > 0 && cpuDelta >= 0) ? (cpuDelta / sysDelta) * cpus * 100.0 : 0.0
+
+                    let rawMem = s.memoryStats?.usage ?? 0
+                    let cache = s.memoryStats?.stats?.inactiveFile ?? s.memoryStats?.stats?.cache ?? 0
+                    let mem = Int64(rawMem > cache ? rawMem - cache : rawMem)
+                    return (cpu, mem)
+                }
+            }
+            var totalCPU = 0.0
+            var totalMem: Int64 = 0
+            var count = 0
+            for await item in group {
+                if let (cpu, mem) = item {
+                    totalCPU += cpu
+                    totalMem += mem
+                    count += 1
+                }
+            }
+            return count > 0 ? (totalCPU, totalMem) : (nil, nil)
+        }
+    }
+
     private static func readColimaDiskBytes() -> Int64? {
         struct ColimaStatus: Decodable { let disk: Int64? }
         let process = Process()

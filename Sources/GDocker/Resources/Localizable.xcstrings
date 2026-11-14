@@ -2853,23 +2853,6 @@
         }
       }
     },
-    "%@ of %@ containers": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ of %@ containers"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ de %@ containers"
-          }
-        }
-      }
-    },
     "%@ of %@ running": {
       "extractionState": "manual",
       "localizations": {
@@ -3444,23 +3427,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Hora"
-          }
-        }
-      }
-    },
-    "%@ CPUs": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ CPUs"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ CPUs"
           }
         }
       }

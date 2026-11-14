@@ -50,20 +50,34 @@ struct RuntimeCard: View {
                 }
 
                 HStack {
-                    Text(verbatim: String(localized: "\(String(runningCount)) of \(String(totalCount)) containers", bundle: .l10n))
+                    Text("Running", bundle: .l10n)
                     Spacer()
-                    if let cpus = hostInfo?.cpus, cpus > 0 {
-                        Text(verbatim: String(localized: "\(String(cpus)) CPUs", bundle: .l10n))
-                    }
+                    Text(verbatim: "\(runningCount)")
+                        .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                        .foregroundStyle(Color.ctp.text)
                 }
                 .font(.system(size: 11))
                 .foregroundStyle(Color.ctp.muted)
 
+                if let cpus = hostInfo?.cpus, cpus > 0 {
+                    let cpuPct = hostInfo?.cpuPercent ?? 0
+                    let maxPct = Double(cpus) * 100.0
+                    let normRatio = maxPct > 0 ? CGFloat(cpuPct / maxPct) : 0
+                    let displayPct = Int(min(100, (cpuPct / Double(cpus)).rounded()))
+                    metricBar(
+                        label: Text(verbatim: "CPUs"),
+                        value: "\(displayPct)% · \(cpus)",
+                        ratio: normRatio,
+                        color: Color.ctp.warn
+                    )
+                }
+
                 if let memTotal = hostInfo?.memTotal, memTotal > 0 {
+                    let used = hostInfo?.memUsed ?? 0
                     metricBar(
                         label: Text("Memory", bundle: .l10n),
-                        value: formatGB(memTotal),
-                        ratio: totalCount > 0 ? CGFloat(runningCount) / CGFloat(totalCount) : 0.25,
+                        value: "\(formatGB(used)) / \(formatGB(memTotal))",
+                        ratio: CGFloat(used) / CGFloat(memTotal),
                         color: Color.ctp.accent
                     )
                 }
