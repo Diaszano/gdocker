@@ -1,43 +1,34 @@
 import Foundation
-import GDockerCore
 import Observation
 
-enum NetworkFilter: String, CaseIterable, Sendable {
+public enum NetworkFilter: String, CaseIterable, Sendable {
     case all, custom, system
 }
 
 @MainActor @Observable
-final class NetworksStore {
-    private(set) var all: [NetworkSummary] = []
-    var selectedID: String?
-    var selectedIDs: Set<String> = []
-    var searchText = ""
-    var filter: NetworkFilter = .all
-    var lastError: String?
+public final class NetworksStore {
+    public private(set) var all: [NetworkSummary] = []
+    public var selectedID: String?
+    public var selectedIDs: Set<String> = []
+    public var searchText = ""
+    public var filter: NetworkFilter = .all
+    public var lastError: String?
 
     private let clientProvider: @MainActor () -> (any DockerOperations)?
 
-    init(clientProvider: @MainActor @escaping () -> (any DockerOperations)? = { nil }) {
+    public init(clientProvider: @MainActor @escaping () -> (any DockerOperations)? = { nil }) {
         self.clientProvider = clientProvider
     }
 
-    convenience init(client: @MainActor @escaping () -> DockerClient?) {
-        self.init(clientProvider: { client() })
-    }
+    public var networks: [NetworkSummary] { all }
+    public var count: Int { all.count }
+    public var selected: NetworkSummary? { all.first { $0.id == selectedID } }
 
-    convenience init(store: ContainersStore) {
-        self.init(clientProvider: { store.client })
-    }
-
-    var networks: [NetworkSummary] { all }
-    var count: Int { all.count }
-    var selected: NetworkSummary? { all.first { $0.id == selectedID } }
-
-    nonisolated static func isDefaultNetworkName(_ name: String) -> Bool {
+    nonisolated public static func isDefaultNetworkName(_ name: String) -> Bool {
         ["bridge", "host", "none"].contains(name.lowercased())
     }
 
-    var filteredNetworks: [NetworkSummary] {
+    public var filteredNetworks: [NetworkSummary] {
         let query = searchText.trimmingCharacters(in: .whitespaces)
         return all.filter { network in
             let isDefault = Self.isDefaultNetworkName(network.name)
@@ -55,7 +46,7 @@ final class NetworksStore {
         }
     }
 
-    func refresh() async {
+    public func refresh() async {
         guard let client = clientProvider() else {
             all = []
             selectedID = nil
@@ -77,11 +68,11 @@ final class NetworksStore {
         }
     }
 
-    func remove(id: String) async {
+    public func remove(id: String) async {
         await remove(ids: [id])
     }
 
-    func remove(ids: Set<String>) async {
+    public func remove(ids: Set<String>) async {
         let targets = ids.filter { id in
             guard let net = all.first(where: { $0.id == id }) else { return true }
             return !Self.isDefaultNetworkName(net.name)
@@ -104,7 +95,7 @@ final class NetworksStore {
         await refresh()
     }
 
-    func prune() async {
+    public func prune() async {
         guard let client = clientProvider() else {
             lastError = "Docker client is not connected"
             return

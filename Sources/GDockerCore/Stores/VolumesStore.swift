@@ -1,55 +1,48 @@
-import AppKit
 import Foundation
-import GDockerCore
 import Observation
 
-enum VolumeFilter: String, CaseIterable, Sendable {
+public enum VolumeFilter: String, CaseIterable, Sendable {
     case all, named, anonymous
 }
 
 @MainActor @Observable
-final class VolumesStore {
-    private(set) var all: [VolumeSummary] = []
-    var selectedID: String?
-    var selectedIDs: Set<String> = []
-    var searchText = ""
-    var filter: VolumeFilter = .all
-    var lastError: String?
-    private(set) var mountedVolumes: Set<String> = []
-    private(set) var mountingVolumes: Set<String> = []
+public final class VolumesStore {
+    public private(set) var all: [VolumeSummary] = []
+    public var selectedID: String?
+    public var selectedIDs: Set<String> = []
+    public var searchText = ""
+    public var filter: VolumeFilter = .all
+    public var lastError: String?
+    public private(set) var mountedVolumes: Set<String> = []
+    public private(set) var mountingVolumes: Set<String> = []
 
     private let clientProvider: @MainActor () -> (any DockerOperations)?
     private let webdavService: VolumeWebDAVService
+    private let openURL: @MainActor (URL) -> Void
 
-    init(
+    public init(
         clientProvider: @MainActor @escaping () -> (any DockerOperations)? = { nil },
-        webdavService: VolumeWebDAVService = .shared
+        webdavService: VolumeWebDAVService = .shared,
+        openURL: @MainActor @escaping (URL) -> Void = { _ in }
     ) {
         self.clientProvider = clientProvider
         self.webdavService = webdavService
+        self.openURL = openURL
     }
 
     private var activeSocketPath: String? {
         (clientProvider() as? DockerClient)?.socketPath ?? DockerSocket.discover()
     }
 
-    convenience init(client: @MainActor @escaping () -> DockerClient?) {
-        self.init(clientProvider: { client() })
-    }
+    public var volumes: [VolumeSummary] { all }
+    public var count: Int { all.count }
+    public var selected: VolumeSummary? { all.first { $0.name == selectedID } }
 
-    convenience init(store: ContainersStore) {
-        self.init(clientProvider: { store.client })
-    }
-
-    var volumes: [VolumeSummary] { all }
-    var count: Int { all.count }
-    var selected: VolumeSummary? { all.first { $0.name == selectedID } }
-
-    nonisolated static func isAnonymousVolume(_ name: String) -> Bool {
+    nonisolated public static func isAnonymousVolume(_ name: String) -> Bool {
         name.count == 64 && name.allSatisfy(\.isHexDigit)
     }
 
-    var filteredVolumes: [VolumeSummary] {
+    public var filteredVolumes: [VolumeSummary] {
         let query = searchText.trimmingCharacters(in: .whitespaces)
         return all.filter { volume in
             switch filter {
@@ -65,7 +58,7 @@ final class VolumesStore {
         }
     }
 
-    func refresh() async {
+    public func refresh() async {
         guard let client = clientProvider() else {
             all = []
             selectedID = nil
@@ -87,7 +80,7 @@ final class VolumesStore {
         }
     }
 
-    func openInFinder(name: String) async {
+    public func openInFinder(name: String) async {
         guard !mountingVolumes.contains(name) else { return }
         mountingVolumes.insert(name)
         defer { mountingVolumes.remove(name) }
@@ -96,23 +89,23 @@ final class VolumesStore {
             let info = try await webdavService.mount(volumeName: name, socketPath: activeSocketPath)
             mountedVolumes = webdavService.mountedVolumeNames()
             lastError = nil
-            NSWorkspace.shared.open(info.mountPoint)
+            openURL(info.mountPoint)
         } catch {
             lastError = error.localizedDescription
             mountedVolumes = webdavService.mountedVolumeNames()
         }
     }
 
-    func unmount(name: String) async {
+    public func unmount(name: String) async {
         await webdavService.unmount(volumeName: name, socketPath: activeSocketPath)
         mountedVolumes = webdavService.mountedVolumeNames()
     }
 
-    func remove(name: String, force: Bool = false) async {
+    public func remove(name: String, force: Bool = false) async {
         await remove(names: [name], force: force)
     }
 
-    func remove(names: Set<String>, force: Bool = false) async {
+    public func remove(names: Set<String>, force: Bool = false) async {
         guard !names.isEmpty else { return }
         guard let client = clientProvider() else {
             lastError = "Docker client is not connected"
@@ -136,11 +129,7 @@ final class VolumesStore {
         await refresh()
     }
 
-    func remove(id: String, force: Bool = false) async {
-        await remove(name: id, force: force)
-    }
-
-    func prune() async {
+    public func prune() async {
         guard let client = clientProvider() else {
             lastError = "Docker client is not connected"
             return

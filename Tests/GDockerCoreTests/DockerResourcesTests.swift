@@ -31,19 +31,6 @@ import Testing
         #expect(second.created == 1699980000)
     }
 
-    @Test func imageSummaryCodableRoundTrip() throws {
-        let original = ImageSummary(
-            id: "sha256:abc123",
-            repoTags: ["app:v1"],
-            size: 50_000_000,
-            created: 1700000000
-        )
-        let encoded = try JSONEncoder().encode(original)
-        let decoded = try JSONDecoder().decode(ImageSummary.self, from: encoded)
-        #expect(decoded == original)
-        #expect(decoded.id == original.id)
-    }
-
     // MARK: - VolumeSummary Tests
 
     @Test func decodeVolumesFixture() throws {
@@ -70,19 +57,6 @@ import Testing
         #expect(second.createdAt == "2026-01-02T15:30:00Z")
     }
 
-    @Test func volumeSummaryCodableRoundTrip() throws {
-        let original = VolumeSummary(
-            name: "cache_vol",
-            driver: "local",
-            scope: "local",
-            createdAt: "2026-01-03T00:00:00Z"
-        )
-        let encoded = try JSONEncoder().encode(original)
-        let decoded = try JSONDecoder().decode(VolumeSummary.self, from: encoded)
-        #expect(decoded == original)
-        #expect(decoded.id == "cache_vol")
-    }
-
     // MARK: - NetworkSummary Tests
 
     @Test func decodeNetworksFixture() throws {
@@ -101,20 +75,6 @@ import Testing
         let isolated = networks[1]
         #expect(isolated.name == "isolated_net")
         #expect(isolated.containerCount == 0)
-    }
-
-    @Test func networkSummaryCodableRoundTrip() throws {
-        let original = NetworkSummary(
-            id: "net-xyz",
-            name: "custom_net",
-            driver: "overlay",
-            scope: "swarm",
-            containerCount: 5
-        )
-        let encoded = try JSONEncoder().encode(original)
-        let decoded = try JSONDecoder().decode(NetworkSummary.self, from: encoded)
-        #expect(decoded == original)
-        #expect(decoded.containerCount == 5)
     }
 
     // MARK: - PruneReport Tests

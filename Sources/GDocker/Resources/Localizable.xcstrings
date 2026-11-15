@@ -2041,19 +2041,19 @@
         }
       }
     },
-    "Mask environment variables": {
+    "Reason": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mask environment variables"
+            "value": "Reason"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mascarar variáveis de ambiente"
+            "value": "Motivo"
           }
         }
       }

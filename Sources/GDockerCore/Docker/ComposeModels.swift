@@ -1,7 +1,7 @@
 import Foundation
 
 public struct ComposeServiceSummary: Sendable, Codable, Equatable, Identifiable {
-    public var id: String { name }
+    public var id: String { containerID ?? name }
     public let name: String
     public let containerID: String?
     public let state: String?

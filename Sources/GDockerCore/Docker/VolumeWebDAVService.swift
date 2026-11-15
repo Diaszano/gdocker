@@ -503,14 +503,29 @@ public final class VolumeWebDAVService: @unchecked Sendable {
             return ProcessResult(exitCode: 1, stdout: "", stderr: error.localizedDescription)
         }
 
-        let outData = outPipe.fileHandleForReading.readDataToEndOfFile()
-        let errData = errPipe.fileHandleForReading.readDataToEndOfFile()
+        final class DataBox: @unchecked Sendable { var data = Data() }
+        let outBox = DataBox()
+        let errBox = DataBox()
+        let group = DispatchGroup()
+
+        group.enter()
+        DispatchQueue.global(qos: .userInitiated).async {
+            outBox.data = outPipe.fileHandleForReading.readDataToEndOfFile()
+            group.leave()
+        }
+        group.enter()
+        DispatchQueue.global(qos: .userInitiated).async {
+            errBox.data = errPipe.fileHandleForReading.readDataToEndOfFile()
+            group.leave()
+        }
+
+        group.wait()
         process.waitUntilExit()
 
         return ProcessResult(
             exitCode: process.terminationStatus,
-            stdout: String(data: outData, encoding: .utf8) ?? "",
-            stderr: String(data: errData, encoding: .utf8) ?? ""
+            stdout: String(data: outBox.data, encoding: .utf8) ?? "",
+            stderr: String(data: errBox.data, encoding: .utf8) ?? ""
         )
     }
 }

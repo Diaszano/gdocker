@@ -42,6 +42,16 @@ nonisolated(unsafe) private let initialize: [String: Any] = [
     await h.server.stop()
 }
 
+@Test func oversizedBodyIsRejected413() async throws {
+    let h = try await McpHarness.start()
+    let huge = String(repeating: "x", count: 1_048_577)
+    let response = try await h.client(token: nil).post([
+        "jsonrpc": "2.0", "id": 1, "method": "initialize", "padding": huge,
+    ])
+    #expect(response.status == 413)
+    await h.server.stop()
+}
+
 @Test func nonLocalHostIsRejected() async throws {
     let h = try await McpHarness.start()
     let body = String(decoding: try JSONSerialization.data(withJSONObject: initialize), as: UTF8.self)

@@ -16,8 +16,9 @@ app:
 	swift build -c release $(SWIFT_FLAGS)
 	rm -rf $(APP)
 	mkdir -p $(APP)/Contents/MacOS $(APP)/Contents/Resources
-	cp "$$(swift build -c release $(SWIFT_FLAGS) --show-bin-path)/GDocker" $(APP)/Contents/MacOS/GDocker
-	cp -R "$$(swift build -c release $(SWIFT_FLAGS) --show-bin-path)/GDocker_GDocker.bundle" $(APP)/Contents/Resources/
+	bin="$$(swift build -c release $(SWIFT_FLAGS) --show-bin-path)"; \
+		cp "$$bin/GDocker" $(APP)/Contents/MacOS/GDocker; \
+		cp -R "$$bin/GDocker_GDocker.bundle" $(APP)/Contents/Resources/
 	cp scripts/Info.plist $(APP)/Contents/Info.plist
 	cp scripts/AppIcon.icns $(APP)/Contents/Resources/AppIcon.icns
 	codesign --force --deep -s - $(APP)

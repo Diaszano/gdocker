@@ -4,7 +4,6 @@ import SwiftUI
 
 struct PermissionsView: View {
     let mcp: McpController
-    @AppStorage("maskEnvVars") private var maskEnvVars = true
 
     private var model: PermissionsModel { mcp.permissionsModel }
 
@@ -20,7 +19,7 @@ struct PermissionsView: View {
                         .foregroundStyle(Color.ctp.muted)
                 }
 
-                ServerCard(mcp: mcp, maskEnvVars: $maskEnvVars)
+                ServerCard(mcp: mcp)
             }
             .padding(.horizontal, 20)
             .padding(.top, 28)
@@ -155,7 +154,6 @@ private extension Permission {
 
 private struct ServerCard: View {
     let mcp: McpController
-    @Binding var maskEnvVars: Bool
 
     @State private var copied = false
     @State private var confirmRegenerate = false
@@ -183,14 +181,6 @@ private struct ServerCard: View {
             }
 
             Spacer()
-
-            Toggle(isOn: $maskEnvVars) {
-                Text("Mask environment variables", bundle: .l10n)
-                    .font(.system(size: 12))
-                    .foregroundStyle(Color.ctp.text)
-            }
-            .toggleStyle(.switch)
-            .controlSize(.small)
 
             if copied {
                 Text("Copied", bundle: .l10n)

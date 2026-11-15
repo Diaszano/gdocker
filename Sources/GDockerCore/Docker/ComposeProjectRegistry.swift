@@ -64,10 +64,6 @@ public actor ComposeProjectRegistry {
         }
     }
 
-    public func ingest(containers: [ContainerSummary]) async {
-        await ingest(containers)
-    }
-
     // MARK: - Remove
 
     public func removeProject(named name: String) async {
@@ -131,7 +127,7 @@ public actor ComposeProjectRegistry {
                     ))
                 }
 
-                services.sort { $0.name < $1.name }
+                services.sort { ($0.name, $0.containerID ?? "") < ($1.name, $1.containerID ?? "") }
 
                 let allServicesHaveContainer = !services.contains { $0.containerID == nil }
                 let status: ComposeStatus

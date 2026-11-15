@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 import GDockerCore
 import Observation
@@ -134,5 +135,38 @@ final class ContainersStore {
                 await stale.shutdown()
             }
         }
+    }
+}
+
+extension ImagesStore {
+    convenience init(store: ContainersStore) {
+        self.init(clientProvider: { store.client })
+    }
+}
+
+extension VolumesStore {
+    convenience init(store: ContainersStore) {
+        self.init(clientProvider: { store.client }, openURL: { NSWorkspace.shared.open($0) })
+    }
+}
+
+extension NetworksStore {
+    convenience init(store: ContainersStore) {
+        self.init(clientProvider: { store.client })
+    }
+}
+
+extension ComposeStore {
+    convenience init(
+        store: ContainersStore,
+        registry: ComposeProjectRegistry,
+        runner: any ComposeOperations = CLIComposeRunner()
+    ) {
+        self.init(
+            containersProvider: { store.all },
+            refreshContainers: { await store.refresh() },
+            registry: registry,
+            runner: runner
+        )
     }
 }

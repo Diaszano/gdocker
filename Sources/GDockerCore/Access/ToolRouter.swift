@@ -181,8 +181,12 @@ public actor ToolRouter {
             let tail = min(max(args.int("tail") ?? 100, 1), 2000)
             let timestamps = args.bool("timestamps") ?? false
             let lines = try await docker.recentLogs(try need(target).id, tail: tail, timestamps: timestamps)
+            guard timestamps else {
+                return lines.map(\.text).joined(separator: "\n")
+            }
+            let formatter = Self.makeISOFormatter()
             return lines.map { line in
-                line.timestamp.map { "\(Self.iso($0)) \(line.text)" } ?? line.text
+                line.timestamp.map { "\(formatter.string(from: $0)) \(line.text)" } ?? line.text
             }.joined(separator: "\n")
         case "get_stats":
             let sample = try await docker.statsOnce(try need(target).id)
@@ -411,9 +415,9 @@ public actor ToolRouter {
         return String(decoding: data ?? Data(), as: UTF8.self)
     }
 
-    private static func iso(_ date: Date) -> String {
+    private static func makeISOFormatter() -> ISO8601DateFormatter {
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        return formatter.string(from: date)
+        return formatter
     }
 }

@@ -249,6 +249,19 @@ struct ComposeRegistryTests {
 
         #expect(decoded == project)
         #expect(decoded.id == "demo")
-        #expect(decoded.services.first?.id == "web")
+        #expect(decoded.services.first?.id == "cid123")
+    }
+
+    @Test func scaledServiceHasDistinctIdentifiableIDs() async throws {
+        let tempURL = temporaryFileURL()
+        defer { try? FileManager.default.removeItem(at: tempURL) }
+
+        let registry = ComposeProjectRegistry(fileURL: tempURL)
+        let c1 = makeContainer(id: "c1", project: "stack", service: "worker")
+        let c2 = makeContainer(id: "c2", project: "stack", service: "worker")
+        let projects = await registry.projects(containers: [c1, c2])
+        let project = try #require(projects.first)
+        #expect(project.services.count == 2)
+        #expect(Set(project.services.map(\.id)) == ["c1", "c2"])
     }
 }

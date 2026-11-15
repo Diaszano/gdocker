@@ -14,12 +14,12 @@ public struct StatsSample: Sendable, Equatable {
               let previousSystem = raw.precpu_stats.system_cpu_usage,
               system > previousSystem
         else { return nil }
-        let cpuDelta = Double(raw.cpu_stats.total) - Double(raw.precpu_stats.total)
+        let cpuDelta = max(0, Double(raw.cpu_stats.total) - Double(raw.precpu_stats.total))
         let systemDelta = Double(system - previousSystem)
         let cpus = Double(raw.cpu_stats.online_cpus ?? 1)
         let memory = raw.memory_stats
         let used = memory.usage ?? 0
-        let inactive = memory.stats?.inactive_file ?? 0
+        let inactive = memory.stats?.inactive_file ?? memory.stats?.cache ?? 0
         let networks = raw.networks?.values
         return StatsSample(
             cpuPercent: cpuDelta / systemDelta * cpus * 100,
@@ -39,7 +39,10 @@ public struct StatsSample: Sendable, Equatable {
             var total: UInt64 { cpu_usage?.total_usage ?? 0 }
         }
         struct Memory: Decodable {
-            struct Detail: Decodable { let inactive_file: UInt64? }
+            struct Detail: Decodable {
+                let inactive_file: UInt64?
+                let cache: UInt64?
+            }
             let usage: UInt64?
             let limit: UInt64?
             let stats: Detail?

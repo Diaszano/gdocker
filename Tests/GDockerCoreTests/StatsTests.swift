@@ -43,3 +43,16 @@ private let full = Data("""
     #expect(sample.memoryUsed == 600)
     #expect(sample.netRx == 0 && sample.netTx == 0)
 }
+
+@Test func counterResetClampsCpuPercentToZero() throws {
+    let json = Data("""
+    {
+      "cpu_stats": { "cpu_usage": { "total_usage": 100 }, "system_cpu_usage": 2000, "online_cpus": 2 },
+      "precpu_stats": { "cpu_usage": { "total_usage": 500 }, "system_cpu_usage": 1000 },
+      "memory_stats": { "usage": 600, "limit": 1000, "stats": { "cache": 200 } }
+    }
+    """.utf8)
+    let sample = try #require(try StatsSample.from(json: json))
+    #expect(sample.cpuPercent == 0)
+    #expect(sample.memoryUsed == 400)
+}

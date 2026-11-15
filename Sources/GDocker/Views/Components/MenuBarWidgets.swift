@@ -125,9 +125,17 @@ struct MenuBarApprovalBanner: View {
     let answer: (ApprovalDecision) -> Void
 
     private var commandSummary: String {
-        if request.arguments.isEmpty { return request.tool }
-        let args = request.arguments.map { "\($0.name): \($0.value)" }.joined(separator: " · ")
-        return "\(request.tool) (\(args))"
+        let base: String
+        if request.arguments.isEmpty {
+            base = request.tool
+        } else {
+            let args = request.arguments.map { "\($0.name): \($0.value)" }.joined(separator: " · ")
+            base = "\(request.tool) (\(args))"
+        }
+        if let reason = request.reason, !reason.isEmpty {
+            return "\(base) — \(reason)"
+        }
+        return base
     }
 
     var body: some View {

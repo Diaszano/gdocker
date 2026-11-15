@@ -1,43 +1,30 @@
 import Foundation
-import GDockerCore
 import Observation
 
-enum ImageFilter: String, CaseIterable, Sendable {
+public enum ImageFilter: String, CaseIterable, Sendable {
     case all, inUse, dangling
 }
 
 @MainActor @Observable
-final class ImagesStore {
-    private(set) var all: [ImageSummary] = []
-    var selectedID: String?
-    var selectedIDs: Set<String> = []
-    var searchText = ""
-    var filter: ImageFilter = .all
-    var lastError: String?
+public final class ImagesStore {
+    public private(set) var all: [ImageSummary] = []
+    public var selectedID: String?
+    public var selectedIDs: Set<String> = []
+    public var searchText = ""
+    public var filter: ImageFilter = .all
+    public var lastError: String?
 
     private let clientProvider: @MainActor () -> (any DockerOperations)?
 
-    init(clientProvider: @MainActor @escaping () -> (any DockerOperations)? = { nil }) {
+    public init(clientProvider: @MainActor @escaping () -> (any DockerOperations)? = { nil }) {
         self.clientProvider = clientProvider
     }
 
-    convenience init(client: @MainActor @escaping () -> DockerClient?) {
-        self.init(clientProvider: { client() })
-    }
+    public var images: [ImageSummary] { all }
+    public var count: Int { all.count }
+    public var selected: ImageSummary? { all.first { $0.id == selectedID } }
 
-    convenience init(store: ContainersStore) {
-        self.init(clientProvider: { store.client })
-    }
-
-    var images: [ImageSummary] { all }
-    var count: Int { all.count }
-    var selected: ImageSummary? { all.first { $0.id == selectedID } }
-
-    var filteredImages: [ImageSummary] {
-        filteredImages(containers: [])
-    }
-
-    func containerUsageCount(for image: ImageSummary, containers: [ContainerSummary]) -> Int {
+    public func containerUsageCount(for image: ImageSummary, containers: [ContainerSummary]) -> Int {
         let validTags = Set(image.repoTags.filter { $0 != "<none>:<none>" })
         let rawID = image.id.hasPrefix("sha256:") ? String(image.id.dropFirst(7)) : image.id
         let shortID = String(rawID.prefix(12))
@@ -49,7 +36,7 @@ final class ImagesStore {
         }.count
     }
 
-    func filteredImages(containers: [ContainerSummary]) -> [ImageSummary] {
+    public func filteredImages(containers: [ContainerSummary]) -> [ImageSummary] {
         let query = searchText.trimmingCharacters(in: .whitespaces)
         return all.filter { image in
             switch filter {
@@ -67,7 +54,7 @@ final class ImagesStore {
         }
     }
 
-    func refresh() async {
+    public func refresh() async {
         guard let client = clientProvider() else {
             all = []
             selectedID = nil
@@ -88,11 +75,11 @@ final class ImagesStore {
         }
     }
 
-    func remove(id: String, force: Bool = false) async {
+    public func remove(id: String, force: Bool = false) async {
         await remove(ids: [id], force: force)
     }
 
-    func remove(ids: Set<String>, force: Bool = false) async {
+    public func remove(ids: Set<String>, force: Bool = false) async {
         guard !ids.isEmpty else { return }
         guard let client = clientProvider() else {
             lastError = "Docker client is not connected"
@@ -111,7 +98,7 @@ final class ImagesStore {
         await refresh()
     }
 
-    func prune(all: Bool = false) async {
+    public func prune(all: Bool = false) async {
         guard let client = clientProvider() else {
             lastError = "Docker client is not connected"
             return

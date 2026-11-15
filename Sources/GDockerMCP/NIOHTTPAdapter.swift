@@ -11,6 +11,8 @@ final class McpNIOHandler: ChannelInboundHandler, @unchecked Sendable {
     typealias InboundIn = HTTPServerRequestPart
     typealias OutboundOut = HTTPServerResponsePart
 
+    static let maxBodyBytes = 1_048_576
+
     private struct RequestState {
         var head: HTTPRequestHead
         var body: ByteBuffer
@@ -30,7 +32,18 @@ final class McpNIOHandler: ChannelInboundHandler, @unchecked Sendable {
         case .head(let head):
             state = RequestState(head: head, body: context.channel.allocator.buffer(capacity: 0))
         case .body(var buffer):
-            state?.body.writeBuffer(&buffer)
+            guard var current = state else { return }
+            if current.body.readableBytes + buffer.readableBytes > Self.maxBodyBytes {
+                state = nil
+                var head = current.head
+                head.headers.replaceOrAdd(name: "Connection", value: "close")
+                nonisolated(unsafe) let unsafeContext = context
+                let response = HTTPResponse.error(statusCode: 413, .invalidRequest("Payload Too Large"))
+                Task { await self.write(response, head: head, context: unsafeContext) }
+                return
+            }
+            current.body.writeBuffer(&buffer)
+            state = current
         case .end:
             guard let request = state else { return }
             state = nil

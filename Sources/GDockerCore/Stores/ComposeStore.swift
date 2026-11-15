@@ -1,49 +1,47 @@
 import Foundation
-import GDockerCore
 import Observation
 
-enum ComposeFilter: String, CaseIterable, Sendable {
+public enum ComposeFilter: String, CaseIterable, Sendable {
     case all, running, partial, stopped
 }
 
 @MainActor @Observable
-final class ComposeStore {
-    private(set) var projects: [ComposeProject] = []
-    var selectedProjectName: String?
-    var searchText = ""
-    var filter: ComposeFilter = .all
-    var lastError: String?
-    var isPerformingAction = false
-    private(set) var isComposeAvailable = true
+public final class ComposeStore {
+    public private(set) var projects: [ComposeProject] = []
+    public var selectedProjectName: String?
+    public var searchText = ""
+    public var filter: ComposeFilter = .all
+    public var lastError: String?
+    public var isPerformingAction = false
+    public private(set) var isComposeAvailable = true
 
-    private let store: ContainersStore
+    private let containersProvider: @MainActor () -> [ContainerSummary]
+    private let refreshContainers: @MainActor () async -> Void
     private let registry: ComposeProjectRegistry
     private let runner: any ComposeOperations
 
-    init(
-        store: ContainersStore,
+    public init(
+        containersProvider: @MainActor @escaping () -> [ContainerSummary] = { [] },
+        refreshContainers: @MainActor @escaping () async -> Void = {},
         registry: ComposeProjectRegistry,
         runner: any ComposeOperations = CLIComposeRunner()
     ) {
-        self.store = store
+        self.containersProvider = containersProvider
+        self.refreshContainers = refreshContainers
         self.registry = registry
         self.runner = runner
     }
 
-    convenience init(store: ContainersStore, runner: any ComposeOperations = CLIComposeRunner()) {
-        self.init(store: store, registry: ComposeProjectRegistry(), runner: runner)
-    }
+    public var count: Int { projects.count }
 
-    var count: Int { projects.count }
+    public var activeCount: Int { projects.filter(\.isActive).count }
 
-    var activeCount: Int { projects.filter(\.isActive).count }
-
-    var selected: ComposeProject? {
+    public var selected: ComposeProject? {
         guard let selectedProjectName else { return nil }
         return projects.first { $0.name == selectedProjectName }
     }
 
-    var filteredProjects: [ComposeProject] {
+    public var filteredProjects: [ComposeProject] {
         projects.filter { project in
             switch filter {
             case .all: break
@@ -58,27 +56,27 @@ final class ComposeStore {
         }
     }
 
-    var downCount: Int {
+    public var downCount: Int {
         projects.filter { $0.status == .down }.count
     }
 
-    func cleanDownProjects() async {
+    public func cleanDownProjects() async {
         for project in projects where project.status == .down {
             await registry.removeProject(named: project.name)
         }
         await refresh()
     }
 
-    func refresh() async {
+    public func refresh() async {
         isComposeAvailable = await runner.isComposeAvailable()
-        let containers = store.all
+        let containers = containersProvider()
         projects = await registry.projects(containers: containers)
         if let selectedProjectName, !projects.contains(where: { $0.name == selectedProjectName }) {
             self.selectedProjectName = nil
         }
     }
 
-    func up(project: ComposeProject) async {
+    public func up(project: ComposeProject) async {
         isPerformingAction = true
         defer { isPerformingAction = false }
         do {
@@ -88,14 +86,14 @@ final class ComposeStore {
                 configFiles: project.configFiles
             )
             lastError = nil
-            await store.refresh()
+            await refreshContainers()
             await refresh()
         } catch {
             lastError = (error as? LocalizedError)?.errorDescription ?? "\(error)"
         }
     }
 
-    func down(project: ComposeProject, removeVolumes: Bool = false) async {
+    public func down(project: ComposeProject, removeVolumes: Bool = false) async {
         isPerformingAction = true
         defer { isPerformingAction = false }
         do {
@@ -106,14 +104,14 @@ final class ComposeStore {
                 removeVolumes: removeVolumes
             )
             lastError = nil
-            await store.refresh()
+            await refreshContainers()
             await refresh()
         } catch {
             lastError = (error as? LocalizedError)?.errorDescription ?? "\(error)"
         }
     }
 
-    func forget(project: ComposeProject) async {
+    public func forget(project: ComposeProject) async {
         await registry.removeProject(named: project.name)
         await refresh()
     }

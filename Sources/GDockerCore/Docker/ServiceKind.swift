@@ -16,12 +16,17 @@ public enum ServiceKind: String, CaseIterable, Sendable {
     case minio
     case generic
 
-    /// Maps an image reference (e.g. `ghcr.io/bitnami/redis:7-alpine`) to a known `ServiceKind`.
-    public static func from(image: String) -> ServiceKind {
+    private static func parseImage(_ image: String) -> (normalized: String, repoName: String) {
         let withoutDigest = image.split(separator: "@", maxSplits: 1).first.map(String.init) ?? image
         let withoutTag = withoutDigest.split(separator: ":", maxSplits: 1).first.map(String.init) ?? withoutDigest
+        let normalized = withoutTag.lowercased()
         let repoName = (withoutTag.split(separator: "/").last.map(String.init) ?? withoutTag).lowercased()
+        return (normalized, repoName)
+    }
 
+    /// Maps an image reference (e.g. `ghcr.io/bitnami/redis:7-alpine`) to a known `ServiceKind`.
+    public static func from(image: String) -> ServiceKind {
+        let (_, repoName) = parseImage(image)
         if repoName.isEmpty { return .generic }
         if repoName.contains("postgres") || repoName == "pgvector" { return .postgres }
         if repoName.contains("redis") || repoName == "valkey" { return .redis }
@@ -40,10 +45,7 @@ public enum ServiceKind: String, CaseIterable, Sendable {
 
     /// Maps an image reference to a bundled Penpot brand logo slug under `Resources/ServiceLogos`, if available.
     public static func logoSlug(for image: String) -> String? {
-        let withoutDigest = image.split(separator: "@", maxSplits: 1).first.map(String.init) ?? image
-        let withoutTag = withoutDigest.split(separator: ":", maxSplits: 1).first.map(String.init) ?? withoutDigest
-        let normalized = withoutTag.lowercased()
-        let repoName = (withoutTag.split(separator: "/").last.map(String.init) ?? withoutTag).lowercased()
+        let (normalized, repoName) = parseImage(image)
         guard !repoName.isEmpty else { return nil }
 
         // Check specific multi-word / compound names before generic substrings.

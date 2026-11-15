@@ -101,6 +101,9 @@ private struct RequestCard: View {
             ForEach(request.arguments, id: \.name) { argument in
                 detailRow(label: argument.name, value: argument.value)
             }
+            if let reason = request.reason, !reason.isEmpty {
+                detailRow(label: String(localized: "Reason", bundle: .l10n), value: reason)
+            }
         }
         .textSelection(.enabled)
         .padding(14)

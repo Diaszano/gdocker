@@ -1,4 +1,5 @@
 import AppKit
+import GDockerCore
 import SwiftUI
 
 struct GDockerApp: App {
