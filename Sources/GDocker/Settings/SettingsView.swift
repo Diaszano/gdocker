@@ -4,6 +4,7 @@ struct SettingsView: View {
     @Environment(McpController.self) private var mcp
     @AppStorage(SettingsKey.theme) private var theme = Theme.system
     @AppStorage(SettingsKey.keepInMenuBar) private var keepInMenuBar = false
+    @AppStorage(SettingsKey.compactMenuBarIcon) private var compactMenuBarIcon = false
     @AppStorage(SettingsKey.mcpAutoStart) private var mcpAutoStart = true
     @AppStorage(SettingsKey.mcpPort) private var mcpPort = SettingsKey.defaultMcpPort
 
@@ -18,6 +19,10 @@ struct SettingsView: View {
                 Toggle(isOn: $keepInMenuBar) {
                     Text("Keep running in the menu bar when the window is closed", bundle: .l10n)
                 }
+                Toggle(isOn: $compactMenuBarIcon) {
+                    Text("Compact menu bar icon (icon only)", bundle: .l10n)
+                }
+                .disabled(!keepInMenuBar)
             }
             Section(header: Text("MCP server", bundle: .l10n)) {
                 Toggle(isOn: $mcpAutoStart) {

@@ -1,7 +1,15 @@
+import Foundation
 import GDockerCore
 import Observation
 
 enum ContainerAction { case start, stop, restart, remove }
+enum DetailTabRequest: Equatable { case logs, terminal }
+
+struct InspectorRequest: Equatable {
+    let token = UUID()
+    let containerID: String
+    let tab: DetailTabRequest
+}
 
 @MainActor @Observable
 final class ContainersStore {
@@ -9,6 +17,7 @@ final class ContainersStore {
     private(set) var client: DockerClient?
     private(set) var hostInfo: DockerHostInfo?
     var selectedID: String?
+    var pendingInspectorRequest: InspectorRequest?
     var lastError: String?
     /// Bumped after every action. A restart can finish between two polls, leaving id and state unchanged, while Docker
     /// has already closed the container's log stream; views key their streams on this to reopen them.
@@ -22,6 +31,10 @@ final class ContainersStore {
     private var usageTask: Task<Void, Never>?
 
     var selected: ContainerSummary? { all.first { $0.id == selectedID } }
+
+    func requestInspector(containerID: String, tab: DetailTabRequest) {
+        pendingInspectorRequest = InspectorRequest(containerID: containerID, tab: tab)
+    }
 
     var visibleGroups: [ContainerGroup] {
         let query = searchText.trimmingCharacters(in: .whitespaces)

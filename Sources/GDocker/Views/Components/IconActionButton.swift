@@ -4,6 +4,7 @@ import SwiftUI
 struct IconActionButton: View {
     let systemImage: String
     var tint: Color = Color.ctp.text
+    var size: CGFloat = 28
     var help: LocalizedStringKey? = nil
     let action: () -> Void
 
@@ -12,9 +13,9 @@ struct IconActionButton: View {
     var body: some View {
         Button(action: action) {
             Image(systemName: systemImage)
-                .font(.system(size: 12, weight: .medium))
+                .font(.system(size: size * 0.43, weight: .medium))
                 .foregroundStyle(tint)
-                .frame(width: 28, height: 28)
+                .frame(width: size, height: size)
                 .background(
                     RoundedRectangle(cornerRadius: 6)
                         .fill(hovered ? tint.opacity(0.14) : Color.clear)

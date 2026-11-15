@@ -47,10 +47,14 @@ struct MainWindow: View {
         .tint(Color.ctp.accent)
         .id(theme)
         .task {
+            applyPendingInspector()
             await imagesStore.refresh()
             await volumesStore.refresh()
             await networksStore.refresh()
             await composeStore.refresh()
+        }
+        .onChange(of: store.pendingInspectorRequest) { _, _ in
+            applyPendingInspector()
         }
         .task(id: section) {
             switch section {
@@ -182,6 +186,15 @@ struct MainWindow: View {
             .foregroundStyle(Color.ctp.muted)
             .padding(.horizontal, 10)
             .padding(.vertical, 4)
+    }
+
+    private func applyPendingInspector() {
+        guard let request = store.pendingInspectorRequest else { return }
+        section = .containers
+        store.selectedID = request.containerID
+        inspectorTab = request.tab == .logs ? .logs : .terminal
+        showInspector = true
+        store.pendingInspectorRequest = nil
     }
 
     private func navButton(

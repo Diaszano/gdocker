@@ -4,6 +4,7 @@ import SwiftUI
 enum SettingsKey {
     static let theme = "theme"
     static let keepInMenuBar = "keepInMenuBar"
+    static let compactMenuBarIcon = "compactMenuBarIcon"
     static let mcpPort = "mcpPort"
     static let mcpAutoStart = "mcpAutoStart"
 

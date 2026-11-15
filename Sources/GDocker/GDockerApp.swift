@@ -11,6 +11,7 @@ struct GDockerApp: App {
     @State private var composeStore: ComposeStore
     @State private var mcp: McpController
     @AppStorage(SettingsKey.keepInMenuBar) private var keepInMenuBar = false
+    @AppStorage(SettingsKey.compactMenuBarIcon) private var compactMenuBarIcon = false
     @State private var confirmSystemPrune = false
     @State private var isPruning = false
 
@@ -72,10 +73,14 @@ struct GDockerApp: App {
         }
         Settings { SettingsView().environment(mcp) }
         MenuBarExtra(isInserted: $keepInMenuBar) {
-            MenuBarContent().environment(store).environment(mcp)
+            MenuBarContent()
+                .environment(store)
+                .environment(composeStore)
+                .environment(mcp)
         } label: {
-            Image(systemName: "shippingbox")
+            MenuBarIconLabel(store: store, mcp: mcp, compact: compactMenuBarIcon)
         }
+        .menuBarExtraStyle(.window)
     }
 
     private func performSystemPrune() async {

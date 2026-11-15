@@ -1,6 +1,22 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "%@ active · %@ stopped": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ active · %@ stopped"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ ativos · %@ parados"
+          }
+        }
+      }
+    },
     "%@ awaiting approval": {
       "extractionState": "manual",
       "localizations": {
@@ -243,6 +259,22 @@
         }
       }
     },
+    "%@ stopped containers": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ stopped containers"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ containers parados"
+          }
+        }
+      }
+    },
     "%@ volume": {
       "localizations": {
         "en": {
@@ -308,6 +340,22 @@
         }
       }
     },
+    ":%@ · %@ client(s)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": ":%@ · %@ client(s)"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": ":%@ · %@ cliente(s)"
+          }
+        }
+      }
+    },
     "AI activity": {
       "localizations": {
         "en": {
@@ -320,6 +368,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Atividade da IA"
+          }
+        }
+      }
+    },
+    "AI approval pending": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI approval pending"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aprovação da IA pendente"
           }
         }
       }
@@ -896,6 +960,22 @@
         }
       }
     },
+    "Compact menu bar icon (icon only)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compact menu bar icon (icon only)"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ícone compacto na barra de menu (apenas ícone)"
+          }
+        }
+      }
+    },
     "Compose": {
       "localizations": {
         "en": {
@@ -957,6 +1037,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Compose · %@ de %@ rodando"
+          }
+        }
+      }
+    },
+    "Confirm": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Confirm"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Confirmar"
           }
         }
       }
@@ -1101,6 +1197,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Copiar ID da rede"
+          }
+        }
+      }
+    },
+    "Copy config": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy config"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copiar config"
           }
         }
       }
@@ -1559,6 +1671,22 @@
         }
       }
     },
+    "Host resources": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Host resources"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recursos do host"
+          }
+        }
+      }
+    },
     "Image ID": {
       "localizations": {
         "en": {
@@ -1913,70 +2041,6 @@
         }
       }
     },
-    "MCP: error": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "MCP: error"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "MCP: erro"
-          }
-        }
-      }
-    },
-    "MCP: running": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "MCP: running"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "MCP: ativo"
-          }
-        }
-      }
-    },
-    "MCP: starting": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "MCP: starting"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "MCP: iniciando"
-          }
-        }
-      }
-    },
-    "MCP: stopped": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "MCP: stopped"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "MCP: parado"
-          }
-        }
-      }
-    },
     "Mask environment variables": {
       "extractionState": "manual",
       "localizations": {
@@ -2253,6 +2317,22 @@
         }
       }
     },
+    "No containers running": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No containers running"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nenhum container em execução"
+          }
+        }
+      }
+    },
     "No environment variables": {
       "localizations": {
         "en": {
@@ -2301,6 +2381,38 @@
         }
       }
     },
+    "No matching containers": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No matching containers"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nenhum container encontrado"
+          }
+        }
+      }
+    },
+    "No stopped containers": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No stopped containers"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nenhum container parado"
+          }
+        }
+      }
+    },
     "OK": {
       "localizations": {
         "en": {
@@ -2313,6 +2425,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "OK"
+          }
+        }
+      }
+    },
+    "Open": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abrir"
           }
         }
       }
@@ -2685,6 +2813,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ler logs"
+          }
+        }
+      }
+    },
+    "Recent AI activity": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recent AI activity"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atividade recente da IA"
           }
         }
       }
@@ -3187,6 +3331,22 @@
         }
       }
     },
+    "Search containers or stacks...": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search containers or stacks..."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buscar containers ou stacks..."
+          }
+        }
+      }
+    },
     "Search images": {
       "localizations": {
         "en": {
@@ -3343,6 +3503,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sessão encerrada (código %@)"
+          }
+        }
+      }
+    },
+    "Settings": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Settings"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajustes"
           }
         }
       }
