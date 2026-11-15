@@ -44,9 +44,31 @@ struct VolumeWebDAVServiceTests {
         #expect(args == [
             "-S",
             "-v", "pgdata",
+            "http://GDocker.local:49152/",
+            "/tmp/mnt/pgdata",
+        ])
+
+        let fallbackArgs = VolumeWebDAVService.mountWebDAVArguments(
+            volumeName: "pgdata",
+            port: 49152,
+            mountPoint: "/tmp/mnt/pgdata",
+            host: VolumeWebDAVService.fallbackHost
+        )
+        #expect(fallbackArgs == [
+            "-S",
+            "-v", "pgdata",
             "http://127.0.0.1:49152/",
             "/tmp/mnt/pgdata",
         ])
+    }
+
+    @Test func resolveMountHostRegistersLocalHostnameOrFallsBackToLoopback() {
+        let service = VolumeWebDAVService()
+        let host = service.resolveMountHost()
+        #expect(host == VolumeWebDAVService.localHostname || host == VolumeWebDAVService.fallbackHost)
+        #expect(VolumeWebDAVService.resolvesToLoopback(host))
+        #expect(VolumeWebDAVService.resolvesToLoopback("127.0.0.1"))
+        #expect(!VolumeWebDAVService.resolvesToLoopback("nonexistent-gdocker-test.invalid"))
     }
 
     @Test func findFreePortReturnsValidEphemeralPort() throws {

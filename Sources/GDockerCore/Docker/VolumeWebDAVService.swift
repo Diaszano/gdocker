@@ -1,3 +1,4 @@
+import dnssd
 import Foundation
 
 public struct VolumeMountInfo: Sendable, Equatable {
@@ -41,9 +42,12 @@ public enum VolumeWebDAVError: LocalizedError, Equatable {
 public final class VolumeWebDAVService: @unchecked Sendable {
     public static let shared = VolumeWebDAVService()
     public static let webdavImage = "rclone/rclone:latest"
+    public static let localHostname = "GDocker.local"
+    public static let fallbackHost = "127.0.0.1"
 
     private let lock = NSLock()
     private var activeMounts: [String: VolumeMountInfo] = [:]
+    private var dnsConnection: DNSServiceRef?
     private let baseMountsDirectory: URL
 
     public init(baseMountsDirectory: URL? = nil) {
@@ -54,6 +58,10 @@ public final class VolumeWebDAVService: @unchecked Sendable {
                 ?? URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
             self.baseMountsDirectory = caches.appendingPathComponent("com.gdocker.volume-mounts", isDirectory: true)
         }
+    }
+
+    deinit {
+        releaseLocalHostname()
     }
 
     // MARK: - Pure Helpers
@@ -85,13 +93,44 @@ public final class VolumeWebDAVService: @unchecked Sendable {
         ]
     }
 
-    public static func mountWebDAVArguments(volumeName: String, port: UInt16, mountPoint: String) -> [String] {
+    public static func mountWebDAVArguments(
+        volumeName: String,
+        port: UInt16,
+        mountPoint: String,
+        host: String = localHostname
+    ) -> [String] {
         [
             "-S",
             "-v", volumeName,
-            "http://127.0.0.1:\(port)/",
+            "http://\(host):\(port)/",
             mountPoint,
         ]
+    }
+
+    /// Returns true if `host` currently resolves to IPv4 loopback (`127.0.0.1`).
+    public static func resolvesToLoopback(_ host: String) -> Bool {
+        var hints = addrinfo()
+        hints.ai_family = AF_INET
+        hints.ai_socktype = SOCK_STREAM
+
+        var result: UnsafeMutablePointer<addrinfo>?
+        guard getaddrinfo(host, nil, &hints, &result) == 0, let head = result else {
+            return false
+        }
+        defer { freeaddrinfo(head) }
+
+        let loopback = inet_addr("127.0.0.1")
+        var current: UnsafeMutablePointer<addrinfo>? = head
+        while let entry = current {
+            if let addr = entry.pointee.ai_addr, entry.pointee.ai_family == AF_INET {
+                let sin = addr.withMemoryRebound(to: sockaddr_in.self, capacity: 1) { $0.pointee }
+                if sin.sin_addr.s_addr == loopback {
+                    return true
+                }
+            }
+            current = entry.pointee.ai_next
+        }
+        return false
     }
 
     /// Returns true when `url` is a mounted filesystem (different device ID than its parent directory).
@@ -207,8 +246,23 @@ public final class VolumeWebDAVService: @unchecked Sendable {
 
         do {
             try await waitForWebDAVServer(port: port, containerName: containerName, dockerPath: dockerPath, environment: dockerEnv)
-            let mountArgs = Self.mountWebDAVArguments(volumeName: volumeName, port: port, mountPoint: mountPoint.path)
-            let mountResult = try await runProcess(executable: "/sbin/mount_webdav", arguments: mountArgs, environment: ProcessInfo.processInfo.environment)
+            let mountHost = resolveMountHost()
+            var mountArgs = Self.mountWebDAVArguments(
+                volumeName: volumeName,
+                port: port,
+                mountPoint: mountPoint.path,
+                host: mountHost
+            )
+            var mountResult = try await runProcess(executable: "/sbin/mount_webdav", arguments: mountArgs, environment: ProcessInfo.processInfo.environment)
+            if mountResult.exitCode != 0, mountHost != Self.fallbackHost {
+                mountArgs = Self.mountWebDAVArguments(
+                    volumeName: volumeName,
+                    port: port,
+                    mountPoint: mountPoint.path,
+                    host: Self.fallbackHost
+                )
+                mountResult = try await runProcess(executable: "/sbin/mount_webdav", arguments: mountArgs, environment: ProcessInfo.processInfo.environment)
+            }
             guard mountResult.exitCode == 0 else {
                 let detail = mountResult.stderr.isEmpty ? mountResult.stdout : mountResult.stderr
                 throw VolumeWebDAVError.mountFailed(detail.trimmingCharacters(in: .whitespacesAndNewlines))
@@ -325,6 +379,98 @@ public final class VolumeWebDAVService: @unchecked Sendable {
         }
         if let dockerPath {
             _ = runProcessSync(executable: dockerPath, arguments: ["rm", "-f", containerName], environment: dockerEnv)
+        }
+        releaseLocalHostnameIfIdle()
+    }
+
+    // MARK: - Local mDNS Hostname
+
+    /// Registers `GDocker.local -> 127.0.0.1` on the local-only mDNS interface so Finder displays
+    /// `GDocker.local` instead of `127.0.0.1`. Falls back to `127.0.0.1` if mDNS is unavailable.
+    public func resolveMountHost() -> String {
+        if ensureLocalHostnameRegistered(), Self.resolvesToLoopback(Self.localHostname) {
+            return Self.localHostname
+        }
+        releaseLocalHostnameIfIdle()
+        return Self.fallbackHost
+    }
+
+    private func ensureLocalHostnameRegistered() -> Bool {
+        lock.lock()
+        if dnsConnection != nil {
+            lock.unlock()
+            if Self.resolvesToLoopback(Self.localHostname) {
+                return true
+            }
+            lock.lock()
+            if let existing = dnsConnection {
+                DNSServiceRefDeallocate(existing)
+                dnsConnection = nil
+            }
+        }
+
+        var conn: DNSServiceRef?
+        guard DNSServiceCreateConnection(&conn) == kDNSServiceErr_NoError, let conn else {
+            lock.unlock()
+            return false
+        }
+
+        var record: DNSRecordRef?
+        var ip: UInt32 = inet_addr("127.0.0.1")
+        let err = DNSServiceRegisterRecord(
+            conn,
+            &record,
+            DNSServiceFlags(kDNSServiceFlagsShared),
+            kDNSServiceInterfaceIndexLocalOnly,
+            Self.localHostname,
+            UInt16(kDNSServiceType_A),
+            UInt16(kDNSServiceClass_IN),
+            UInt16(MemoryLayout<UInt32>.size),
+            &ip,
+            0,
+            { _, _, _, _, _ in },
+            nil
+        )
+
+        guard err == kDNSServiceErr_NoError else {
+            DNSServiceRefDeallocate(conn)
+            lock.unlock()
+            return false
+        }
+
+        let fd = DNSServiceRefSockFD(conn)
+        if fd >= 0 {
+            var pfd = pollfd(fd: fd, events: Int16(POLLIN), revents: 0)
+            if poll(&pfd, 1, 150) > 0, (pfd.revents & Int16(POLLIN)) != 0 {
+                DNSServiceProcessResult(conn)
+            }
+        }
+
+        dnsConnection = conn
+        lock.unlock()
+        return true
+    }
+
+    private func releaseLocalHostnameIfIdle() {
+        lock.lock()
+        let shouldRelease = activeMounts.isEmpty
+        let conn = shouldRelease ? dnsConnection : nil
+        if shouldRelease {
+            dnsConnection = nil
+        }
+        lock.unlock()
+        if let conn {
+            DNSServiceRefDeallocate(conn)
+        }
+    }
+
+    private func releaseLocalHostname() {
+        lock.lock()
+        let conn = dnsConnection
+        dnsConnection = nil
+        lock.unlock()
+        if let conn {
+            DNSServiceRefDeallocate(conn)
         }
     }
 
