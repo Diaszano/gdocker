@@ -8,7 +8,7 @@ public actor DockerClient {
 
     private let http: HTTPClient
     private let baseURL: String
-    private let socketPath: String
+    nonisolated public let socketPath: String
 
     public init(socketPath: String) {
         self.socketPath = socketPath

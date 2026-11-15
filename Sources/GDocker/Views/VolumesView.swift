@@ -28,7 +28,7 @@ struct VolumesView: View {
     @State private var driverWidth: CGFloat = 88
     @State private var scopeWidth: CGFloat = 84
     @State private var createdWidth: CGFloat = 136
-    private let actionsWidth: CGFloat = 64
+    private let actionsWidth: CGFloat = 98
 
     private var selectAllState: TableCheckState {
         let visible = store.filteredVolumes.map(\.name)
@@ -200,6 +200,8 @@ struct VolumesView: View {
                                         volume: volume,
                                         isSelected: store.selectedID == volume.name,
                                         isChecked: store.selectedIDs.contains(volume.name),
+                                        isMounted: store.mountedVolumes.contains(volume.name),
+                                        isMounting: store.mountingVolumes.contains(volume.name),
                                         nameMinWidth: nameMinWidth,
                                         driverWidth: driverWidth,
                                         scopeWidth: scopeWidth,
@@ -207,6 +209,8 @@ struct VolumesView: View {
                                         actionsWidth: actionsWidth,
                                         onSelect: { store.selectedID = volume.name },
                                         onToggleCheck: { toggleCheck(volume.name) },
+                                        onOpenInFinder: { Task { await store.openInFinder(name: volume.name) } },
+                                        onUnmount: { Task { await store.unmount(name: volume.name) } },
                                         onRemove: { confirmRemoveTarget = volume },
                                         onForceRemove: { Task { await store.remove(name: volume.name, force: true) } }
                                     )
@@ -292,6 +296,8 @@ private struct VolumeRow: View {
     let volume: VolumeSummary
     let isSelected: Bool
     let isChecked: Bool
+    let isMounted: Bool
+    let isMounting: Bool
     let nameMinWidth: CGFloat
     let driverWidth: CGFloat
     let scopeWidth: CGFloat
@@ -299,6 +305,8 @@ private struct VolumeRow: View {
     let actionsWidth: CGFloat
     let onSelect: () -> Void
     let onToggleCheck: () -> Void
+    let onOpenInFinder: () -> Void
+    let onUnmount: () -> Void
     let onRemove: () -> Void
     let onForceRemove: () -> Void
 
@@ -321,10 +329,20 @@ private struct VolumeRow: View {
                     .foregroundStyle(Color.ctp.text)
                     .lineLimit(1)
                     .truncationMode(.middle)
-                Text(verbatim: isAnonymous ? String(localized: "Anonymous volume", bundle: .l10n) : String(localized: "Named volume", bundle: .l10n))
-                    .font(.system(size: 11))
-                    .foregroundStyle(Color.ctp.muted)
-                    .lineLimit(1)
+                HStack(spacing: 6) {
+                    Text(verbatim: isAnonymous ? String(localized: "Anonymous volume", bundle: .l10n) : String(localized: "Named volume", bundle: .l10n))
+                        .font(.system(size: 11))
+                        .foregroundStyle(Color.ctp.muted)
+                        .lineLimit(1)
+                    if isMounted {
+                        Text("Mounted in Finder", bundle: .l10n)
+                            .font(.system(size: 10, weight: .medium))
+                            .foregroundStyle(Color.ctp.ok)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 1)
+                            .background(Capsule().fill(Color.ctp.ok.opacity(0.14)))
+                    }
+                }
             }
             .frame(minWidth: nameMinWidth, maxWidth: .infinity, alignment: .leading)
 
@@ -355,8 +373,30 @@ private struct VolumeRow: View {
             Spacer().frame(width: 10)
 
             HStack(spacing: 6) {
+                if isMounting {
+                    ProgressView()
+                        .controlSize(.small)
+                        .frame(width: 28, height: 28)
+                        .help(Text("Mounting volume...", bundle: .l10n))
+                } else {
+                    IconActionButton(
+                        systemImage: isMounted ? "folder.fill" : "folder",
+                        tint: isMounted ? Color.ctp.ok : Color.ctp.accent,
+                        help: LocalizedStringKey(String(localized: "Open in Finder", bundle: .l10n)),
+                        action: onOpenInFinder
+                    )
+                }
                 IconActionButton(systemImage: "trash", tint: Color.ctp.err, help: "Remove", action: onRemove)
                 SectionMenuButton {
+                    Button(action: onOpenInFinder) {
+                        Label { Text("Open in Finder", bundle: .l10n) } icon: { Image(systemName: "folder") }
+                    }
+                    .disabled(isMounting)
+                    if isMounted {
+                        Button(action: onUnmount) {
+                            Label { Text("Unmount from Finder", bundle: .l10n) } icon: { Image(systemName: "eject") }
+                        }
+                    }
                     Button { copyToPasteboard(volume.name) } label: {
                         Label { Text("Copy Name", bundle: .l10n) } icon: { Image(systemName: "doc.on.doc") }
                     }

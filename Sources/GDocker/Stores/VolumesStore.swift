@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 import GDockerCore
 import Observation
@@ -14,11 +15,22 @@ final class VolumesStore {
     var searchText = ""
     var filter: VolumeFilter = .all
     var lastError: String?
+    private(set) var mountedVolumes: Set<String> = []
+    private(set) var mountingVolumes: Set<String> = []
 
     private let clientProvider: @MainActor () -> (any DockerOperations)?
+    private let webdavService: VolumeWebDAVService
 
-    init(clientProvider: @MainActor @escaping () -> (any DockerOperations)? = { nil }) {
+    init(
+        clientProvider: @MainActor @escaping () -> (any DockerOperations)? = { nil },
+        webdavService: VolumeWebDAVService = .shared
+    ) {
         self.clientProvider = clientProvider
+        self.webdavService = webdavService
+    }
+
+    private var activeSocketPath: String? {
+        (clientProvider() as? DockerClient)?.socketPath ?? DockerSocket.discover()
     }
 
     convenience init(client: @MainActor @escaping () -> DockerClient?) {
@@ -62,6 +74,7 @@ final class VolumesStore {
         }
         do {
             all = try await client.listVolumes()
+            mountedVolumes = webdavService.mountedVolumeNames()
             selectedIDs.formIntersection(Set(all.map(\.name)))
             if let selectedID, !all.contains(where: { $0.name == selectedID }) {
                 self.selectedID = nil
@@ -72,6 +85,27 @@ final class VolumesStore {
             selectedID = nil
             selectedIDs.removeAll()
         }
+    }
+
+    func openInFinder(name: String) async {
+        guard !mountingVolumes.contains(name) else { return }
+        mountingVolumes.insert(name)
+        defer { mountingVolumes.remove(name) }
+
+        do {
+            let info = try await webdavService.mount(volumeName: name, socketPath: activeSocketPath)
+            mountedVolumes = webdavService.mountedVolumeNames()
+            lastError = nil
+            NSWorkspace.shared.open(info.mountPoint)
+        } catch {
+            lastError = error.localizedDescription
+            mountedVolumes = webdavService.mountedVolumeNames()
+        }
+    }
+
+    func unmount(name: String) async {
+        await webdavService.unmount(volumeName: name, socketPath: activeSocketPath)
+        mountedVolumes = webdavService.mountedVolumeNames()
     }
 
     func remove(name: String, force: Bool = false) async {
@@ -85,13 +119,18 @@ final class VolumesStore {
             return
         }
         var errors: [String] = []
+        let socketPath = activeSocketPath
         for name in names {
+            if mountedVolumes.contains(name) {
+                await webdavService.unmount(volumeName: name, socketPath: socketPath)
+            }
             do {
                 try await client.removeVolume(name, force: force)
             } catch {
                 errors.append(error.localizedDescription)
             }
         }
+        mountedVolumes = webdavService.mountedVolumeNames()
         selectedIDs.subtract(names)
         lastError = errors.isEmpty ? nil : errors.joined(separator: "\n")
         await refresh()

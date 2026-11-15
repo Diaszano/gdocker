@@ -1,4 +1,5 @@
 import AppKit
+import GDockerCore
 
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
@@ -14,6 +15,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
         !UserDefaults.standard.bool(forKey: SettingsKey.keepInMenuBar)
+    }
+
+    func applicationWillTerminate(_ notification: Notification) {
+        VolumeWebDAVService.shared.unmountAllSync(socketPath: DockerSocket.discover())
     }
 
     private static func hideDockIconIfNoWindows() {
