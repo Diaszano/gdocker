@@ -1,0 +1,109 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version without leading v (e.g. 0.2.0)"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build, Release & Publish Homebrew Cask
+    runs-on: macos-15
+    env:
+      HOMEBREW_TAP_GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Require Homebrew tap credentials
+        run: |
+          if [ -z "$HOMEBREW_TAP_GITHUB_TOKEN" ]; then
+            echo "::error::HOMEBREW_TAP_GITHUB_TOKEN is required to publish Casks/gdocker.rb to Diaszano/homebrew-tap"
+            exit 1
+          fi
+
+      - name: Resolve version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            RAW="${{ inputs.version }}"
+          else
+            RAW="${GITHUB_REF_NAME}"
+          fi
+          VERSION="${RAW#v}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Ensure SwiftLint is installed
+        run: |
+          if ! command -v swiftlint >/dev/null 2>&1; then
+            brew install swiftlint
+          fi
+
+      - name: Verify before release
+        run: make verify
+
+      - name: Build universal app bundle & archive
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          /usr/libexec/PlistBuddy \
+            -c "Set :CFBundleShortVersionString $VERSION" \
+            -c "Set :CFBundleVersion $VERSION" \
+            scripts/Info.plist
+          make app SWIFT_FLAGS="--arch arm64 --arch x86_64"
+          ZIP="build/GDocker-$VERSION.zip"
+          rm -f "$ZIP"
+          ditto -c -k --keepParent build/GDocker.app "$ZIP"
+          SHA="$(shasum -a 256 "$ZIP" | cut -d' ' -f1)"
+          printf '%s  %s\n' "$SHA" "GDocker-$VERSION.zip" > build/SHA256SUMS
+          echo "sha256=$SHA" >> "$GITHUB_OUTPUT"
+          echo "zip=$ZIP" >> "$GITHUB_OUTPUT"
+        id: build
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ steps.version.outputs.tag }}"
+          ZIP="${{ steps.build.outputs.zip }}"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$ZIP" build/SHA256SUMS --clobber
+          else
+            gh release create "$TAG" "$ZIP" build/SHA256SUMS \
+              --title "$TAG" \
+              --generate-notes
+          fi
+
+      - name: Checkout Diaszano/homebrew-tap
+        uses: actions/checkout@v4
+        with:
+          repository: Diaszano/homebrew-tap
+          token: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
+          path: homebrew-tap
+
+      - name: Update Casks/gdocker.rb in homebrew-tap
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          SHA="${{ steps.build.outputs.sha256 }}"
+          ./scripts/generate-cask.sh "$VERSION" "$SHA" homebrew-tap/Casks/gdocker.rb
+          ruby -c homebrew-tap/Casks/gdocker.rb
+          cd homebrew-tap
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Casks/gdocker.rb
+          if git diff --cached --quiet; then
+            echo "Casks/gdocker.rb is already up to date."
+          else
+            git commit -m "chore(cask): update gdocker to v$VERSION"
+            git push origin HEAD:main
+          fi

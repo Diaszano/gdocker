@@ -1,0 +1,72 @@
+name: Bug Report
+description: Report a crash, incorrect behavior, or UI/MCP issue in GDocker
+title: "fix: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug! Please check [SECURITY.md](../../blob/main/SECURITY.md) before posting if this involves a security vulnerability.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Clear and concise summary of the bug.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: Minimal steps to reproduce the issue.
+      placeholder: |
+        1. Open GDocker
+        2. Go to ...
+        3. Click ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected vs Actual Behavior
+      description: What did you expect to happen, and what actually happened?
+    validations:
+      required: true
+
+  - type: input
+    id: gdocker_version
+    attributes:
+      label: GDocker Version
+      placeholder: "e.g. 0.1.0 or commit SHA"
+    validations:
+      required: true
+
+  - type: input
+    id: macos_version
+    attributes:
+      label: macOS Version & Architecture
+      placeholder: "e.g. macOS 15.2 (Apple Silicon / arm64)"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: runtime
+    attributes:
+      label: Docker Runtime
+      options:
+        - Docker Desktop
+        - OrbStack
+        - Colima
+        - Rancher Desktop
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or Screenshots
+      description: Attach relevant logs or screenshots (please redact any tokens or secrets).

@@ -2,13 +2,51 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: ["**"]
   pull_request:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  test:
+  verify:
+    name: Verify & Build
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
-      - run: swift test
-      - run: python3 -I scripts/check_l10n.py .
+
+      - name: Cache SwiftPM dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            .build
+            ~/Library/Caches/org.swift.swiftpm
+          key: ${{ runner.os }}-spm-${{ hashFiles('Package.resolved') }}
+          restore-keys: |
+            ${{ runner.os }}-spm-
+
+      - name: Ensure SwiftLint is installed
+        run: |
+          if ! command -v swiftlint >/dev/null 2>&1; then
+            brew install swiftlint
+          fi
+          swiftlint version
+
+      - name: Check formatting
+        run: make fmt-check
+
+      - name: Run SwiftLint
+        run: make lint
+
+      - name: Check localizations
+        run: make l10n-check
+
+      - name: Run test suite
+        run: make test
+
+      - name: Build app bundle
+        run: make app
