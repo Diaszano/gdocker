@@ -1,8 +1,19 @@
+# macOS
+.DS_Store
+
+# Swift / Xcode
+.build/
+.swiftpm/
+build/
+*.app
+*.xcodeproj
+xcuserdata/
+DerivedData/
+
+# Tooling & AI workspaces
 .worktrees/
 .worktree/
 .superpowers/
 .claude/
-.build/
-build/
-*.app
 .serena/
+.code-review-graph/
