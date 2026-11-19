@@ -16,7 +16,7 @@ enum TableCheckState {
 /// Rounded 15×15 checkbox matching Penpot `01e` and `05–07`.
 struct TableCheckbox: View {
     let state: TableCheckState
-    var help: LocalizedStringKey? = nil
+    var help: LocalizedStringKey?
     let action: () -> Void
 
     var body: some View {
@@ -193,7 +193,7 @@ struct ResourceRowIcon: View {
 
 /// 28×28 bordered `⋯` dropdown menu button matching `IconActionButton`.
 struct SectionMenuButton<MenuContent: View>: View {
-    var help: LocalizedStringKey? = nil
+    var help: LocalizedStringKey?
     @ViewBuilder let menuContent: () -> MenuContent
 
     @State private var hovered = false

@@ -32,9 +32,11 @@ public actor ActivityLog {
         stored = Array(entries.suffix(limit))
     }
 
-    public func record(client: String, tool: String, arguments: String, outcome: ActivityEntry.Outcome, detail: String?) {
+    public func record(client: String, tool: String, arguments: String, outcome: ActivityEntry.Outcome, detail: String?)
+    {
         let entry = ActivityEntry(
-            id: UUID(), date: Date(), client: client, tool: tool, arguments: arguments, outcome: outcome, detail: detail)
+            id: UUID(), date: Date(), client: client, tool: tool, arguments: arguments, outcome: outcome, detail: detail
+        )
         stored.append(entry)
         if stored.count > limit { stored.removeFirst(stored.count - limit) }
         persist(appending: entry)
@@ -77,7 +79,10 @@ public actor ActivityLog {
     private func rewrite() {
         var data = Data()
         for entry in stored {
-            if let line = try? Self.encoder.encode(entry) { data.append(line); data.append(0x0A) }
+            if let line = try? Self.encoder.encode(entry) {
+                data.append(line)
+                data.append(0x0A)
+            }
         }
         try? data.write(to: fileURL, options: .atomic)
         linesOnDisk = stored.count

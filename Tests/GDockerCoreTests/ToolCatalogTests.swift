@@ -1,4 +1,5 @@
 import Testing
+
 @testable import GDockerCore
 
 @Test(arguments: [
@@ -40,8 +41,10 @@ func catalogHasSpecDefaults(name: String, group: ToolGroup, permission: Permissi
 }
 
 @Test func containerToolsRequireAContainerArgument() throws {
-    for name in ["inspect_container", "get_logs", "get_stats", "get_container_env", "start_container",
-                 "restart_container", "stop_container", "exec_in_container", "remove_container"] {
+    for name in [
+        "inspect_container", "get_logs", "get_stats", "get_container_env", "start_container",
+        "restart_container", "stop_container", "exec_in_container", "remove_container",
+    ] {
         let spec = try #require(ToolCatalog.spec(named: name))
         let container = try #require(spec.parameters.first { $0.name == "container" })
         #expect(container.required && container.kind == .string)

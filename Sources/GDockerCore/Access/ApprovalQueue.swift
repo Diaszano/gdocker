@@ -4,7 +4,10 @@ public struct ApprovalArgument: Sendable, Equatable {
     public let name: String
     public let value: String
 
-    public init(name: String, value: String) { self.name = name; self.value = value }
+    public init(name: String, value: String) {
+        self.name = name
+        self.value = value
+    }
 }
 
 public struct ApprovalRequest: Sendable, Identifiable, Equatable {
@@ -17,8 +20,11 @@ public struct ApprovalRequest: Sendable, Identifiable, Equatable {
 
     public init(client: String, tool: String, arguments: [ApprovalArgument], reason: String?, allowsAlways: Bool) {
         self.id = UUID()
-        self.client = client; self.tool = tool; self.arguments = arguments
-        self.reason = reason; self.allowsAlways = allowsAlways
+        self.client = client
+        self.tool = tool
+        self.arguments = arguments
+        self.reason = reason
+        self.allowsAlways = allowsAlways
     }
 }
 

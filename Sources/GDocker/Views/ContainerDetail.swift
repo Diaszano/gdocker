@@ -4,7 +4,7 @@ import SwiftUI
 struct ContainerDetail: View {
     let container: ContainerSummary
     @Binding var selectedTab: Tab
-    var onClose: (() -> Void)? = nil
+    var onClose: (() -> Void)?
 
     @Environment(ContainersStore.self) private var store
     @State private var logs = LogsModel()
@@ -60,7 +60,9 @@ struct ContainerDetail: View {
         ) {
             Button(role: .destructive) {
                 Task { await store.perform(.remove, on: container.id) }
-            } label: { Text("Remove", bundle: .l10n) }
+            } label: {
+                Text("Remove", bundle: .l10n)
+            }
         } message: {
             Text("The container will be deleted permanently.", bundle: .l10n)
         }
@@ -76,7 +78,8 @@ struct ContainerDetail: View {
                     .lineLimit(1)
                 Spacer()
                 if let onClose {
-                    IconActionButton(systemImage: "sidebar.right", tint: Color.ctp.muted, help: "Hide inspector", action: onClose)
+                    IconActionButton(
+                        systemImage: "sidebar.right", tint: Color.ctp.muted, help: "Hide inspector", action: onClose)
                 }
             }
 
@@ -119,9 +122,11 @@ struct ContainerDetail: View {
 
     private var subtitle: String {
         // IPv4 and IPv6 bindings of the same port show up twice; list each mapping once.
-        let ports = Set(container.ports.compactMap { port in
-            port.publicPort.map { ":\($0)→\(port.privatePort)" }
-        }).sorted()
+        let ports = Set(
+            container.ports.compactMap { port in
+                port.publicPort.map { ":\($0)→\(port.privatePort)" }
+            }
+        ).sorted()
         return ([container.image] + ports).joined(separator: " · ")
     }
 

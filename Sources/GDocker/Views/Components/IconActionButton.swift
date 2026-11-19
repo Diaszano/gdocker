@@ -5,7 +5,7 @@ struct IconActionButton: View {
     let systemImage: String
     var tint: Color = Color.ctp.text
     var size: CGFloat = 28
-    var help: LocalizedStringKey? = nil
+    var help: LocalizedStringKey?
     let action: () -> Void
 
     @State private var hovered = false

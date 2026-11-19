@@ -14,8 +14,9 @@ public enum McpEndpoint {
 
     public static func read(from file: URL = fileURL()) -> URL? {
         guard let data = try? Data(contentsOf: file),
-              let object = try? JSONDecoder().decode([String: String].self, from: data),
-              let text = object["url"] else { return nil }
+            let object = try? JSONDecoder().decode([String: String].self, from: data),
+            let text = object["url"]
+        else { return nil }
         return URL(string: text)
     }
 

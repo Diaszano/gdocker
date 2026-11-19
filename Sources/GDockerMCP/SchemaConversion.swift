@@ -13,7 +13,8 @@ enum SchemaConversion {
         }
         properties["reason"] = .object([
             "type": .string("string"),
-            "description": .string("Optional: why you are calling this tool. Shown to the user when approval is needed."),
+            "description": .string(
+                "Optional: why you are calling this tool. Shown to the user when approval is needed."),
         ])
         return .object(["type": .string("object"), "properties": .object(properties), "required": .array(required)])
     }

@@ -11,8 +11,8 @@ public struct StatsSample: Sendable, Equatable {
     public static func from(json: Data) throws -> StatsSample? {
         let raw = try JSONDecoder().decode(Raw.self, from: json)
         guard let system = raw.cpu_stats.system_cpu_usage,
-              let previousSystem = raw.precpu_stats.system_cpu_usage,
-              system > previousSystem
+            let previousSystem = raw.precpu_stats.system_cpu_usage,
+            system > previousSystem
         else { return nil }
         let cpuDelta = max(0, Double(raw.cpu_stats.total) - Double(raw.precpu_stats.total))
         let systemDelta = Double(system - previousSystem)
@@ -30,6 +30,7 @@ public struct StatsSample: Sendable, Equatable {
         )
     }
 
+    // swiftlint:disable identifier_name
     private struct Raw: Decodable {
         struct CPU: Decodable {
             struct Usage: Decodable { let total_usage: UInt64 }
@@ -47,11 +48,15 @@ public struct StatsSample: Sendable, Equatable {
             let limit: UInt64?
             let stats: Detail?
         }
-        struct Network: Decodable { let rx_bytes: UInt64; let tx_bytes: UInt64 }
+        struct Network: Decodable {
+            let rx_bytes: UInt64
+            let tx_bytes: UInt64
+        }
 
         let cpu_stats: CPU
         let precpu_stats: CPU
         let memory_stats: Memory
         let networks: [String: Network]?
     }
+    // swiftlint:enable identifier_name
 }

@@ -20,7 +20,10 @@ public enum DockerError: Error, Equatable, LocalizedError {
 
     private static func message(in body: Data) -> String {
         if let json = try? JSONSerialization.jsonObject(with: body) as? [String: Any],
-           let message = json["message"] as? String { return message }
+            let message = json["message"] as? String
+        {
+            return message
+        }
         return String(decoding: body, as: UTF8.self)
     }
 

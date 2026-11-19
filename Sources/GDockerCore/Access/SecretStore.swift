@@ -16,13 +16,17 @@ public struct KeychainSecretStore: SecretStore {
     /// `GDOCKER_KEYCHAIN_SERVICE` exists for verification only. Every ad-hoc signed build has a new identity, and
     /// the keychain asks for authorization when a build reads an item another build created; a fresh service name
     /// per verification run means no old item is ever touched.
-    public init(service: String = ProcessInfo.processInfo.environment["GDOCKER_KEYCHAIN_SERVICE"] ?? "com.diaszano.gdocker") {
+    public init(
+        service: String = ProcessInfo.processInfo.environment["GDOCKER_KEYCHAIN_SERVICE"] ?? "com.diaszano.gdocker"
+    ) {
         self.service = service
     }
 
     private func query(_ account: String) -> [String: Any] {
-        [kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: service,
-         kSecAttrAccount as String: account]
+        [
+            kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: service,
+            kSecAttrAccount as String: account,
+        ]
     }
 
     public func read(account: String) throws -> String? {

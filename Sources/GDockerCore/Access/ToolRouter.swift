@@ -4,7 +4,10 @@ public struct ToolOutput: Sendable, Equatable {
     public let text: String
     public let isError: Bool
 
-    public init(text: String, isError: Bool) { self.text = text; self.isError = isError }
+    public init(text: String, isError: Bool) {
+        self.text = text
+        self.isError = isError
+    }
 }
 
 /// Runs one MCP tool call: validates the arguments, applies the Allow/Ask/Deny rule (asking the user when needed),
@@ -126,7 +129,9 @@ public actor ToolRouter {
                     shown.append(ApprovalArgument(name: parameter.name, value: ToolArguments.displayCommand(argv)))
                 }
             case .string:
-                if let text = args.string(parameter.name) { shown.append(ApprovalArgument(name: parameter.name, value: text)) }
+                if let text = args.string(parameter.name) {
+                    shown.append(ApprovalArgument(name: parameter.name, value: text))
+                }
             case .integer:
                 if let number = args.int(parameter.name) {
                     shown.append(ApprovalArgument(name: parameter.name, value: String(number)))
@@ -190,13 +195,14 @@ public actor ToolRouter {
             }.joined(separator: "\n")
         case "get_stats":
             let sample = try await docker.statsOnce(try need(target).id)
-            return Self.jsonText([
-                "cpu_percent": (sample.cpuPercent * 100).rounded() / 100,
-                "memory_used_bytes": Int(clamping: sample.memoryUsed),
-                "memory_limit_bytes": Int(clamping: sample.memoryLimit),
-                "net_rx_bytes": Int(clamping: sample.netRx),
-                "net_tx_bytes": Int(clamping: sample.netTx),
-            ] as [String: Any])
+            return Self.jsonText(
+                [
+                    "cpu_percent": (sample.cpuPercent * 100).rounded() / 100,
+                    "memory_used_bytes": Int(clamping: sample.memoryUsed),
+                    "memory_limit_bytes": Int(clamping: sample.memoryLimit),
+                    "net_rx_bytes": Int(clamping: sample.netRx),
+                    "net_tx_bytes": Int(clamping: sample.netTx),
+                ] as [String: Any])
         case "get_container_env":
             let env = try await docker.inspect(try need(target).id).details.config.env
             return env.isEmpty ? "(no environment variables)" : env.joined(separator: "\n")
@@ -215,10 +221,11 @@ public actor ToolRouter {
         case "exec_in_container":
             let container = try need(target)
             let result = try await docker.exec(container.id, command: args.strings("command") ?? [])
-            return Self.jsonText([
-                "exit_code": result.exitCode, "stdout": result.stdout, "stderr": result.stderr,
-                "truncated": result.truncated,
-            ] as [String: Any])
+            return Self.jsonText(
+                [
+                    "exit_code": result.exitCode, "stdout": result.stdout, "stderr": result.stderr,
+                    "truncated": result.truncated,
+                ] as [String: Any])
         case "remove_container":
             let container = try need(target)
             try await docker.remove(container.id, force: args.bool("force") ?? false)
@@ -267,7 +274,8 @@ public actor ToolRouter {
             let report = try await docker.systemPrune(all: all, volumes: volumes)
             return Self.jsonText(Self.describe(report))
         case "list_compose_projects", "compose_up", "compose_down":
-            guard let composeFactory = compose, let runner = await composeFactory(), await runner.isComposeAvailable() else {
+            guard let composeFactory = compose, let runner = await composeFactory(), await runner.isComposeAvailable()
+            else {
                 throw ToolFailure("Docker Compose is not available. Ensure Docker Compose is installed.")
             }
             if let registry {
@@ -286,7 +294,8 @@ public actor ToolRouter {
                 }
                 let records = await registry?.records() ?? []
                 guard let record = records.first(where: { $0.name == projectName }) else {
-                    throw ToolFailure("Unknown compose project '\(projectName)'. Run list_compose_projects to see known projects.")
+                    throw ToolFailure(
+                        "Unknown compose project '\(projectName)'. Run list_compose_projects to see known projects.")
                 }
                 let output = try await runner.composeUp(
                     project: record.name,
@@ -302,7 +311,8 @@ public actor ToolRouter {
                 let removeVolumes = args.bool("remove_volumes") ?? false
                 let records = await registry?.records() ?? []
                 guard let record = records.first(where: { $0.name == projectName }) else {
-                    throw ToolFailure("Unknown compose project '\(projectName)'. Run list_compose_projects to see known projects.")
+                    throw ToolFailure(
+                        "Unknown compose project '\(projectName)'. Run list_compose_projects to see known projects.")
                 }
                 let output = try await runner.composeDown(
                     project: record.name,
@@ -340,7 +350,8 @@ public actor ToolRouter {
     private static func describe(_ container: ContainerSummary) -> [String: Any] {
         var ports: [String] = []
         for port in container.ports {
-            let text = port.publicPort.map { "\($0)->\(port.privatePort)/\(port.type)" } ?? "\(port.privatePort)/\(port.type)"
+            let text =
+                port.publicPort.map { "\($0)->\(port.privatePort)/\(port.type)" } ?? "\(port.privatePort)/\(port.type)"
             if !ports.contains(text) { ports.append(text) }
         }
         return [

@@ -1,6 +1,7 @@
 import CryptoKit
 import Foundation
 import Testing
+
 @testable import GDockerCore
 
 private func tempHome() throws -> URL {
@@ -10,7 +11,8 @@ private func tempHome() throws -> URL {
 }
 
 @Test func envUnixWins() throws {
-    let path = DockerSocket.discover(env: ["DOCKER_HOST": "unix:///tmp/x.sock"], home: try tempHome(), exists: { _ in true })
+    let path = DockerSocket.discover(
+        env: ["DOCKER_HOST": "unix:///tmp/x.sock"], home: try tempHome(), exists: { _ in true })
     #expect(path == "/tmp/x.sock")
 }
 

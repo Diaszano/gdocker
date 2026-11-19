@@ -43,7 +43,9 @@ public actor DockerClient {
             let ncpu: Int?
             let memTotal: Int64?
             enum CodingKeys: String, CodingKey {
-                case name = "Name", ncpu = "NCPU", memTotal = "MemTotal"
+                case name = "Name"
+                case ncpu = "NCPU"
+                case memTotal = "MemTotal"
             }
         }
         struct RawDF: Decodable {
@@ -53,16 +55,18 @@ public actor DockerClient {
 
         let infoData = try await send(.GET, "/info")
         let raw = try JSONDecoder().decode(RawInfo.self, from: infoData)
-        let isColima = socketPath.lowercased().contains("colima")
+        let isColima =
+            socketPath.lowercased().contains("colima")
             || (raw.name?.lowercased().contains("colima") ?? false)
 
-        var diskUsed: Int64? = nil
+        var diskUsed: Int64?
         if let dfData = try? await send(.GET, "/system/df"),
-           let df = try? JSONDecoder().decode(RawDF.self, from: dfData) {
+            let df = try? JSONDecoder().decode(RawDF.self, from: dfData)
+        {
             diskUsed = df.layersSize
         }
 
-        var diskTotal: Int64? = nil
+        var diskTotal: Int64?
         if isColima, let colimaDisk = await Self.readColimaDiskBytes() {
             diskTotal = colimaDisk
         }
@@ -83,8 +87,10 @@ public actor DockerClient {
         return await withTaskGroup(of: (Double, Int64)?.self) { group in
             for id in runningIDs {
                 group.addTask {
-                    guard let data = try? await self.send(.GET, "/containers/\(Self.pathSegment(id))/stats?stream=false"),
-                          let sample = try? StatsSample.from(json: data) else {
+                    guard
+                        let data = try? await self.send(.GET, "/containers/\(Self.pathSegment(id))/stats?stream=false"),
+                        let sample = try? StatsSample.from(json: data)
+                    else {
                         return nil
                     }
                     return (sample.cpuPercent, Int64(clamping: sample.memoryUsed))
@@ -138,8 +144,12 @@ public actor DockerClient {
         return (details, String(decoding: pretty, as: UTF8.self))
     }
 
-    public func start(_ id: String) async throws { _ = try await send(.POST, "/containers/\(Self.pathSegment(id))/start") }
-    public func stop(_ id: String) async throws { _ = try await send(.POST, "/containers/\(Self.pathSegment(id))/stop") }
+    public func start(_ id: String) async throws {
+        _ = try await send(.POST, "/containers/\(Self.pathSegment(id))/start")
+    }
+    public func stop(_ id: String) async throws {
+        _ = try await send(.POST, "/containers/\(Self.pathSegment(id))/stop")
+    }
     public func restart(_ id: String) async throws {
         _ = try await send(.POST, "/containers/\(Self.pathSegment(id))/restart")
     }

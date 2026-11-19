@@ -47,9 +47,12 @@ struct MenuBarRuntimeSummaryCard: View {
                     .font(.system(size: 11, weight: .semibold))
                     .foregroundStyle(Color.ctp.muted)
                 Spacer()
-                Text(verbatim: String(localized: "\(String(runningCount)) active · \(String(stoppedCount)) stopped", bundle: .l10n))
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundStyle(Color.ctp.text)
+                Text(
+                    verbatim: String(
+                        localized: "\(String(runningCount)) active · \(String(stoppedCount)) stopped", bundle: .l10n)
+                )
+                .font(.system(size: 11, weight: .medium))
+                .foregroundStyle(Color.ctp.text)
             }
 
             HStack(spacing: 12) {
@@ -166,7 +169,9 @@ struct MenuBarApprovalBanner: View {
                 .background(RoundedRectangle(cornerRadius: 6).fill(Color.ctp.code))
 
             HStack(spacing: 6) {
-                Button { answer(.deny) } label: {
+                Button {
+                    answer(.deny)
+                } label: {
                     Text("Deny", bundle: .l10n)
                         .font(.system(size: 11, weight: .semibold))
                         .foregroundStyle(Color.ctp.err)
@@ -175,13 +180,17 @@ struct MenuBarApprovalBanner: View {
                         .background(
                             RoundedRectangle(cornerRadius: 6)
                                 .fill(Color.ctp.hover)
-                                .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(Color.ctp.err.opacity(0.45), lineWidth: 1))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 6).strokeBorder(
+                                        Color.ctp.err.opacity(0.45), lineWidth: 1))
                         )
                 }
                 .buttonStyle(.plain)
 
                 if request.allowsAlways {
-                    Button { answer(.allowAlways) } label: {
+                    Button {
+                        answer(.allowAlways)
+                    } label: {
                         Text("Allow always", bundle: .l10n)
                             .font(.system(size: 11, weight: .semibold))
                             .foregroundStyle(Color.ctp.accent)
@@ -190,13 +199,17 @@ struct MenuBarApprovalBanner: View {
                             .background(
                                 RoundedRectangle(cornerRadius: 6)
                                     .fill(Color.ctp.accent.opacity(0.16))
-                                    .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(Color.ctp.accent.opacity(0.5), lineWidth: 1))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 6).strokeBorder(
+                                            Color.ctp.accent.opacity(0.5), lineWidth: 1))
                             )
                     }
                     .buttonStyle(.plain)
                 }
 
-                Button { answer(.allowOnce) } label: {
+                Button {
+                    answer(.allowOnce)
+                } label: {
                     Text("Allow once", bundle: .l10n)
                         .font(.system(size: 11, weight: .bold))
                         .foregroundStyle(Color.ctp.code)
@@ -251,7 +264,8 @@ struct MenuBarComposeHeader: View {
                             .padding(.horizontal, 6)
                             .padding(.vertical, 2)
                             .background(
-                                Capsule().fill((runningCount == totalCount ? Color.ctp.ok : Color.ctp.muted).opacity(0.14))
+                                Capsule().fill(
+                                    (runningCount == totalCount ? Color.ctp.ok : Color.ctp.muted).opacity(0.14))
                             )
                     }
                 }
@@ -266,10 +280,13 @@ struct MenuBarComposeHeader: View {
                     IconActionButton(systemImage: "play.fill", tint: Color.ctp.ok, size: 22, help: "Up", action: onUp)
                 }
                 if runningCount > 0, let onRestart {
-                    IconActionButton(systemImage: "arrow.clockwise", tint: Color.ctp.muted, size: 22, help: "Restart", action: onRestart)
+                    IconActionButton(
+                        systemImage: "arrow.clockwise", tint: Color.ctp.muted, size: 22, help: "Restart",
+                        action: onRestart)
                 }
                 if runningCount > 0, let onStop {
-                    IconActionButton(systemImage: "stop.fill", tint: Color.ctp.err, size: 22, help: "Stop", action: onStop)
+                    IconActionButton(
+                        systemImage: "stop.fill", tint: Color.ctp.err, size: 22, help: "Stop", action: onStop)
                 }
             }
         }
@@ -362,7 +379,9 @@ struct MenuBarContainerRow: View {
                     }
                     .buttonStyle(.plain)
 
-                    Button { onAction(.remove) } label: {
+                    Button {
+                        onAction(.remove)
+                    } label: {
                         Text("Remove", bundle: .l10n)
                             .font(.system(size: 10.5, weight: .semibold))
                             .foregroundStyle(Color.ctp.code)
@@ -381,7 +400,9 @@ struct MenuBarContainerRow: View {
                         IconActionButton(systemImage: "terminal", tint: Color.ctp.muted, size: 24, help: "Terminal") {
                             onOpenTab(.terminal)
                         }
-                        IconActionButton(systemImage: "arrow.clockwise", tint: Color.ctp.muted, size: 24, help: "Restart") {
+                        IconActionButton(
+                            systemImage: "arrow.clockwise", tint: Color.ctp.muted, size: 24, help: "Restart"
+                        ) {
                             onAction(.restart)
                         }
                         IconActionButton(systemImage: "stop.fill", tint: Color.ctp.err, size: 24, help: "Stop") {
@@ -391,7 +412,9 @@ struct MenuBarContainerRow: View {
                         IconActionButton(systemImage: "play.fill", tint: Color.ctp.ok, size: 24, help: "Start") {
                             onAction(.start)
                         }
-                        IconActionButton(systemImage: "trash", tint: Color.ctp.err, size: 24, help: "Remove", action: onRequestRemove)
+                        IconActionButton(
+                            systemImage: "trash", tint: Color.ctp.err, size: 24, help: "Remove", action: onRequestRemove
+                        )
                     }
                 }
             }
@@ -404,14 +427,34 @@ struct MenuBarContainerRow: View {
         )
         .onHover { hovered = $0 }
         .contextMenu {
-            Button { onOpenTab(.logs) } label: { Text("Logs", bundle: .l10n) }
+            Button {
+                onOpenTab(.logs)
+            } label: {
+                Text("Logs", bundle: .l10n)
+            }
             if container.isActive {
-                Button { onOpenTab(.terminal) } label: { Text("Terminal", bundle: .l10n) }
+                Button {
+                    onOpenTab(.terminal)
+                } label: {
+                    Text("Terminal", bundle: .l10n)
+                }
                 Divider()
-                Button { onAction(.restart) } label: { Text("Restart", bundle: .l10n) }
-                Button { onAction(.stop) } label: { Text("Stop", bundle: .l10n) }
+                Button {
+                    onAction(.restart)
+                } label: {
+                    Text("Restart", bundle: .l10n)
+                }
+                Button {
+                    onAction(.stop)
+                } label: {
+                    Text("Stop", bundle: .l10n)
+                }
             } else {
-                Button { onAction(.start) } label: { Text("Start", bundle: .l10n) }
+                Button {
+                    onAction(.start)
+                } label: {
+                    Text("Start", bundle: .l10n)
+                }
                 Divider()
                 Button(role: .destructive, action: onRequestRemove) { Text("Remove", bundle: .l10n) }
             }
@@ -475,9 +518,21 @@ struct MenuBarMcpStrip: View {
                     .foregroundStyle(Color.ctp.ok)
             } else {
                 Menu {
-                    Button { copy(.claudeCodeHTTP) } label: { Text("Claude Code (HTTP)", bundle: .l10n) }
-                    Button { copy(.jsonHTTP) } label: { Text("JSON (HTTP)", bundle: .l10n) }
-                    Button { copy(.claudeDesktopStdio) } label: { Text("Claude Desktop (stdio)", bundle: .l10n) }
+                    Button {
+                        copy(.claudeCodeHTTP)
+                    } label: {
+                        Text("Claude Code (HTTP)", bundle: .l10n)
+                    }
+                    Button {
+                        copy(.jsonHTTP)
+                    } label: {
+                        Text("JSON (HTTP)", bundle: .l10n)
+                    }
+                    Button {
+                        copy(.claudeDesktopStdio)
+                    } label: {
+                        Text("Claude Desktop (stdio)", bundle: .l10n)
+                    }
                 } label: {
                     Text("Copy config", bundle: .l10n)
                         .font(.system(size: 10.5, weight: .medium))
@@ -487,21 +542,26 @@ struct MenuBarMcpStrip: View {
                         .background(
                             RoundedRectangle(cornerRadius: 6)
                                 .fill(Color.ctp.hover)
-                                .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(Color.ctp.muted.opacity(0.25), lineWidth: 1))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 6).strokeBorder(
+                                        Color.ctp.muted.opacity(0.25), lineWidth: 1))
                         )
                 }
                 .menuStyle(.borderlessButton)
                 .fixedSize()
             }
 
-            Toggle("", isOn: Binding(
-                get: { isRunning },
-                set: { shouldRun in
-                    Task {
-                        if shouldRun { await mcp.start() } else { await mcp.stop() }
+            Toggle(
+                "",
+                isOn: Binding(
+                    get: { isRunning },
+                    set: { shouldRun in
+                        Task {
+                            if shouldRun { await mcp.start() } else { await mcp.stop() }
+                        }
                     }
-                }
-            ))
+                )
+            )
             .labelsHidden()
             .toggleStyle(.switch)
             .controlSize(.mini)

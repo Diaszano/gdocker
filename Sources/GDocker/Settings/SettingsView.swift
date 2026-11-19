@@ -15,7 +15,9 @@ struct SettingsView: View {
             Section {
                 Picker(selection: $theme) {
                     ForEach(Theme.allCases, id: \.self) { Text($0.title, bundle: .l10n).tag($0) }
-                } label: { Text("Theme", bundle: .l10n) }
+                } label: {
+                    Text("Theme", bundle: .l10n)
+                }
                 Toggle(isOn: $keepInMenuBar) {
                     Text("Keep running in the menu bar when the window is closed", bundle: .l10n)
                 }

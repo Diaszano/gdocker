@@ -31,11 +31,11 @@ disabled_rules:
   - cyclomatic_complexity
   - large_tuple
   - nesting
+  - optional_data_string_conversion
 
 opt_in_rules:
   - empty_count
   - first_where
-  - redundant_nil_coalescing
   - sorted_first_last
 
 identifier_name:

@@ -23,7 +23,8 @@ public actor ComposeProjectRegistry {
 
         for container in containers {
             guard let rawProject = container.composeProject?.trimmingCharacters(in: .whitespacesAndNewlines),
-                  !rawProject.isEmpty else {
+                !rawProject.isEmpty
+            else {
                 continue
             }
 
@@ -93,13 +94,14 @@ public actor ComposeProjectRegistry {
                 let services = record.serviceNames.sorted().map {
                     ComposeServiceSummary(name: $0, containerID: nil, state: nil, statusKind: nil)
                 }
-                result.append(ComposeProject(
-                    name: record.name,
-                    workingDir: record.workingDir,
-                    configFiles: record.configFiles,
-                    services: services,
-                    status: .down
-                ))
+                result.append(
+                    ComposeProject(
+                        name: record.name,
+                        workingDir: record.workingDir,
+                        configFiles: record.configFiles,
+                        services: services,
+                        status: .down
+                    ))
             } else {
                 var services: [ComposeServiceSummary] = []
                 var seenServices = Set<String>()
@@ -109,22 +111,24 @@ public actor ComposeProjectRegistry {
                         .trimmingCharacters(in: .whitespacesAndNewlines)
                     let serviceName = !rawService.isEmpty ? rawService : container.name
                     seenServices.insert(serviceName)
-                    services.append(ComposeServiceSummary(
-                        name: serviceName,
-                        containerID: container.id,
-                        state: container.state,
-                        statusKind: container.statusKind
-                    ))
+                    services.append(
+                        ComposeServiceSummary(
+                            name: serviceName,
+                            containerID: container.id,
+                            state: container.state,
+                            statusKind: container.statusKind
+                        ))
                 }
 
                 // Add any known serviceNames not currently represented by a container
                 for serviceName in record.serviceNames where !seenServices.contains(serviceName) {
-                    services.append(ComposeServiceSummary(
-                        name: serviceName,
-                        containerID: nil,
-                        state: nil,
-                        statusKind: nil
-                    ))
+                    services.append(
+                        ComposeServiceSummary(
+                            name: serviceName,
+                            containerID: nil,
+                            state: nil,
+                            statusKind: nil
+                        ))
                 }
 
                 services.sort { ($0.name, $0.containerID ?? "") < ($1.name, $1.containerID ?? "") }
@@ -133,19 +137,22 @@ public actor ComposeProjectRegistry {
                 let status: ComposeStatus
                 if allServicesHaveContainer && services.allSatisfy({ $0.statusKind == .running }) {
                     status = .running
-                } else if allServicesHaveContainer && services.allSatisfy({ $0.statusKind == .stopped || $0.statusKind == .failed }) {
+                } else if allServicesHaveContainer
+                    && services.allSatisfy({ $0.statusKind == .stopped || $0.statusKind == .failed })
+                {
                     status = .stopped
                 } else {
                     status = .partiallyRunning
                 }
 
-                result.append(ComposeProject(
-                    name: record.name,
-                    workingDir: record.workingDir,
-                    configFiles: record.configFiles,
-                    services: services,
-                    status: status
-                ))
+                result.append(
+                    ComposeProject(
+                        name: record.name,
+                        workingDir: record.workingDir,
+                        configFiles: record.configFiles,
+                        services: services,
+                        status: status
+                    ))
             }
         }
 

@@ -34,7 +34,9 @@ struct ToolArguments {
         let invalid = ToolFailure("Invalid argument '\(parameter.name)': expected \(parameter.kind.expectation).")
         switch (parameter.kind, value) {
         case (.string, .string(let text)):
-            if parameter.required && text.isEmpty { throw ToolFailure("Argument '\(parameter.name)' must not be empty.") }
+            if parameter.required && text.isEmpty {
+                throw ToolFailure("Argument '\(parameter.name)' must not be empty.")
+            }
         case (.integer, .int): break
         case (.integer, .double(let number)) where number == number.rounded(): break
         case (.boolean, .bool): break
@@ -103,8 +105,8 @@ struct ToolArguments {
     }
 }
 
-private extension ToolParameter.Kind {
-    var expectation: String {
+extension ToolParameter.Kind {
+    fileprivate var expectation: String {
         switch self {
         case .string: "a string"
         case .integer: "an integer"

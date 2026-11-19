@@ -79,7 +79,10 @@ struct MainWindow: View {
             Text("Docker error", bundle: .l10n),
             isPresented: Binding(get: { store.lastError != nil }, set: { if !$0 { store.lastError = nil } })
         ) {
-            Button { } label: { Text("OK", bundle: .l10n) }
+            Button {
+            } label: {
+                Text("OK", bundle: .l10n)
+            }
         } message: {
             Text(verbatim: store.lastError ?? "")
         }
@@ -109,7 +112,9 @@ struct MainWindow: View {
                     navButton(.images, title: "Images", icon: "square.stack.3d.up", count: imagesStore.count)
                     navButton(.volumes, title: "Volumes", icon: "externaldrive", count: volumesStore.count)
                     navButton(.networks, title: "Networks", icon: "network", count: networksStore.count)
-                    navButton(.compose, title: "Compose", icon: "square.stack.3d.forward.dottedline", count: composeStore.activeCount)
+                    navButton(
+                        .compose, title: "Compose", icon: "square.stack.3d.forward.dottedline",
+                        count: composeStore.activeCount)
 
                     if !sidebarCollapsed {
                         sectionHeader("AI")

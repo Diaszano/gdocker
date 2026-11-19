@@ -1,5 +1,6 @@
 import Foundation
 import Testing
+
 @testable import GDockerCore
 
 private let hasDocker = DockerSocket.discover() != nil

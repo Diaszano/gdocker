@@ -9,7 +9,10 @@ public struct PortBinding: Decodable, Hashable, Sendable {
     public let type: String
 
     enum CodingKeys: String, CodingKey {
-        case ip = "IP", privatePort = "PrivatePort", publicPort = "PublicPort", type = "Type"
+        case ip = "IP"
+        case privatePort = "PrivatePort"
+        case publicPort = "PublicPort"
+        case type = "Type"
     }
 }
 
@@ -24,16 +27,28 @@ public struct ContainerSummary: Decodable, Identifiable, Hashable, Sendable {
     public let sizeRw: Int64?
 
     enum CodingKeys: String, CodingKey {
-        case id = "Id", names = "Names", image = "Image", state = "State", status = "Status"
-        case labels = "Labels", ports = "Ports", sizeRw = "SizeRw"
+        case id = "Id"
+        case names = "Names"
+        case image = "Image"
+        case state = "State"
+        case status = "Status"
+        case labels = "Labels"
+        case ports = "Ports"
+        case sizeRw = "SizeRw"
     }
 
     public init(
         id: String, names: [String], image: String, state: String, status: String,
         labels: [String: String], ports: [PortBinding], sizeRw: Int64? = nil
     ) {
-        self.id = id; self.names = names; self.image = image; self.state = state
-        self.status = status; self.labels = labels; self.ports = ports; self.sizeRw = sizeRw
+        self.id = id
+        self.names = names
+        self.image = image
+        self.state = state
+        self.status = status
+        self.labels = labels
+        self.ports = ports
+        self.sizeRw = sizeRw
     }
 
     public init(from decoder: Decoder) throws {
@@ -139,11 +154,12 @@ public struct ContainerGroup: Identifiable, Sendable {
 /// Named projects alphabetically, containers without a project last; containers sorted by name.
 public func groupByCompose(_ containers: [ContainerSummary]) -> [ContainerGroup] {
     let byProject = Dictionary(grouping: containers, by: \.composeProject)
-    return byProject
+    return
+        byProject
         .map { ContainerGroup(project: $0.key, containers: $0.value.sorted { $0.name < $1.name }) }
         .sorted { a, b in
             switch (a.project, b.project) {
-            case let (x?, y?): return x < y
+            case (let x?, let y?): return x < y
             case (nil, _?): return false
             case (_?, nil): return true
             case (nil, nil): return false
@@ -157,7 +173,11 @@ public struct ContainerDetails: Decodable, Sendable {
         public let env: [String]
         public let tty: Bool
 
-        enum CodingKeys: String, CodingKey { case image = "Image", env = "Env", tty = "Tty" }
+        enum CodingKeys: String, CodingKey {
+            case image = "Image"
+            case env = "Env"
+            case tty = "Tty"
+        }
 
         public init(from decoder: Decoder) throws {
             let c = try decoder.container(keyedBy: CodingKeys.self)
@@ -171,7 +191,10 @@ public struct ContainerDetails: Decodable, Sendable {
         public let status: String
         public let startedAt: String
 
-        enum CodingKeys: String, CodingKey { case status = "Status", startedAt = "StartedAt" }
+        enum CodingKeys: String, CodingKey {
+            case status = "Status"
+            case startedAt = "StartedAt"
+        }
     }
 
     public let id: String
@@ -179,5 +202,10 @@ public struct ContainerDetails: Decodable, Sendable {
     public let config: Config
     public let state: State
 
-    enum CodingKeys: String, CodingKey { case id = "Id", name = "Name", config = "Config", state = "State" }
+    enum CodingKeys: String, CodingKey {
+        case id = "Id"
+        case name = "Name"
+        case config = "Config"
+        case state = "State"
+    }
 }

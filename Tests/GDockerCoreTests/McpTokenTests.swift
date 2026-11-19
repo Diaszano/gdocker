@@ -1,5 +1,6 @@
 import Foundation
 import Testing
+
 @testable import GDockerCore
 
 final class InMemorySecretStore: SecretStore, @unchecked Sendable {

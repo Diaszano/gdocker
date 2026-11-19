@@ -1,5 +1,6 @@
 import Foundation
 import Testing
+
 @testable import GDockerCore
 
 @Suite("VolumeWebDAVServiceTests")
@@ -23,16 +24,17 @@ struct VolumeWebDAVServiceTests {
             containerName: "gdocker-webdav-pgdata-1234",
             port: 49152
         )
-        #expect(args == [
-            "run", "-d", "--rm",
-            "--name", "gdocker-webdav-pgdata-1234",
-            "--label", "gdocker.webdav=true",
-            "--label", "gdocker.webdav.volume=pgdata",
-            "-p", "127.0.0.1:49152:8080",
-            "-v", "pgdata:/data",
-            "rclone/rclone:latest",
-            "serve", "webdav", "/data", "--addr", ":8080",
-        ])
+        #expect(
+            args == [
+                "run", "-d", "--rm",
+                "--name", "gdocker-webdav-pgdata-1234",
+                "--label", "gdocker.webdav=true",
+                "--label", "gdocker.webdav.volume=pgdata",
+                "-p", "127.0.0.1:49152:8080",
+                "-v", "pgdata:/data",
+                "rclone/rclone:latest",
+                "serve", "webdav", "/data", "--addr", ":8080",
+            ])
     }
 
     @Test func mountWebDAVArgumentsUseSilentFlagAndVolumeName() {
@@ -41,12 +43,13 @@ struct VolumeWebDAVServiceTests {
             port: 49152,
             mountPoint: "/tmp/mnt/pgdata"
         )
-        #expect(args == [
-            "-S",
-            "-v", "pgdata",
-            "http://GDocker.local:49152/",
-            "/tmp/mnt/pgdata",
-        ])
+        #expect(
+            args == [
+                "-S",
+                "-v", "pgdata",
+                "http://GDocker.local:49152/",
+                "/tmp/mnt/pgdata",
+            ])
 
         let fallbackArgs = VolumeWebDAVService.mountWebDAVArguments(
             volumeName: "pgdata",
@@ -54,12 +57,13 @@ struct VolumeWebDAVServiceTests {
             mountPoint: "/tmp/mnt/pgdata",
             host: VolumeWebDAVService.fallbackHost
         )
-        #expect(fallbackArgs == [
-            "-S",
-            "-v", "pgdata",
-            "http://127.0.0.1:49152/",
-            "/tmp/mnt/pgdata",
-        ])
+        #expect(
+            fallbackArgs == [
+                "-S",
+                "-v", "pgdata",
+                "http://127.0.0.1:49152/",
+                "/tmp/mnt/pgdata",
+            ])
     }
 
     @Test func resolveMountHostRegistersLocalHostnameOrFallsBackToLoopback() {

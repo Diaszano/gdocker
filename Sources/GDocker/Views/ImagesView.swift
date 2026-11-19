@@ -61,10 +61,14 @@ struct ImagesView: View {
                     confirmRemoveTarget = nil
                     Task { await store.remove(id: target.id) }
                 }
-            } label: { Text("Remove", bundle: .l10n) }
+            } label: {
+                Text("Remove", bundle: .l10n)
+            }
         } message: {
             if let target = confirmRemoveTarget {
-                Text(verbatim: String(localized: "The image '\(target.formattedTags)' will be removed permanently.", bundle: .l10n))
+                Text(
+                    verbatim: String(
+                        localized: "The image '\(target.formattedTags)' will be removed permanently.", bundle: .l10n))
             } else {
                 Text("The selected image will be removed permanently.", bundle: .l10n)
             }
@@ -77,9 +81,14 @@ struct ImagesView: View {
             Button(role: .destructive) {
                 let ids = store.selectedIDs
                 Task { await store.remove(ids: ids) }
-            } label: { Text("Remove", bundle: .l10n) }
+            } label: {
+                Text("Remove", bundle: .l10n)
+            }
         } message: {
-            Text(verbatim: String(localized: "\(String(store.selectedIDs.count)) selected images will be removed permanently.", bundle: .l10n))
+            Text(
+                verbatim: String(
+                    localized: "\(String(store.selectedIDs.count)) selected images will be removed permanently.",
+                    bundle: .l10n))
         }
         .confirmationDialog(
             Text("Prune unused images?", bundle: .l10n),
@@ -89,7 +98,9 @@ struct ImagesView: View {
             Button(role: .destructive) {
                 let all = pruneAllUnused
                 Task { await store.prune(all: all) }
-            } label: { Text("Prune Images", bundle: .l10n) }
+            } label: {
+                Text("Prune Images", bundle: .l10n)
+            }
         } message: {
             Text("All dangling and unused images will be removed permanently.", bundle: .l10n)
         }
@@ -97,7 +108,10 @@ struct ImagesView: View {
             Text("Docker error", bundle: .l10n),
             isPresented: Binding(get: { store.lastError != nil }, set: { if !$0 { store.lastError = nil } })
         ) {
-            Button { } label: { Text("OK", bundle: .l10n) }
+            Button {
+            } label: {
+                Text("OK", bundle: .l10n)
+            }
         } message: {
             Text(verbatim: store.lastError ?? "")
         }
@@ -117,7 +131,8 @@ struct ImagesView: View {
                 }
                 Spacer()
 
-                TableSearchField(text: $store.searchText, prompt: String(localized: "Search images", bundle: .l10n), width: 260)
+                TableSearchField(
+                    text: $store.searchText, prompt: String(localized: "Search images", bundle: .l10n), width: 260)
 
                 IconActionButton(
                     systemImage: "arrow.clockwise",
@@ -139,31 +154,52 @@ struct ImagesView: View {
                     Button {
                         Task { await store.refresh() }
                     } label: {
-                        Label { Text("Refresh", bundle: .l10n) } icon: { Image(systemName: "arrow.clockwise") }
+                        Label {
+                            Text("Refresh", bundle: .l10n)
+                        } icon: {
+                            Image(systemName: "arrow.clockwise")
+                        }
                     }
                     Button(role: .destructive) {
                         pruneAllUnused = false
                         confirmPrune = true
                     } label: {
-                        Label { Text("Prune dangling images", bundle: .l10n) } icon: { Image(systemName: "trash.slash") }
+                        Label {
+                            Text("Prune dangling images", bundle: .l10n)
+                        } icon: {
+                            Image(systemName: "trash.slash")
+                        }
                     }
                     Button(role: .destructive) {
                         pruneAllUnused = true
                         confirmPrune = true
                     } label: {
-                        Label { Text("Prune all unused images", bundle: .l10n) } icon: { Image(systemName: "trash") }
+                        Label {
+                            Text("Prune all unused images", bundle: .l10n)
+                        } icon: {
+                            Image(systemName: "trash")
+                        }
                     }
                 }
             }
 
             HStack(spacing: 8) {
-                FilterPill(title: LocalizedStringKey(String(localized: "All", bundle: .l10n)), dotColor: nil, isSelected: store.filter == .all) {
+                FilterPill(
+                    title: LocalizedStringKey(String(localized: "All", bundle: .l10n)), dotColor: nil,
+                    isSelected: store.filter == .all
+                ) {
                     store.filter = .all
                 }
-                FilterPill(title: LocalizedStringKey(String(localized: "In use", bundle: .l10n)), dotColor: Color.ctp.ok, isSelected: store.filter == .inUse) {
+                FilterPill(
+                    title: LocalizedStringKey(String(localized: "In use", bundle: .l10n)), dotColor: Color.ctp.ok,
+                    isSelected: store.filter == .inUse
+                ) {
                     store.filter = .inUse
                 }
-                FilterPill(title: LocalizedStringKey(String(localized: "Untagged", bundle: .l10n)), dotColor: Color.ctp.warn, isSelected: store.filter == .dangling) {
+                FilterPill(
+                    title: LocalizedStringKey(String(localized: "Untagged", bundle: .l10n)), dotColor: Color.ctp.warn,
+                    isSelected: store.filter == .dangling
+                ) {
                     store.filter = .dangling
                 }
                 Spacer()
@@ -195,7 +231,8 @@ struct ImagesView: View {
                         ScrollView(.vertical) {
                             LazyVStack(spacing: 0) {
                                 ForEach(items) { image in
-                                    let usageCount = store.containerUsageCount(for: image, containers: containersStore.all)
+                                    let usageCount = store.containerUsageCount(
+                                        for: image, containers: containersStore.all)
                                     ImageRow(
                                         image: image,
                                         usageCount: usageCount,
@@ -356,15 +393,29 @@ private struct ImageRow: View {
             HStack(spacing: 6) {
                 IconActionButton(systemImage: "trash", tint: Color.ctp.err, help: "Remove", action: onRemove)
                 SectionMenuButton {
-                    Button { copyToPasteboard(image.id) } label: {
-                        Label { Text("Copy Image ID", bundle: .l10n) } icon: { Image(systemName: "doc.on.doc") }
+                    Button {
+                        copyToPasteboard(image.id)
+                    } label: {
+                        Label {
+                            Text("Copy Image ID", bundle: .l10n)
+                        } icon: {
+                            Image(systemName: "doc.on.doc")
+                        }
                     }
                     Divider()
                     Button(role: .destructive, action: onRemove) {
-                        Label { Text("Remove", bundle: .l10n) } icon: { Image(systemName: "trash") }
+                        Label {
+                            Text("Remove", bundle: .l10n)
+                        } icon: {
+                            Image(systemName: "trash")
+                        }
                     }
                     Button(role: .destructive, action: onForceRemove) {
-                        Label { Text("Force remove", bundle: .l10n) } icon: { Image(systemName: "trash.fill") }
+                        Label {
+                            Text("Force remove", bundle: .l10n)
+                        } icon: {
+                            Image(systemName: "trash.fill")
+                        }
                     }
                 }
             }

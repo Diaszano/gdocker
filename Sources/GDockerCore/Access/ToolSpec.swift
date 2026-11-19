@@ -7,7 +7,10 @@ public struct ToolParameter: Sendable, Equatable {
     public let summary: String
 
     public init(name: String, kind: Kind, required: Bool, summary: String) {
-        self.name = name; self.kind = kind; self.required = required; self.summary = summary
+        self.name = name
+        self.kind = kind
+        self.required = required
+        self.summary = summary
     }
 }
 
@@ -29,7 +32,12 @@ public struct ToolSpec: Sendable, Equatable, Identifiable {
         name: String, title: String, group: ToolGroup, defaultPermission: Permission, summary: String,
         parameters: [ToolParameter], allowsAlways: Bool = true
     ) {
-        self.name = name; self.title = title; self.group = group; self.defaultPermission = defaultPermission
-        self.summary = summary; self.parameters = parameters; self.allowsAlways = allowsAlways
+        self.name = name
+        self.title = title
+        self.group = group
+        self.defaultPermission = defaultPermission
+        self.summary = summary
+        self.parameters = parameters
+        self.allowsAlways = allowsAlways
     }
 }

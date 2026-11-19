@@ -14,7 +14,8 @@ public actor PermissionStore {
         self.fileURL = fileURL
         self.catalog = catalog
         let known = Set(catalog.map(\.name))
-        let stored = (try? Data(contentsOf: fileURL))
+        let stored =
+            (try? Data(contentsOf: fileURL))
             .flatMap { try? JSONDecoder().decode([String: String].self, from: $0) } ?? [:]
         overrides = stored.reduce(into: [:]) { result, entry in
             if known.contains(entry.key), let permission = Permission(rawValue: entry.value) {
@@ -57,8 +58,8 @@ public actor PermissionStore {
     }
 }
 
-private extension JSONEncoder {
-    static var sorted: JSONEncoder {
+extension JSONEncoder {
+    fileprivate static var sorted: JSONEncoder {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
         return encoder

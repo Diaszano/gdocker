@@ -196,7 +196,9 @@ struct MenuBarContent: View {
                 .background(
                     RoundedRectangle(cornerRadius: 6)
                         .fill(Color.ctp.accent.opacity(0.16))
-                        .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(Color.ctp.accent.opacity(0.45), lineWidth: 1))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 6).strokeBorder(Color.ctp.accent.opacity(0.45), lineWidth: 1)
+                        )
                 )
             }
             .buttonStyle(.plain)
@@ -212,12 +214,17 @@ struct MenuBarContent: View {
             Image(systemName: "magnifyingglass")
                 .font(.system(size: 12))
                 .foregroundStyle(Color.ctp.muted)
-            TextField("", text: $searchText, prompt: Text("Search containers or stacks...", bundle: .l10n).foregroundStyle(Color.ctp.muted))
-                .textFieldStyle(.plain)
-                .font(.system(size: 12))
-                .foregroundStyle(Color.ctp.text)
+            TextField(
+                "", text: $searchText,
+                prompt: Text("Search containers or stacks...", bundle: .l10n).foregroundStyle(Color.ctp.muted)
+            )
+            .textFieldStyle(.plain)
+            .font(.system(size: 12))
+            .foregroundStyle(Color.ctp.text)
             if !searchText.isEmpty {
-                Button { searchText = "" } label: {
+                Button {
+                    searchText = ""
+                } label: {
                     Image(systemName: "xmark.circle.fill")
                         .font(.system(size: 11))
                         .foregroundStyle(Color.ctp.muted)
@@ -286,7 +293,9 @@ struct MenuBarContent: View {
                 .foregroundStyle(Color.ctp.muted)
             Spacer()
             if confirmPruneStopped {
-                Button { confirmPruneStopped = false } label: {
+                Button {
+                    confirmPruneStopped = false
+                } label: {
                     Text("Cancel", bundle: .l10n)
                         .font(.system(size: 10.5, weight: .medium))
                         .foregroundStyle(Color.ctp.muted)
@@ -312,7 +321,9 @@ struct MenuBarContent: View {
                 }
                 .buttonStyle(.plain)
             } else {
-                Button { confirmPruneStopped = true } label: {
+                Button {
+                    confirmPruneStopped = true
+                } label: {
                     Text("Clean Stopped", bundle: .l10n)
                         .font(.system(size: 11, weight: .semibold))
                         .foregroundStyle(Color.ctp.err)
@@ -321,7 +332,9 @@ struct MenuBarContent: View {
                         .background(
                             RoundedRectangle(cornerRadius: 6)
                                 .fill(Color.ctp.err.opacity(0.14))
-                                .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(Color.ctp.err.opacity(0.4), lineWidth: 1))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 6).strokeBorder(
+                                        Color.ctp.err.opacity(0.4), lineWidth: 1))
                         )
                 }
                 .buttonStyle(.plain)
@@ -343,7 +356,9 @@ struct MenuBarContent: View {
                 .font(.system(size: 12, weight: .semibold))
                 .foregroundStyle(Color.ctp.text)
             Spacer()
-            Button { refreshNow() } label: {
+            Button {
+                refreshNow()
+            } label: {
                 Text("Refresh", bundle: .l10n)
                     .font(.system(size: 11, weight: .semibold))
                     .foregroundStyle(Color.ctp.accent)
@@ -521,13 +536,15 @@ struct MenuBarContent: View {
                     onToggle: { toggleGroup(project.name) },
                     onUp: { Task { await composeStore.up(project: project) } },
                     onRestart: ids.isEmpty ? nil : { Task { await store.performBulk(.restart, on: ids) } },
-                    onStop: runningInProject == 0 ? nil : {
-                        if !ids.isEmpty {
-                            Task { await store.performBulk(.stop, on: ids) }
-                        } else {
-                            Task { await composeStore.down(project: project) }
+                    onStop: runningInProject == 0
+                        ? nil
+                        : {
+                            if !ids.isEmpty {
+                                Task { await store.performBulk(.stop, on: ids) }
+                            } else {
+                                Task { await composeStore.down(project: project) }
+                            }
                         }
-                    }
                 )
                 if !isCollapsed {
                     ForEach(containers) { container in
@@ -569,9 +586,13 @@ struct MenuBarContent: View {
                         Text(verbatim: project.name)
                             .font(.system(size: 12, weight: .semibold))
                             .foregroundStyle(Color.ctp.text)
-                        Text(verbatim: String(localized: "\(String(runningInProject)) of \(String(totalInProject)) running", bundle: .l10n))
-                            .font(.system(size: 10.5))
-                            .foregroundStyle(Color.ctp.muted)
+                        Text(
+                            verbatim: String(
+                                localized: "\(String(runningInProject)) of \(String(totalInProject)) running",
+                                bundle: .l10n)
+                        )
+                        .font(.system(size: 10.5))
+                        .foregroundStyle(Color.ctp.muted)
                     }
                     Spacer()
                     Button {
@@ -589,7 +610,9 @@ struct MenuBarContent: View {
                         .background(
                             RoundedRectangle(cornerRadius: 6)
                                 .fill(Color.ctp.ok.opacity(0.14))
-                                .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(Color.ctp.ok.opacity(0.45), lineWidth: 1))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 6).strokeBorder(
+                                        Color.ctp.ok.opacity(0.45), lineWidth: 1))
                         )
                     }
                     .buttonStyle(.plain)
@@ -599,7 +622,8 @@ struct MenuBarContent: View {
                 .background(
                     RoundedRectangle(cornerRadius: 8)
                         .fill(Color.ctp.side)
-                        .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(Color.ctp.muted.opacity(0.2), lineWidth: 1))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8).strokeBorder(Color.ctp.muted.opacity(0.2), lineWidth: 1))
                 )
             }
         }
@@ -674,7 +698,9 @@ struct MenuBarContent: View {
                     .background(
                         RoundedRectangle(cornerRadius: 8)
                             .fill(Color.ctp.side)
-                            .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(Color.ctp.muted.opacity(0.18), lineWidth: 1))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8).strokeBorder(
+                                    Color.ctp.muted.opacity(0.18), lineWidth: 1))
                     )
                 }
             }
@@ -687,7 +713,9 @@ struct MenuBarContent: View {
         VStack(spacing: 0) {
             Divider().overlay(Color.ctp.muted.opacity(0.18))
             HStack {
-                Button { openMainWindow() } label: {
+                Button {
+                    openMainWindow()
+                } label: {
                     Text("Open window", bundle: .l10n)
                         .font(.system(size: 11.5, weight: .semibold))
                         .foregroundStyle(Color.ctp.accent)
@@ -696,7 +724,9 @@ struct MenuBarContent: View {
 
                 Spacer()
 
-                Button { openSettingsWindow() } label: {
+                Button {
+                    openSettingsWindow()
+                } label: {
                     Text("Settings", bundle: .l10n)
                         .font(.system(size: 11, weight: .medium))
                         .foregroundStyle(Color.ctp.muted)
@@ -707,7 +737,9 @@ struct MenuBarContent: View {
                 Text(verbatim: "·")
                     .foregroundStyle(Color.ctp.muted.opacity(0.5))
 
-                Button { NSApp.terminate(nil) } label: {
+                Button {
+                    NSApp.terminate(nil)
+                } label: {
                     Text("Quit", bundle: .l10n)
                         .font(.system(size: 11, weight: .medium))
                         .foregroundStyle(Color.ctp.err)

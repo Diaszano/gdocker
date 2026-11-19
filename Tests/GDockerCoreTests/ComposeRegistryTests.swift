@@ -1,5 +1,6 @@
 import Foundation
 import Testing
+
 @testable import GDockerCore
 
 @Suite("ComposeRegistryTests")
@@ -18,7 +19,7 @@ struct ComposeRegistryTests {
             "com.docker.compose.project": project,
             "com.docker.compose.service": service,
             "com.docker.compose.project.working_dir": workingDir,
-            "com.docker.compose.project.config_files": configFiles
+            "com.docker.compose.project.config_files": configFiles,
         ]
         return ContainerSummary(
             id: id,
@@ -81,11 +82,12 @@ struct ComposeRegistryTests {
 
         let records = await registry.records()
         let record = try #require(records.first)
-        #expect(record.configFiles == [
-            "docker-compose.yml",
-            "docker-compose.override.yml",
-            "compose.local.yml"
-        ])
+        #expect(
+            record.configFiles == [
+                "docker-compose.yml",
+                "docker-compose.override.yml",
+                "compose.local.yml",
+            ])
     }
 
     @Test func statusComputationAllRunning() async throws {
@@ -111,7 +113,8 @@ struct ComposeRegistryTests {
 
         let registry = ComposeProjectRegistry(fileURL: tempURL)
         let c1 = makeContainer(id: "c1", project: "stack", service: "web", state: "running", status: "Up 3 hours")
-        let c2 = makeContainer(id: "c2", project: "stack", service: "db", state: "exited", status: "Exited (0) 5 mins ago")
+        let c2 = makeContainer(
+            id: "c2", project: "stack", service: "db", state: "exited", status: "Exited (0) 5 mins ago")
 
         let projects = await registry.projects(containers: [c1, c2])
         let project = try #require(projects.first)
@@ -144,8 +147,10 @@ struct ComposeRegistryTests {
         defer { try? FileManager.default.removeItem(at: tempURL) }
 
         let registry = ComposeProjectRegistry(fileURL: tempURL)
-        let c1 = makeContainer(id: "c1", project: "stack", service: "web", state: "exited", status: "Exited (0) 1 hour ago")
-        let c2 = makeContainer(id: "c2", project: "stack", service: "db", state: "exited", status: "Exited (1) 1 hour ago")
+        let c1 = makeContainer(
+            id: "c1", project: "stack", service: "web", state: "exited", status: "Exited (0) 1 hour ago")
+        let c2 = makeContainer(
+            id: "c2", project: "stack", service: "db", state: "exited", status: "Exited (1) 1 hour ago")
 
         let projects = await registry.projects(containers: [c1, c2])
         let project = try #require(projects.first)

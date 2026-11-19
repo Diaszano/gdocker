@@ -3,7 +3,8 @@ import Foundation
 /// Defines high-level Docker Compose operations supported by GDocker.
 public protocol ComposeOperations: Sendable {
     func composeUp(project: String, workingDir: String, configFiles: [String]) async throws -> String
-    func composeDown(project: String, workingDir: String, configFiles: [String], removeVolumes: Bool) async throws -> String
+    func composeDown(project: String, workingDir: String, configFiles: [String], removeVolumes: Bool) async throws
+        -> String
     func isComposeAvailable() async -> Bool
 }
 
@@ -80,8 +81,11 @@ public actor FakeComposeRunner: ComposeOperations {
         return try upResponse.get()
     }
 
-    public func composeDown(project: String, workingDir: String, configFiles: [String], removeVolumes: Bool) async throws -> String {
-        calls.append(.down(project: project, workingDir: workingDir, configFiles: configFiles, removeVolumes: removeVolumes))
+    public func composeDown(project: String, workingDir: String, configFiles: [String], removeVolumes: Bool)
+        async throws -> String
+    {
+        calls.append(
+            .down(project: project, workingDir: workingDir, configFiles: configFiles, removeVolumes: removeVolumes))
         return try downResponse.get()
     }
 
@@ -92,12 +96,13 @@ public actor FakeComposeRunner: ComposeOperations {
 
 /// Official Docker CLI-backed implementation of `ComposeOperations`.
 public final class CLIComposeRunner: ComposeOperations, Sendable {
-    public typealias ProcessLauncher = @Sendable (
-        _ executable: String,
-        _ arguments: [String],
-        _ environment: [String: String],
-        _ currentDirectory: String?
-    ) async throws -> (exitCode: Int32, output: String)
+    public typealias ProcessLauncher =
+        @Sendable (
+            _ executable: String,
+            _ arguments: [String],
+            _ environment: [String: String],
+            _ currentDirectory: String?
+        ) async throws -> (exitCode: Int32, output: String)
 
     public let binaryPath: String?
     public let socketPath: String?
@@ -132,12 +137,7 @@ public final class CLIComposeRunner: ComposeOperations, Sendable {
             if fileExists(expanded) { return expanded }
             return nil
         }
-        for candidate in candidateBinaryPaths {
-            if fileExists(candidate) {
-                return candidate
-            }
-        }
-        return nil
+        return candidateBinaryPaths.first(where: fileExists)
     }
 
     private func resolveSocketPath() -> String? {

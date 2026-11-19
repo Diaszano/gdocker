@@ -55,7 +55,9 @@ struct GDockerApp: App {
                         Text("Prune System", bundle: .l10n)
                     }
                 } message: {
-                    Text("This will remove all stopped containers, unused networks, and dangling images. Volumes will not be removed.", bundle: .l10n)
+                    Text(
+                        "This will remove all stopped containers, unused networks, and dangling images. Volumes will not be removed.",
+                        bundle: .l10n)
                 }
         }
         .windowStyle(.hiddenTitleBar)

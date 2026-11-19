@@ -1,5 +1,6 @@
 import Foundation
 import Testing
+
 @testable import GDockerCore
 
 private func frame(_ stream: UInt8, _ text: String) -> [UInt8] {

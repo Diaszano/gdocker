@@ -44,9 +44,11 @@ private struct RequestCard: View {
                 Text("Approve AI call?", bundle: .l10n)
                     .font(.system(size: 15, weight: .bold))
                     .foregroundStyle(Color.ctp.text)
-                Text(verbatim: String(localized: "\(request.client) wants to execute a sensitive action", bundle: .l10n))
-                    .font(.system(size: 12))
-                    .foregroundStyle(Color.ctp.muted)
+                Text(
+                    verbatim: String(localized: "\(request.client) wants to execute a sensitive action", bundle: .l10n)
+                )
+                .font(.system(size: 12))
+                .foregroundStyle(Color.ctp.muted)
             }
             Spacer()
             if pendingCount > 1 {
@@ -61,7 +63,9 @@ private struct RequestCard: View {
         HStack(spacing: 10) {
             Spacer()
             // No keyboard shortcuts on purpose: see ApprovalPanelController. The user must click.
-            Button { answer(.deny) } label: {
+            Button {
+                answer(.deny)
+            } label: {
                 Text("Deny", bundle: .l10n)
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundStyle(Color.ctp.err)
@@ -71,7 +75,9 @@ private struct RequestCard: View {
             }
             .buttonStyle(.plain)
 
-            Button { answer(.allowOnce) } label: {
+            Button {
+                answer(.allowOnce)
+            } label: {
                 Text("Allow once", bundle: .l10n)
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundStyle(Color.ctp.text)
@@ -82,7 +88,9 @@ private struct RequestCard: View {
             .buttonStyle(.plain)
 
             if request.allowsAlways {
-                Button { answer(.allowAlways) } label: {
+                Button {
+                    answer(.allowAlways)
+                } label: {
                     Text("Allow always", bundle: .l10n)
                         .font(.system(size: 12, weight: .semibold))
                         .foregroundStyle(Color.ctp.bg)

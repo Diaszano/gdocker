@@ -75,7 +75,9 @@ final class McpNIOHandler: ChannelInboundHandler, @unchecked Sendable {
         return HTTPRequest(method: state.head.method.rawValue, headers: headers, body: body, path: path)
     }
 
-    private func write(_ response: HTTPResponse, head requestHead: HTTPRequestHead, context: ChannelHandlerContext) async {
+    private func write(_ response: HTTPResponse, head requestHead: HTTPRequestHead, context: ChannelHandlerContext)
+        async
+    {
         nonisolated(unsafe) let unsafeContext = context
         let loop = context.eventLoop
         let version = requestHead.version

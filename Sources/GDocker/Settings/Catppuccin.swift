@@ -49,6 +49,7 @@ extension NSColor {
 }
 
 extension Color {
+    // swiftlint:disable:next type_name
     enum ctp {
         static let bg = Color(nsColor: .ctp(\.bg))
         static let side = Color(nsColor: .ctp(\.side))

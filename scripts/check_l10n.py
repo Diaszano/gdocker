@@ -22,11 +22,11 @@ def key(text):
 used = set()
 for path in (root / "Sources/GDocker").rglob("*.swift"):
     source = path.read_text()
-    used |= set(re.findall(r'Text\("([^"]+)",\s*bundle:\s*\.l10n', source))
+    used |= set(re.findall(r'Text\(\s*"([^"]+)",\s*bundle:\s*\.l10n', source))
     used |= set(re.findall(r'case \.\w+: "([^"]+)"', source))  # LocalizedStringKey enum titles
-    used |= set(re.findall(r'prompt:\s*Text\("([^"]+)"', source))
+    used |= set(re.findall(r'prompt:\s*Text\(\s*"([^"]+)"', source))
     used |= set(re.findall(r'localizedString\(forKey:\s*"([^"]+)"', source))
-    used |= {key(match) for match in re.findall(r'String\(localized:\s*"((?:[^"\\]|\\.)*)"', source)}
+    used |= {key(match) for match in re.findall(r'String\(\s*localized:\s*"((?:[^"\\]|\\.)*)"', source)}
 
 # Tool titles are shown in the permissions screen, so they must be translated too.
 catalog_source = (root / "Sources/GDockerCore/Access/ToolCatalog.swift").read_text()

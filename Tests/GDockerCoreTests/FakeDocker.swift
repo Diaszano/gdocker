@@ -1,4 +1,5 @@
 import Foundation
+
 @testable import GDockerCore
 
 /// In-memory Docker for router tests. Records every call so a test can prove Docker was (not) touched.
@@ -19,9 +20,10 @@ actor FakeDocker: DockerOperations {
     ]
 
     var images: [ImageSummary] = [
-        ImageSummary(id: FakeDocker.id("img111"), repoTags: ["nginx:latest"], size: 142_000_000, created: 1700000000),
-        ImageSummary(id: FakeDocker.id("img222"), repoTags: ["redis:alpine"], size: 35_000_000, created: 1700001000),
-        ImageSummary(id: FakeDocker.id("img333"), repoTags: [], size: 50_000_000, created: 1700002000),
+        ImageSummary(
+            id: FakeDocker.id("img111"), repoTags: ["nginx:latest"], size: 142_000_000, created: 1_700_000_000),
+        ImageSummary(id: FakeDocker.id("img222"), repoTags: ["redis:alpine"], size: 35_000_000, created: 1_700_001_000),
+        ImageSummary(id: FakeDocker.id("img333"), repoTags: [], size: 50_000_000, created: 1_700_002_000),
     ]
 
     var volumes: [VolumeSummary] = [
@@ -30,8 +32,10 @@ actor FakeDocker: DockerOperations {
     ]
 
     var networks: [NetworkSummary] = [
-        NetworkSummary(id: FakeDocker.id("net111"), name: "bridge", driver: "bridge", scope: "local", containerCount: 2),
-        NetworkSummary(id: FakeDocker.id("net222"), name: "custom_net", driver: "bridge", scope: "local", containerCount: 0),
+        NetworkSummary(
+            id: FakeDocker.id("net111"), name: "bridge", driver: "bridge", scope: "local", containerCount: 2),
+        NetworkSummary(
+            id: FakeDocker.id("net222"), name: "custom_net", driver: "bridge", scope: "local", containerCount: 0),
     ]
 
     var pruneContainersResult: (deleted: [String], spaceReclaimed: Int64) = (["c1"], 1024)
@@ -64,26 +68,29 @@ actor FakeDocker: DockerOperations {
     func inspect(_ id: String) async throws -> (details: ContainerDetails, rawJSON: String) {
         try record("inspect:\(id)")
         let raw = """
-        {"Id":"\(id)","Name":"/web","Config":{"Image":"nginx","Env":["SECRET=hunter2","PLAIN=1"],"Tty":false},\
-        "State":{"Status":"running","StartedAt":"2026-01-01T00:00:00Z"}}
-        """
+            {"Id":"\(id)","Name":"/web","Config":{"Image":"nginx","Env":["SECRET=hunter2","PLAIN=1"],"Tty":false},\
+            "State":{"Status":"running","StartedAt":"2026-01-01T00:00:00Z"}}
+            """
         return (try JSONDecoder().decode(ContainerDetails.self, from: Data(raw.utf8)), raw)
     }
 
     func recentLogs(_ id: String, tail: Int, timestamps: Bool) async throws -> [LogLine] {
         try record("logs:\(id)")
         requestedTail = tail
-        return [LogLine(id: 1, stream: .stdout, timestamp: nil, text: "first"),
-                LogLine(id: 2, stream: .stderr, timestamp: nil, text: "second")]
+        return [
+            LogLine(id: 1, stream: .stdout, timestamp: nil, text: "first"),
+            LogLine(id: 2, stream: .stderr, timestamp: nil, text: "second"),
+        ]
     }
 
     func statsOnce(_ id: String) async throws -> StatsSample {
         try record("stats:\(id)")
-        let json = Data("""
-        {"cpu_stats":{"cpu_usage":{"total_usage":400},"system_cpu_usage":2000,"online_cpus":4},
-         "precpu_stats":{"cpu_usage":{"total_usage":200},"system_cpu_usage":1000},
-         "memory_stats":{"usage":600,"limit":1000}}
-        """.utf8)
+        let json = Data(
+            """
+            {"cpu_stats":{"cpu_usage":{"total_usage":400},"system_cpu_usage":2000,"online_cpus":4},
+             "precpu_stats":{"cpu_usage":{"total_usage":200},"system_cpu_usage":1000},
+             "memory_stats":{"usage":600,"limit":1000}}
+            """.utf8)
         guard let sample = try StatsSample.from(json: json) else { throw FakeDockerError.missing }
         return sample
     }
@@ -171,7 +178,9 @@ actor FakeDocker: DockerOperations {
     func setImages(_ images: [ImageSummary]) { self.images = images }
     func setVolumes(_ volumes: [VolumeSummary]) { self.volumes = volumes }
     func setNetworks(_ networks: [NetworkSummary]) { self.networks = networks }
-    func setPruneContainersResult(_ result: (deleted: [String], spaceReclaimed: Int64)) { pruneContainersResult = result }
+    func setPruneContainersResult(_ result: (deleted: [String], spaceReclaimed: Int64)) {
+        pruneContainersResult = result
+    }
     func setPruneImagesResult(_ result: (deleted: [String], spaceReclaimed: Int64)) { pruneImagesResult = result }
     func setPruneVolumesResult(_ result: (deleted: [String], spaceReclaimed: Int64)) { pruneVolumesResult = result }
     func setPruneNetworksResult(_ result: [String]) { pruneNetworksResult = result }

@@ -131,7 +131,9 @@ public actor McpHTTPServer {
     }
 
     private static func isInitialize(_ body: Data?) -> Bool {
-        guard let body, let object = try? JSONSerialization.jsonObject(with: body) as? [String: Any] else { return false }
+        guard let body, let object = try? JSONSerialization.jsonObject(with: body) as? [String: Any] else {
+            return false
+        }
         return object["method"] as? String == "initialize"
     }
 

@@ -9,7 +9,10 @@ public struct ExecResult: Sendable, Equatable {
     public let truncated: Bool
 
     public init(exitCode: Int, stdout: String, stderr: String, truncated: Bool) {
-        self.exitCode = exitCode; self.stdout = stdout; self.stderr = stderr; self.truncated = truncated
+        self.exitCode = exitCode
+        self.stdout = stdout
+        self.stderr = stderr
+        self.truncated = truncated
     }
 }
 

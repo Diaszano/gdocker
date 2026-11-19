@@ -1,5 +1,6 @@
 import Foundation
 import Testing
+
 @testable import GDockerCore
 
 private func object(_ json: String) throws -> [String: Any] {

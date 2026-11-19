@@ -1,5 +1,6 @@
 import Foundation
 import Testing
+
 @testable import GDockerCore
 
 private func tempFile() -> URL {
@@ -15,8 +16,9 @@ private func record(_ log: ActivityLog, _ tool: String, _ outcome: ActivityEntry
 @Test func activityRoundTripsAcrossInstances() async {
     let url = tempFile()
     let first = ActivityLog(fileURL: url)
-    await first.record(client: "claude", tool: "stop_container", arguments: "container=web",
-                       outcome: .approved, detail: "ok")
+    await first.record(
+        client: "claude", tool: "stop_container", arguments: "container=web",
+        outcome: .approved, detail: "ok")
     let entries = await ActivityLog(fileURL: url).entries()
     #expect(entries.count == 1)
     #expect(entries[0].client == "claude")

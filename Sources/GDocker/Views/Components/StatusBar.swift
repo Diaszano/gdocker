@@ -52,7 +52,10 @@ struct StatusBar: View {
                 } label: {
                     StatusBadge(
                         color: Color.ctp.warn,
-                        label: LocalizedStringKey(String(localized: "\(String(mcp.approvalModel.pending.count)) awaiting approval", bundle: .l10n))
+                        label: LocalizedStringKey(
+                            String(
+                                localized: "\(String(mcp.approvalModel.pending.count)) awaiting approval", bundle: .l10n
+                            ))
                     )
                 }
                 .buttonStyle(.plain)

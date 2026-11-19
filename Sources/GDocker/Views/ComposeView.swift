@@ -47,7 +47,10 @@ struct ComposeView: View {
                     Text("Down and Remove Volumes", bundle: .l10n)
                 }
             }
-            Button(role: .cancel) { } label: { Text("Cancel", bundle: .l10n) }
+            Button(role: .cancel) {
+            } label: {
+                Text("Cancel", bundle: .l10n)
+            }
         } message: {
             Text("This will stop and remove containers for this project.", bundle: .l10n)
         }
@@ -68,7 +71,10 @@ struct ComposeView: View {
             Text("Compose error", bundle: .l10n),
             isPresented: Binding(get: { store.lastError != nil }, set: { if !$0 { store.lastError = nil } })
         ) {
-            Button { } label: { Text("OK", bundle: .l10n) }
+            Button {
+            } label: {
+                Text("OK", bundle: .l10n)
+            }
         } message: {
             Text(verbatim: store.lastError ?? "")
         }
@@ -95,7 +101,9 @@ struct ComposeView: View {
                 }
                 Spacer()
 
-                TableSearchField(text: $store.searchText, prompt: String(localized: "Search compose projects", bundle: .l10n), width: 260)
+                TableSearchField(
+                    text: $store.searchText, prompt: String(localized: "Search compose projects", bundle: .l10n),
+                    width: 260)
 
                 IconActionButton(
                     systemImage: "arrow.clockwise",
@@ -117,19 +125,30 @@ struct ComposeView: View {
                     Button {
                         Task { await store.refresh() }
                     } label: {
-                        Label { Text("Refresh", bundle: .l10n) } icon: { Image(systemName: "arrow.clockwise") }
+                        Label {
+                            Text("Refresh", bundle: .l10n)
+                        } icon: {
+                            Image(systemName: "arrow.clockwise")
+                        }
                     }
                     Button(role: .destructive) {
                         confirmCleanDown = true
                     } label: {
-                        Label { Text("Clean stopped compose projects", bundle: .l10n) } icon: { Image(systemName: "trash.slash") }
+                        Label {
+                            Text("Clean stopped compose projects", bundle: .l10n)
+                        } icon: {
+                            Image(systemName: "trash.slash")
+                        }
                     }
                     .disabled(store.downCount == 0)
                 }
             }
 
             HStack(spacing: 8) {
-                FilterPill(title: LocalizedStringKey(String(localized: "All", bundle: .l10n)), dotColor: nil, isSelected: store.filter == .all) {
+                FilterPill(
+                    title: LocalizedStringKey(String(localized: "All", bundle: .l10n)), dotColor: nil,
+                    isSelected: store.filter == .all
+                ) {
                     store.filter = .all
                 }
                 FilterPill(title: "Running", dotColor: Color.ctp.ok, isSelected: store.filter == .running) {
@@ -179,7 +198,9 @@ struct ComposeView: View {
                         Image(systemName: "square.stack.3d.forward.dottedline")
                     }
                 } description: {
-                    Text("Compose projects will appear here when containers with compose labels are detected.", bundle: .l10n)
+                    Text(
+                        "Compose projects will appear here when containers with compose labels are detected.",
+                        bundle: .l10n)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
@@ -221,7 +242,8 @@ struct ComposeView: View {
                                 }
                             }
                         }
-                        .frame(minWidth: max(geo.size.width, minTableWidth), maxHeight: .infinity, alignment: .topLeading)
+                        .frame(
+                            minWidth: max(geo.size.width, minTableWidth), maxHeight: .infinity, alignment: .topLeading)
                     }
                 }
                 .frame(minHeight: 160)
@@ -364,10 +386,15 @@ private struct ComposeRow: View {
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(Color.ctp.text)
                     .lineLimit(1)
-                Text(verbatim: String(localized: "\(String(activeServicesCount)) of \(String(project.services.count)) services active", bundle: .l10n))
-                    .font(.system(size: 11))
-                    .foregroundStyle(Color.ctp.muted)
-                    .lineLimit(1)
+                Text(
+                    verbatim: String(
+                        localized:
+                            "\(String(activeServicesCount)) of \(String(project.services.count)) services active",
+                        bundle: .l10n)
+                )
+                .font(.system(size: 11))
+                .foregroundStyle(Color.ctp.muted)
+                .lineLimit(1)
             }
             .frame(minWidth: nameMinWidth, maxWidth: .infinity, alignment: .leading)
 
@@ -421,20 +448,38 @@ private struct ComposeRow: View {
 
                 SectionMenuButton {
                     Button(action: onUp) {
-                        Label { Text("Start stack", bundle: .l10n) } icon: { Image(systemName: "play.fill") }
+                        Label {
+                            Text("Start stack", bundle: .l10n)
+                        } icon: {
+                            Image(systemName: "play.fill")
+                        }
                     }
                     .disabled(!canAct)
                     Button(role: .destructive, action: onDown) {
-                        Label { Text("Stop stack", bundle: .l10n) } icon: { Image(systemName: "stop.fill") }
+                        Label {
+                            Text("Stop stack", bundle: .l10n)
+                        } icon: {
+                            Image(systemName: "stop.fill")
+                        }
                     }
                     .disabled(!canAct || project.status == .down)
                     Divider()
-                    Button { copyToPasteboard(project.workingDir) } label: {
-                        Label { Text("Copy path", bundle: .l10n) } icon: { Image(systemName: "doc.on.doc") }
+                    Button {
+                        copyToPasteboard(project.workingDir)
+                    } label: {
+                        Label {
+                            Text("Copy path", bundle: .l10n)
+                        } icon: {
+                            Image(systemName: "doc.on.doc")
+                        }
                     }
                     if project.status == .down {
                         Button(role: .destructive, action: onForget) {
-                            Label { Text("Forget Project", bundle: .l10n) } icon: { Image(systemName: "trash") }
+                            Label {
+                                Text("Forget Project", bundle: .l10n)
+                            } icon: {
+                                Image(systemName: "trash")
+                            }
                         }
                     }
                 }

@@ -109,7 +109,9 @@ private struct PermissionPicker: View {
     var body: some View {
         HStack(spacing: 2) {
             ForEach(Permission.allCases, id: \.self) { option in
-                Button { onChange(option) } label: {
+                Button {
+                    onChange(option)
+                } label: {
                     Text(option.title, bundle: .l10n)
                         .font(.system(size: 11, weight: option == selection ? .semibold : .regular))
                         .foregroundStyle(option == selection ? option.color : Color.ctp.muted)
@@ -134,8 +136,8 @@ private struct PermissionPicker: View {
     }
 }
 
-private extension Permission {
-    var title: LocalizedStringKey {
+extension Permission {
+    fileprivate var title: LocalizedStringKey {
         switch self {
         case .allow: "Allow"
         case .ask: "Ask"
@@ -143,7 +145,7 @@ private extension Permission {
         }
     }
 
-    var color: Color {
+    fileprivate var color: Color {
         switch self {
         case .allow: Color.ctp.ok
         case .ask: Color.ctp.warn
@@ -174,7 +176,10 @@ private struct ServerCard: View {
                 } label: {
                     StatusBadge(
                         color: Color.ctp.warn,
-                        label: LocalizedStringKey(String(localized: "\(String(mcp.approvalModel.pending.count)) awaiting approval", bundle: .l10n))
+                        label: LocalizedStringKey(
+                            String(
+                                localized: "\(String(mcp.approvalModel.pending.count)) awaiting approval", bundle: .l10n
+                            ))
                     )
                 }
                 .buttonStyle(.plain)
@@ -189,16 +194,40 @@ private struct ServerCard: View {
             }
 
             SectionMenuButton {
-                Button { copy(.claudeCodeHTTP) } label: { Text("Claude Code (HTTP)", bundle: .l10n) }
-                Button { copy(.jsonHTTP) } label: { Text("JSON (HTTP)", bundle: .l10n) }
-                Button { copy(.claudeDesktopStdio) } label: { Text("Claude Desktop (stdio)", bundle: .l10n) }
+                Button {
+                    copy(.claudeCodeHTTP)
+                } label: {
+                    Text("Claude Code (HTTP)", bundle: .l10n)
+                }
+                Button {
+                    copy(.jsonHTTP)
+                } label: {
+                    Text("JSON (HTTP)", bundle: .l10n)
+                }
+                Button {
+                    copy(.claudeDesktopStdio)
+                } label: {
+                    Text("Claude Desktop (stdio)", bundle: .l10n)
+                }
                 Divider()
-                Button { confirmRegenerate = true } label: { Text("Regenerate token", bundle: .l10n) }
+                Button {
+                    confirmRegenerate = true
+                } label: {
+                    Text("Regenerate token", bundle: .l10n)
+                }
                 switch mcp.state {
                 case .running:
-                    Button { Task { await mcp.stop() } } label: { Text("Stop", bundle: .l10n) }
+                    Button {
+                        Task { await mcp.stop() }
+                    } label: {
+                        Text("Stop", bundle: .l10n)
+                    }
                 case .stopped, .failed:
-                    Button { Task { await mcp.start() } } label: { Text("Start", bundle: .l10n) }
+                    Button {
+                        Task { await mcp.start() }
+                    } label: {
+                        Text("Start", bundle: .l10n)
+                    }
                 case .starting:
                     EmptyView()
                 }
@@ -214,10 +243,15 @@ private struct ServerCard: View {
         .confirmationDialog(
             Text("Regenerate token?", bundle: .l10n), isPresented: $confirmRegenerate, titleVisibility: .visible
         ) {
-            Button(role: .destructive) { Task { await mcp.regenerateToken() } } label: {
+            Button(role: .destructive) {
+                Task { await mcp.regenerateToken() }
+            } label: {
                 Text("Regenerate token", bundle: .l10n)
             }
-            Button(role: .cancel) {} label: { Text("Cancel", bundle: .l10n) }
+            Button(role: .cancel) {
+            } label: {
+                Text("Cancel", bundle: .l10n)
+            }
         } message: {
             Text("Clients using the old token stop working until you copy the config again.", bundle: .l10n)
         }

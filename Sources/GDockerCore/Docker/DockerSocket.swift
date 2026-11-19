@@ -28,7 +28,7 @@ public enum DockerSocket {
     private static func contextSocket(home: URL) -> String? {
         let docker = home.appendingPathComponent(".docker")
         guard let config = readJSON(docker.appendingPathComponent("config.json")),
-              let name = config["currentContext"] as? String, name != "default"
+            let name = config["currentContext"] as? String, name != "default"
         else { return nil }
         let hash = SHA256.hash(data: Data(name.utf8)).map { String(format: "%02x", $0) }.joined()
         let meta = readJSON(docker.appendingPathComponent("contexts/meta/\(hash)/meta.json"))

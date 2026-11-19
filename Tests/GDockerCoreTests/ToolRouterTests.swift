@@ -1,5 +1,6 @@
 import Foundation
 import Testing
+
 @testable import GDockerCore
 
 private struct Harness {
@@ -23,7 +24,8 @@ private struct Harness {
         let dir = FileManager.default.temporaryDirectory.appendingPathComponent("gdocker-\(UUID().uuidString)")
         let fake = FakeDocker()
         let fakeCompose = compose ?? FakeComposeRunner()
-        let fakeRegistry = registry ?? ComposeProjectRegistry(fileURL: dir.appendingPathComponent("compose_projects.json"))
+        let fakeRegistry =
+            registry ?? ComposeProjectRegistry(fileURL: dir.appendingPathComponent("compose_projects.json"))
         let scripted = ScriptedPrompter(decisions)
         let permissions = PermissionStore(fileURL: dir.appendingPathComponent("permissions.json"))
         let activity = ActivityLog(fileURL: dir.appendingPathComponent("activity.jsonl"))
@@ -263,8 +265,10 @@ func wrongTypesAreErrorsWithoutDocker(tool: String, arguments: [String: JSONValu
     let h = Harness(decisions: [.allowOnce])
     _ = await h.call(
         "exec_in_container",
-        ["container": .string("web"), "command": .array([.string("ls"), .string("-la"), .string("/my app")]),
-         "reason": .string("debugging")],
+        [
+            "container": .string("web"), "command": .array([.string("ls"), .string("-la"), .string("/my app")]),
+            "reason": .string("debugging"),
+        ],
         client: "Claude Code")
     let request = try #require(await h.scripted.requests.first)
     #expect(request.client == "Claude Code" && request.tool == "exec_in_container")
@@ -285,8 +289,9 @@ func wrongTypesAreErrorsWithoutDocker(tool: String, arguments: [String: JSONValu
 
 @Test func activityRecordsClientToolAndArguments() async throws {
     let h = Harness()
-    _ = await h.call("get_logs", ["container": .string("web"), "tail": .int(5), "reason": .string("why")],
-                     client: "Cursor")
+    _ = await h.call(
+        "get_logs", ["container": .string("web"), "tail": .int(5), "reason": .string("why")],
+        client: "Cursor")
     let entry = try #require(await h.activity.entries().first)
     #expect(entry.client == "Cursor" && entry.tool == "get_logs")
     #expect(entry.arguments.contains("container=web") && entry.arguments.contains("tail=5"))
@@ -299,7 +304,9 @@ func wrongTypesAreErrorsWithoutDocker(tool: String, arguments: [String: JSONValu
     for spec in ToolCatalog.all {
         var arguments: [String: JSONValue] = ["reason": .string("because")]
         for parameter in spec.parameters where parameter.required {
-            arguments[parameter.name] = parameter.kind == .stringArray ? .array([.string("echo")]) : (parameter.name == "project" ? .string("app") : .string("web"))
+            arguments[parameter.name] =
+                parameter.kind == .stringArray
+                ? .array([.string("echo")]) : (parameter.name == "project" ? .string("app") : .string("web"))
         }
         let out = await h.call(spec.name, arguments)
         #expect(!out.isError, "\(spec.name): \(out.text)")
@@ -420,7 +427,9 @@ func wrongTypesAreErrorsWithoutDocker(tool: String, arguments: [String: JSONValu
     #expect(report["images_deleted"] as? Int == 1)
     #expect(report["networks_deleted"] as? Int == 1)
     #expect(report["volumes_deleted"] as? Int == 1)
-    #expect((report["space_reclaimed_bytes"] as? Int64 ?? (report["space_reclaimed_bytes"] as? Int).map(Int64.init)) == 7168)
+    #expect(
+        (report["space_reclaimed_bytes"] as? Int64 ?? (report["space_reclaimed_bytes"] as? Int).map(Int64.init)) == 7168
+    )
 
     _ = await h.call("system_prune")
     #expect(await h.docker.calls.contains("systemPrune:all=false:volumes=false"))
@@ -445,7 +454,7 @@ func wrongTypesAreErrorsWithoutDocker(tool: String, arguments: [String: JSONValu
             "com.docker.compose.project": "app",
             "com.docker.compose.service": "db",
             "com.docker.compose.project.working_dir": "/workspace",
-            "com.docker.compose.project.config_files": "docker-compose.yml"
+            "com.docker.compose.project.config_files": "docker-compose.yml",
         ],
         ports: []
     )
@@ -482,7 +491,7 @@ func wrongTypesAreErrorsWithoutDocker(tool: String, arguments: [String: JSONValu
             "com.docker.compose.project": "app",
             "com.docker.compose.service": "db",
             "com.docker.compose.project.working_dir": "/workspace",
-            "com.docker.compose.project.config_files": "docker-compose.yml"
+            "com.docker.compose.project.config_files": "docker-compose.yml",
         ],
         ports: []
     )
@@ -518,7 +527,7 @@ func wrongTypesAreErrorsWithoutDocker(tool: String, arguments: [String: JSONValu
             "com.docker.compose.project": "app",
             "com.docker.compose.service": "db",
             "com.docker.compose.project.working_dir": "/workspace",
-            "com.docker.compose.project.config_files": "docker-compose.yml"
+            "com.docker.compose.project.config_files": "docker-compose.yml",
         ],
         ports: []
     )
@@ -529,7 +538,10 @@ func wrongTypesAreErrorsWithoutDocker(tool: String, arguments: [String: JSONValu
     #expect(out.text.contains("Stack stopped") || out.text.contains("Stopped"))
 
     let calls = await compose.calls
-    #expect(calls == [.down(project: "app", workingDir: "/workspace", configFiles: ["docker-compose.yml"], removeVolumes: true)])
+    #expect(
+        calls == [
+            .down(project: "app", workingDir: "/workspace", configFiles: ["docker-compose.yml"], removeVolumes: true)
+        ])
     #expect(await h.lastOutcome() == .approved)
 
     // Critical check: compose_down MUST forbid allowsAlways in the approval request!

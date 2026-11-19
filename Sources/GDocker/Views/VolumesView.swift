@@ -71,10 +71,16 @@ struct VolumesView: View {
                     confirmRemoveTarget = nil
                     Task { await store.remove(name: target.name) }
                 }
-            } label: { Text("Remove", bundle: .l10n) }
+            } label: {
+                Text("Remove", bundle: .l10n)
+            }
         } message: {
             if let target = confirmRemoveTarget {
-                Text(verbatim: String(localized: "The volume '\(target.name)' will be removed permanently. Any stored data will be lost.", bundle: .l10n))
+                Text(
+                    verbatim: String(
+                        localized:
+                            "The volume '\(target.name)' will be removed permanently. Any stored data will be lost.",
+                        bundle: .l10n))
             } else {
                 Text("The selected volume will be removed permanently.", bundle: .l10n)
             }
@@ -87,9 +93,15 @@ struct VolumesView: View {
             Button(role: .destructive) {
                 let names = store.selectedIDs
                 Task { await store.remove(names: names) }
-            } label: { Text("Remove", bundle: .l10n) }
+            } label: {
+                Text("Remove", bundle: .l10n)
+            }
         } message: {
-            Text(verbatim: String(localized: "\(String(store.selectedIDs.count)) selected volumes will be removed permanently. Any stored data will be lost.", bundle: .l10n))
+            Text(
+                verbatim: String(
+                    localized:
+                        "\(String(store.selectedIDs.count)) selected volumes will be removed permanently. Any stored data will be lost.",
+                    bundle: .l10n))
         }
         .confirmationDialog(
             Text("Prune unused volumes?", bundle: .l10n),
@@ -98,15 +110,22 @@ struct VolumesView: View {
         ) {
             Button(role: .destructive) {
                 Task { await store.prune() }
-            } label: { Text("Prune Volumes", bundle: .l10n) }
+            } label: {
+                Text("Prune Volumes", bundle: .l10n)
+            }
         } message: {
-            Text("All unused volumes will be removed permanently. Any data in unused volumes will be lost.", bundle: .l10n)
+            Text(
+                "All unused volumes will be removed permanently. Any data in unused volumes will be lost.",
+                bundle: .l10n)
         }
         .alert(
             Text("Docker error", bundle: .l10n),
             isPresented: Binding(get: { store.lastError != nil }, set: { if !$0 { store.lastError = nil } })
         ) {
-            Button { } label: { Text("OK", bundle: .l10n) }
+            Button {
+            } label: {
+                Text("OK", bundle: .l10n)
+            }
         } message: {
             Text(verbatim: store.lastError ?? "")
         }
@@ -126,7 +145,8 @@ struct VolumesView: View {
                 }
                 Spacer()
 
-                TableSearchField(text: $store.searchText, prompt: String(localized: "Search volumes", bundle: .l10n), width: 260)
+                TableSearchField(
+                    text: $store.searchText, prompt: String(localized: "Search volumes", bundle: .l10n), width: 260)
 
                 IconActionButton(
                     systemImage: "arrow.clockwise",
@@ -147,24 +167,41 @@ struct VolumesView: View {
                     Button {
                         Task { await store.refresh() }
                     } label: {
-                        Label { Text("Refresh", bundle: .l10n) } icon: { Image(systemName: "arrow.clockwise") }
+                        Label {
+                            Text("Refresh", bundle: .l10n)
+                        } icon: {
+                            Image(systemName: "arrow.clockwise")
+                        }
                     }
                     Button(role: .destructive) {
                         confirmPrune = true
                     } label: {
-                        Label { Text("Prune Volumes", bundle: .l10n) } icon: { Image(systemName: "trash.slash") }
+                        Label {
+                            Text("Prune Volumes", bundle: .l10n)
+                        } icon: {
+                            Image(systemName: "trash.slash")
+                        }
                     }
                 }
             }
 
             HStack(spacing: 8) {
-                FilterPill(title: LocalizedStringKey(String(localized: "All", bundle: .l10n)), dotColor: nil, isSelected: store.filter == .all) {
+                FilterPill(
+                    title: LocalizedStringKey(String(localized: "All", bundle: .l10n)), dotColor: nil,
+                    isSelected: store.filter == .all
+                ) {
                     store.filter = .all
                 }
-                FilterPill(title: LocalizedStringKey(String(localized: "Named", bundle: .l10n)), dotColor: Color.ctp.accent, isSelected: store.filter == .named) {
+                FilterPill(
+                    title: LocalizedStringKey(String(localized: "Named", bundle: .l10n)), dotColor: Color.ctp.accent,
+                    isSelected: store.filter == .named
+                ) {
                     store.filter = .named
                 }
-                FilterPill(title: LocalizedStringKey(String(localized: "Anonymous", bundle: .l10n)), dotColor: Color.ctp.muted, isSelected: store.filter == .anonymous) {
+                FilterPill(
+                    title: LocalizedStringKey(String(localized: "Anonymous", bundle: .l10n)), dotColor: Color.ctp.muted,
+                    isSelected: store.filter == .anonymous
+                ) {
                     store.filter = .anonymous
                 }
                 Spacer()
@@ -330,10 +367,14 @@ private struct VolumeRow: View {
                     .lineLimit(1)
                     .truncationMode(.middle)
                 HStack(spacing: 6) {
-                    Text(verbatim: isAnonymous ? String(localized: "Anonymous volume", bundle: .l10n) : String(localized: "Named volume", bundle: .l10n))
-                        .font(.system(size: 11))
-                        .foregroundStyle(Color.ctp.muted)
-                        .lineLimit(1)
+                    Text(
+                        verbatim: isAnonymous
+                            ? String(localized: "Anonymous volume", bundle: .l10n)
+                            : String(localized: "Named volume", bundle: .l10n)
+                    )
+                    .font(.system(size: 11))
+                    .foregroundStyle(Color.ctp.muted)
+                    .lineLimit(1)
                     if isMounted {
                         Text("Mounted in Finder", bundle: .l10n)
                             .font(.system(size: 10, weight: .medium))
@@ -389,23 +430,45 @@ private struct VolumeRow: View {
                 IconActionButton(systemImage: "trash", tint: Color.ctp.err, help: "Remove", action: onRemove)
                 SectionMenuButton {
                     Button(action: onOpenInFinder) {
-                        Label { Text("Open in Finder", bundle: .l10n) } icon: { Image(systemName: "folder") }
+                        Label {
+                            Text("Open in Finder", bundle: .l10n)
+                        } icon: {
+                            Image(systemName: "folder")
+                        }
                     }
                     .disabled(isMounting)
                     if isMounted {
                         Button(action: onUnmount) {
-                            Label { Text("Unmount from Finder", bundle: .l10n) } icon: { Image(systemName: "eject") }
+                            Label {
+                                Text("Unmount from Finder", bundle: .l10n)
+                            } icon: {
+                                Image(systemName: "eject")
+                            }
                         }
                     }
-                    Button { copyToPasteboard(volume.name) } label: {
-                        Label { Text("Copy Name", bundle: .l10n) } icon: { Image(systemName: "doc.on.doc") }
+                    Button {
+                        copyToPasteboard(volume.name)
+                    } label: {
+                        Label {
+                            Text("Copy Name", bundle: .l10n)
+                        } icon: {
+                            Image(systemName: "doc.on.doc")
+                        }
                     }
                     Divider()
                     Button(role: .destructive, action: onRemove) {
-                        Label { Text("Remove", bundle: .l10n) } icon: { Image(systemName: "trash") }
+                        Label {
+                            Text("Remove", bundle: .l10n)
+                        } icon: {
+                            Image(systemName: "trash")
+                        }
                     }
                     Button(role: .destructive, action: onForceRemove) {
-                        Label { Text("Force remove", bundle: .l10n) } icon: { Image(systemName: "trash.fill") }
+                        Label {
+                            Text("Force remove", bundle: .l10n)
+                        } icon: {
+                            Image(systemName: "trash.fill")
+                        }
                     }
                 }
             }

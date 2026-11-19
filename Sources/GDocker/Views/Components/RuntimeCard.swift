@@ -28,7 +28,8 @@ struct RuntimeCard: View {
             .background(
                 RoundedRectangle(cornerRadius: 8)
                     .fill(Color.ctp.bg.opacity(0.65))
-                    .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(Color.ctp.muted.opacity(0.22), lineWidth: 1))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8).strokeBorder(Color.ctp.muted.opacity(0.22), lineWidth: 1))
             )
             .padding(.horizontal, 8)
             .padding(.bottom, 8)
@@ -96,7 +97,8 @@ struct RuntimeCard: View {
             .background(
                 RoundedRectangle(cornerRadius: 8)
                     .fill(Color.ctp.bg.opacity(0.55))
-                    .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(Color.ctp.muted.opacity(0.22), lineWidth: 1))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8).strokeBorder(Color.ctp.muted.opacity(0.22), lineWidth: 1))
             )
             .padding(.horizontal, 10)
             .padding(.bottom, 10)

@@ -21,7 +21,8 @@ struct LogsTab: View {
                 .background(
                     RoundedRectangle(cornerRadius: 7)
                         .fill(Color.ctp.side)
-                        .overlay(RoundedRectangle(cornerRadius: 7).strokeBorder(Color.ctp.muted.opacity(0.24), lineWidth: 1))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 7).strokeBorder(Color.ctp.muted.opacity(0.24), lineWidth: 1))
                 )
 
                 Button {

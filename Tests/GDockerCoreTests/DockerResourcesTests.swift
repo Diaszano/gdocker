@@ -1,5 +1,6 @@
 import Foundation
 import Testing
+
 @testable import GDockerCore
 
 @Suite struct DockerResourcesTests {
@@ -21,14 +22,14 @@ import Testing
         let first = images[0]
         #expect(first.id == "sha256:e9c7d0e10f9b301936f4051a8b1a8d01d4a04d275727fc378d8542e68447167b")
         #expect(first.repoTags == ["ubuntu:latest", "ubuntu:22.04"])
-        #expect(first.size == 77840123)
-        #expect(first.created == 1699990000)
+        #expect(first.size == 77_840_123)
+        #expect(first.created == 1_699_990_000)
 
         // Dangling image with null RepoTags decodes to empty array
         let second = images[1]
         #expect(second.repoTags == [])
-        #expect(second.size == 12345678)
-        #expect(second.created == 1699980000)
+        #expect(second.size == 12_345_678)
+        #expect(second.created == 1_699_980_000)
     }
 
     // MARK: - VolumeSummary Tests
@@ -46,7 +47,7 @@ import Testing
 
         let first = volumes[0]
         #expect(first.name == "app_data")
-        #expect(first.id == "app_data") // computed id { name }
+        #expect(first.id == "app_data")  // computed id { name }
         #expect(first.driver == "local")
         #expect(first.scope == "local")
         #expect(first.createdAt == "2026-01-01T12:00:00Z")
@@ -103,11 +104,12 @@ import Testing
     @Test func decodePruneImagesFixture() throws {
         let data = try fixtureData("prune_images")
         let res = try JSONDecoder().decode(ImagePruneResponse.self, from: data)
-        #expect(res.deletedItems == [
-            "sha256:1111111111111111111111111111111111111111111111111111111111111111",
-            "sha256:2222222222222222222222222222222222222222222222222222222222222222",
-        ])
-        #expect(res.spaceReclaimed == 52428800)
+        #expect(
+            res.deletedItems == [
+                "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+                "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+            ])
+        #expect(res.spaceReclaimed == 52_428_800)
 
         // Null images deleted handled gracefully
         let emptyJSON = Data(#"{"ImagesDeleted": null, "SpaceReclaimed": 0}"#.utf8)
@@ -120,7 +122,7 @@ import Testing
         let data = try fixtureData("prune_volumes")
         let res = try JSONDecoder().decode(VolumePruneResponse.self, from: data)
         #expect(res.volumesDeleted == ["unused_vol_1", "unused_vol_2"])
-        #expect(res.spaceReclaimed == 104857600)
+        #expect(res.spaceReclaimed == 104_857_600)
 
         // Null volumes deleted handled gracefully
         let emptyJSON = Data(#"{"VolumesDeleted": null, "SpaceReclaimed": 0}"#.utf8)
@@ -144,7 +146,7 @@ import Testing
         let data = try fixtureData("prune_containers")
         let res = try JSONDecoder().decode(ContainerPruneResponse.self, from: data)
         #expect(res.containersDeleted == ["stopped_c1", "stopped_c2"])
-        #expect(res.spaceReclaimed == 20971520)
+        #expect(res.spaceReclaimed == 20_971_520)
 
         // Null containers deleted handled gracefully
         let emptyJSON = Data(#"{"ContainersDeleted": null, "SpaceReclaimed": 0}"#.utf8)
@@ -218,7 +220,7 @@ import Testing
         #expect(report.networksDeleted == 1)
         #expect(report.imagesDeleted == 1)
         #expect(report.volumesDeleted == 0)
-        #expect(report.spaceReclaimed == 1024 + 2048) // containers + images only
+        #expect(report.spaceReclaimed == 1024 + 2048)  // containers + images only
 
         let calls = await fake.calls
         #expect(calls.contains("pruneContainers"))

@@ -18,14 +18,18 @@ struct TerminalTab: View {
                 switch TerminalAvailability(state: container.state) {
                 case .stopped:
                     unavailable(Text("Container is not running", bundle: .l10n), icon: "stop.circle") {
-                        Button { Task { await store.perform(.start, on: container.id) } } label: {
+                        Button {
+                            Task { await store.perform(.start, on: container.id) }
+                        } label: {
                             Text("Start", bundle: .l10n)
                         }
                     }
                 case .paused:
                     unavailable(Text("Container is paused", bundle: .l10n), icon: "pause.circle") { EmptyView() }
                 case .restarting:
-                    unavailable(Text("Container is restarting", bundle: .l10n), icon: "arrow.clockwise.circle") { EmptyView() }
+                    unavailable(Text("Container is restarting", bundle: .l10n), icon: "arrow.clockwise.circle") {
+                        EmptyView()
+                    }
                 case .ready:
                     shell
                 }
@@ -42,9 +46,12 @@ struct TerminalTab: View {
             if let code = session.exitCode {
                 Divider()
                 HStack {
-                    Text(verbatim: String(localized: "Session ended (code \(String(code)))", bundle: .l10n)).foregroundStyle(Color.ctp.muted)
+                    Text(verbatim: String(localized: "Session ended (code \(String(code)))", bundle: .l10n))
+                        .foregroundStyle(Color.ctp.muted)
                     Spacer()
-                    Button { session.reconnect(containerID: container.id) } label: {
+                    Button {
+                        session.reconnect(containerID: container.id)
+                    } label: {
                         Text("Reconnect", bundle: .l10n)
                     }
                 }

@@ -8,9 +8,21 @@ struct StatsTab: View {
 
     var body: some View {
         Form {
-            LabeledContent { Text(verbatim: cpu) } label: { Text("CPU", bundle: .l10n) }
-            LabeledContent { Text(verbatim: memory) } label: { Text("Memory", bundle: .l10n) }
-            LabeledContent { Text(verbatim: network) } label: { Text("Network", bundle: .l10n) }
+            LabeledContent {
+                Text(verbatim: cpu)
+            } label: {
+                Text("CPU", bundle: .l10n)
+            }
+            LabeledContent {
+                Text(verbatim: memory)
+            } label: {
+                Text("Memory", bundle: .l10n)
+            }
+            LabeledContent {
+                Text(verbatim: network)
+            } label: {
+                Text("Network", bundle: .l10n)
+            }
         }
         .formStyle(.grouped)
         .task(id: id) {

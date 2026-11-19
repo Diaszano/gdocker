@@ -6,11 +6,15 @@ import GDockerMCP
 /// Minimal Docker for the MCP tests: one container, everything else a no-op.
 struct StubDocker: DockerOperations {
     func listContainers() async throws -> [ContainerSummary] {
-        [ContainerSummary(
-            id: String(repeating: "a", count: 64), names: ["/web"], image: "nginx", state: "running",
-            status: "Up 1 hour", labels: [:], ports: [])]
+        [
+            ContainerSummary(
+                id: String(repeating: "a", count: 64), names: ["/web"], image: "nginx", state: "running",
+                status: "Up 1 hour", labels: [:], ports: [])
+        ]
     }
-    func inspect(_ id: String) async throws -> (details: ContainerDetails, rawJSON: String) { throw DockerError.notFound("stub") }
+    func inspect(_ id: String) async throws -> (details: ContainerDetails, rawJSON: String) {
+        throw DockerError.notFound("stub")
+    }
     func recentLogs(_ id: String, tail: Int, timestamps: Bool) async throws -> [LogLine] { [] }
     func statsOnce(_ id: String) async throws -> StatsSample { throw DockerError.notFound("stub") }
     func start(_ id: String) async throws {}
@@ -100,7 +104,10 @@ final class McpTestClient: @unchecked Sendable {
     var sessionID: String?
     var clientName = "test-client"
 
-    init(url: URL, token: String?) { self.url = url; self.token = token }
+    init(url: URL, token: String?) {
+        self.url = url
+        self.token = token
+    }
 
     @discardableResult
     func post(_ body: [String: Any], headers: [String: String] = [:]) async throws -> McpResponse {
@@ -117,14 +124,17 @@ final class McpTestClient: @unchecked Sendable {
         let http = try unwrap(response as? HTTPURLResponse)
         var headers: [String: String] = [:]
         for (key, value) in http.allHeaderFields { headers["\(key)"] = "\(value)" }
-        return McpResponse(status: http.statusCode, headers: headers, messages: Self.messages(in: data, headers: headers))
+        return McpResponse(
+            status: http.statusCode, headers: headers, messages: Self.messages(in: data, headers: headers))
     }
 
     func initialize() async throws -> McpResponse {
         let response = try await post([
             "jsonrpc": "2.0", "id": 1, "method": "initialize",
-            "params": ["protocolVersion": "2025-03-26", "capabilities": [:],
-                       "clientInfo": ["name": clientName, "version": "1.0"]],
+            "params": [
+                "protocolVersion": "2025-03-26", "capabilities": [:],
+                "clientInfo": ["name": clientName, "version": "1.0"],
+            ],
         ])
         sessionID = response.header("Mcp-Session-Id")
         if response.status == 200 {
@@ -134,14 +144,17 @@ final class McpTestClient: @unchecked Sendable {
     }
 
     func call(_ tool: String, _ arguments: [String: Any] = [:], id: Int = 2) async throws -> McpResponse {
-        try await post(["jsonrpc": "2.0", "id": id, "method": "tools/call",
-                        "params": ["name": tool, "arguments": arguments]])
+        try await post([
+            "jsonrpc": "2.0", "id": id, "method": "tools/call",
+            "params": ["name": tool, "arguments": arguments],
+        ])
     }
 
     private static func messages(in data: Data, headers: [String: String]) -> [[String: Any]] {
         let text = String(decoding: data, as: UTF8.self)
         let isSSE = headers.contains { $0.key.lowercased() == "content-type" && $0.value.contains("text/event-stream") }
-        let payloads = isSSE
+        let payloads =
+            isSSE
             ? text.split(separator: "\n").compactMap { line -> String? in
                 line.hasPrefix("data:") ? String(line.dropFirst(5)).trimmingCharacters(in: .whitespaces) : nil
             }
@@ -155,7 +168,10 @@ func unwrap<T>(_ value: T?) throws -> T {
     return value
 }
 
-enum McpTestError: Error { case missing, socket(String) }
+enum McpTestError: Error {
+    case missing
+    case socket(String)
+}
 
 /// A raw HTTP/1.1 request over a socket, for headers URLSession refuses to set (`Host`). `closed` is whether the
 /// server closed the connection (as `Connection: close` asks) within the read timeout.
@@ -170,7 +186,9 @@ func rawRequest(port: Int, headers: [String: String], body: String) throws -> (s
     address.sin_port = in_port_t(port).bigEndian
     address.sin_addr.s_addr = inet_addr("127.0.0.1")
     let connected = withUnsafePointer(to: &address) {
-        $0.withMemoryRebound(to: sockaddr.self, capacity: 1) { connect(fd, $0, socklen_t(MemoryLayout<sockaddr_in>.size)) }
+        $0.withMemoryRebound(to: sockaddr.self, capacity: 1) {
+            connect(fd, $0, socklen_t(MemoryLayout<sockaddr_in>.size))
+        }
     }
     guard connected == 0 else { throw McpTestError.socket("connect") }
     var request = "POST /mcp HTTP/1.1\r\n"
@@ -182,7 +200,10 @@ func rawRequest(port: Int, headers: [String: String], body: String) throws -> (s
     var closed = false
     while true {
         let count = recv(fd, &buffer, buffer.count, 0)
-        if count == 0 { closed = true; break }
+        if count == 0 {
+            closed = true
+            break
+        }
         if count < 0 { break }
         received.append(contentsOf: buffer[0..<count])
     }

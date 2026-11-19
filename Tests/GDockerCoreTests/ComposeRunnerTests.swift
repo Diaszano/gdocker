@@ -1,5 +1,6 @@
 import Foundation
 import Testing
+
 @testable import GDockerCore
 
 @Suite("ComposeRunnerTests")
@@ -29,10 +30,12 @@ struct ComposeRunnerTests {
         #expect(downResult == "Down ok")
 
         let calls = await fake.calls
-        #expect(calls == [
-            .up(project: "web-stack", workingDir: "/app", configFiles: ["docker-compose.yml"]),
-            .down(project: "web-stack", workingDir: "/app", configFiles: ["docker-compose.yml"], removeVolumes: true)
-        ])
+        #expect(
+            calls == [
+                .up(project: "web-stack", workingDir: "/app", configFiles: ["docker-compose.yml"]),
+                .down(
+                    project: "web-stack", workingDir: "/app", configFiles: ["docker-compose.yml"], removeVolumes: true),
+            ])
     }
 
     @Test func fakeRunnerThrowsSimulatedErrors() async throws {
@@ -94,7 +97,7 @@ struct ComposeRunnerTests {
         let runner = CLIComposeRunner(
             binaryPath: "/usr/local/bin/docker",
             fileExists: { path in
-                path == "/usr/local/bin/docker" // workingDir is missing
+                path == "/usr/local/bin/docker"  // workingDir is missing
             }
         )
 
@@ -146,15 +149,16 @@ struct ComposeRunnerTests {
         #expect(output == "Container web Started\n")
         #expect(captured.binary == "/usr/local/bin/docker")
         #expect(captured.dir == "/workspace/project")
-        #expect(captured.args == [
-            "compose",
-            "-f", "docker-compose.yml",
-            "-f", "docker-compose.override.yml",
-            "--project-directory", "/workspace/project",
-            "-p", "my-stack",
-            "up",
-            "-d"
-        ])
+        #expect(
+            captured.args == [
+                "compose",
+                "-f", "docker-compose.yml",
+                "-f", "docker-compose.override.yml",
+                "--project-directory", "/workspace/project",
+                "-p", "my-stack",
+                "up",
+                "-d",
+            ])
     }
 
     @Test func cliBuildsCorrectArgumentsForComposeDownWithoutAndWithVolumeRemoval() async throws {
@@ -180,13 +184,14 @@ struct ComposeRunnerTests {
             removeVolumes: false
         )
 
-        #expect(captured.args == [
-            "compose",
-            "-f", "docker-compose.yml",
-            "--project-directory", "/workspace/project",
-            "-p", "my-stack",
-            "down"
-        ])
+        #expect(
+            captured.args == [
+                "compose",
+                "-f", "docker-compose.yml",
+                "--project-directory", "/workspace/project",
+                "-p", "my-stack",
+                "down",
+            ])
 
         // Down with volume removal (-v)
         _ = try await runner.composeDown(
@@ -196,14 +201,15 @@ struct ComposeRunnerTests {
             removeVolumes: true
         )
 
-        #expect(captured.args == [
-            "compose",
-            "-f", "docker-compose.yml",
-            "--project-directory", "/workspace/project",
-            "-p", "my-stack",
-            "down",
-            "-v"
-        ])
+        #expect(
+            captured.args == [
+                "compose",
+                "-f", "docker-compose.yml",
+                "--project-directory", "/workspace/project",
+                "-p", "my-stack",
+                "down",
+                "-v",
+            ])
     }
 
     // MARK: - Environment & DOCKER_HOST
@@ -262,7 +268,10 @@ struct ComposeRunnerTests {
     }
 
     @Test func composeFallsBackToPluginWhenNoDocker() async throws {
-        final class Captured: @unchecked Sendable { var binary: String?; var args: [String] = [] }
+        final class Captured: @unchecked Sendable {
+            var binary: String?
+            var args: [String] = []
+        }
         let captured = Captured()
         let plugin = NSHomeDirectory() + "/.docker/cli-plugins/docker-compose"
         let runner = CLIComposeRunner(
@@ -280,7 +289,10 @@ struct ComposeRunnerTests {
     }
 
     @Test func composeFindsOrbStackDocker() async throws {
-        final class Captured: @unchecked Sendable { var binary: String?; var args: [String] = [] }
+        final class Captured: @unchecked Sendable {
+            var binary: String?
+            var args: [String] = []
+        }
         let captured = Captured()
         let orbstack = NSHomeDirectory() + "/.orbstack/bin/docker"
         let runner = CLIComposeRunner(
@@ -298,7 +310,10 @@ struct ComposeRunnerTests {
     }
 
     @Test func composeFindsRancherDesktopDocker() async throws {
-        final class Captured: @unchecked Sendable { var binary: String?; var args: [String] = [] }
+        final class Captured: @unchecked Sendable {
+            var binary: String?
+            var args: [String] = []
+        }
         let captured = Captured()
         let rancher = NSHomeDirectory() + "/.rd/bin/docker"
         let runner = CLIComposeRunner(

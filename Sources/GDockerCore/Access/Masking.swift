@@ -14,7 +14,8 @@ public enum Masking {
             }
             object["Config"] = config
         }
-        let data = (try? JSONSerialization.data(withJSONObject: object, options: [.prettyPrinted, .sortedKeys])) ?? Data()
+        let data =
+            (try? JSONSerialization.data(withJSONObject: object, options: [.prettyPrinted, .sortedKeys])) ?? Data()
         return String(decoding: data, as: UTF8.self)
     }
 }

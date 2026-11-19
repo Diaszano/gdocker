@@ -9,9 +9,13 @@ public enum McpConfigSnippets {
 
     /// A generic `mcpServers` JSON entry, over HTTP.
     public static func jsonHTTP(url: URL, token: String) -> String {
-        json(["mcpServers": ["gdocker": [
-            "type": "http", "url": url.absoluteString, "headers": ["Authorization": "Bearer \(token)"],
-        ] as [String: Any]]])
+        json([
+            "mcpServers": [
+                "gdocker": [
+                    "type": "http", "url": url.absoluteString, "headers": ["Authorization": "Bearer \(token)"],
+                ] as [String: Any]
+            ]
+        ])
     }
 
     /// Claude Desktop, which only launches stdio servers. The bridge reads the token from the keychain itself, so the

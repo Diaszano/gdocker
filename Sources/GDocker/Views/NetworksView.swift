@@ -61,10 +61,14 @@ struct NetworksView: View {
                     confirmRemoveTarget = nil
                     Task { await store.remove(id: target.id) }
                 }
-            } label: { Text("Remove", bundle: .l10n) }
+            } label: {
+                Text("Remove", bundle: .l10n)
+            }
         } message: {
             if let target = confirmRemoveTarget {
-                Text(verbatim: String(localized: "The network '\(target.name)' will be removed permanently.", bundle: .l10n))
+                Text(
+                    verbatim: String(
+                        localized: "The network '\(target.name)' will be removed permanently.", bundle: .l10n))
             } else {
                 Text("The selected network will be removed permanently.", bundle: .l10n)
             }
@@ -77,9 +81,14 @@ struct NetworksView: View {
             Button(role: .destructive) {
                 let ids = store.selectedIDs
                 Task { await store.remove(ids: ids) }
-            } label: { Text("Remove", bundle: .l10n) }
+            } label: {
+                Text("Remove", bundle: .l10n)
+            }
         } message: {
-            Text(verbatim: String(localized: "\(String(store.selectedIDs.count)) selected networks will be removed permanently.", bundle: .l10n))
+            Text(
+                verbatim: String(
+                    localized: "\(String(store.selectedIDs.count)) selected networks will be removed permanently.",
+                    bundle: .l10n))
         }
         .confirmationDialog(
             Text("Prune unused networks?", bundle: .l10n),
@@ -88,15 +97,22 @@ struct NetworksView: View {
         ) {
             Button(role: .destructive) {
                 Task { await store.prune() }
-            } label: { Text("Prune Networks", bundle: .l10n) }
+            } label: {
+                Text("Prune Networks", bundle: .l10n)
+            }
         } message: {
-            Text("All networks not used by at least one container will be removed permanently. Default networks will not be removed.", bundle: .l10n)
+            Text(
+                "All networks not used by at least one container will be removed permanently. Default networks will not be removed.",
+                bundle: .l10n)
         }
         .alert(
             Text("Docker error", bundle: .l10n),
             isPresented: Binding(get: { store.lastError != nil }, set: { if !$0 { store.lastError = nil } })
         ) {
-            Button { } label: { Text("OK", bundle: .l10n) }
+            Button {
+            } label: {
+                Text("OK", bundle: .l10n)
+            }
         } message: {
             Text(verbatim: store.lastError ?? "")
         }
@@ -116,7 +132,8 @@ struct NetworksView: View {
                 }
                 Spacer()
 
-                TableSearchField(text: $store.searchText, prompt: String(localized: "Search networks", bundle: .l10n), width: 260)
+                TableSearchField(
+                    text: $store.searchText, prompt: String(localized: "Search networks", bundle: .l10n), width: 260)
 
                 IconActionButton(
                     systemImage: "arrow.clockwise",
@@ -137,24 +154,41 @@ struct NetworksView: View {
                     Button {
                         Task { await store.refresh() }
                     } label: {
-                        Label { Text("Refresh", bundle: .l10n) } icon: { Image(systemName: "arrow.clockwise") }
+                        Label {
+                            Text("Refresh", bundle: .l10n)
+                        } icon: {
+                            Image(systemName: "arrow.clockwise")
+                        }
                     }
                     Button(role: .destructive) {
                         confirmPrune = true
                     } label: {
-                        Label { Text("Prune Networks", bundle: .l10n) } icon: { Image(systemName: "trash.slash") }
+                        Label {
+                            Text("Prune Networks", bundle: .l10n)
+                        } icon: {
+                            Image(systemName: "trash.slash")
+                        }
                     }
                 }
             }
 
             HStack(spacing: 8) {
-                FilterPill(title: LocalizedStringKey(String(localized: "All", bundle: .l10n)), dotColor: nil, isSelected: store.filter == .all) {
+                FilterPill(
+                    title: LocalizedStringKey(String(localized: "All", bundle: .l10n)), dotColor: nil,
+                    isSelected: store.filter == .all
+                ) {
                     store.filter = .all
                 }
-                FilterPill(title: LocalizedStringKey(String(localized: "Custom", bundle: .l10n)), dotColor: Color.ctp.accent, isSelected: store.filter == .custom) {
+                FilterPill(
+                    title: LocalizedStringKey(String(localized: "Custom", bundle: .l10n)), dotColor: Color.ctp.accent,
+                    isSelected: store.filter == .custom
+                ) {
                     store.filter = .custom
                 }
-                FilterPill(title: LocalizedStringKey(String(localized: "System", bundle: .l10n)), dotColor: Color.ctp.muted, isSelected: store.filter == .system) {
+                FilterPill(
+                    title: LocalizedStringKey(String(localized: "System", bundle: .l10n)), dotColor: Color.ctp.muted,
+                    isSelected: store.filter == .system
+                ) {
                     store.filter = .system
                 }
                 Spacer()
@@ -376,16 +410,32 @@ private struct NetworkRow: View {
                     Spacer().frame(width: 28)
                 }
                 SectionMenuButton {
-                    Button { copyToPasteboard(network.name) } label: {
-                        Label { Text("Copy Name", bundle: .l10n) } icon: { Image(systemName: "doc.on.doc") }
+                    Button {
+                        copyToPasteboard(network.name)
+                    } label: {
+                        Label {
+                            Text("Copy Name", bundle: .l10n)
+                        } icon: {
+                            Image(systemName: "doc.on.doc")
+                        }
                     }
-                    Button { copyToPasteboard(network.id) } label: {
-                        Label { Text("Copy Network ID", bundle: .l10n) } icon: { Image(systemName: "number") }
+                    Button {
+                        copyToPasteboard(network.id)
+                    } label: {
+                        Label {
+                            Text("Copy Network ID", bundle: .l10n)
+                        } icon: {
+                            Image(systemName: "number")
+                        }
                     }
                     if !network.isDefaultNetwork {
                         Divider()
                         Button(role: .destructive, action: onRemove) {
-                            Label { Text("Remove", bundle: .l10n) } icon: { Image(systemName: "trash") }
+                            Label {
+                                Text("Remove", bundle: .l10n)
+                            } icon: {
+                                Image(systemName: "trash")
+                            }
                         }
                     }
                 }

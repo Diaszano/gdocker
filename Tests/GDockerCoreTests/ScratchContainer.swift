@@ -1,4 +1,5 @@
 import Foundation
+
 @testable import GDockerCore
 
 /// A throwaway alpine container for integration tests. Always removed, even when the body throws.
@@ -9,8 +10,10 @@ enum ScratchContainer {
 
     static func with<T>(_ body: (String) async throws -> T) async throws -> T {
         let name = "gd-test-\(UUID().uuidString.prefix(8).lowercased())"
-        let started = run(["run", "-d", "--name", name, "alpine", "sh", "-c",
-                           "echo one; echo two; echo three; sleep 300"])
+        let started = run([
+            "run", "-d", "--name", name, "alpine", "sh", "-c",
+            "echo one; echo two; echo three; sleep 300",
+        ])
         guard started.code == 0 else { throw Failure(output: started.output) }
         do {
             let result = try await body(name)

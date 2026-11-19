@@ -5,8 +5,10 @@ import Testing
 
 nonisolated(unsafe) private let initialize: [String: Any] = [
     "jsonrpc": "2.0", "id": 1, "method": "initialize",
-    "params": ["protocolVersion": "2025-03-26", "capabilities": [:],
-               "clientInfo": ["name": "t", "version": "1"]],
+    "params": [
+        "protocolVersion": "2025-03-26", "capabilities": [:],
+        "clientInfo": ["name": "t", "version": "1"],
+    ],
 ]
 
 // MARK: - Review focus 1: authentication and origin
@@ -57,8 +59,10 @@ nonisolated(unsafe) private let initialize: [String: Any] = [
     let body = String(decoding: try JSONSerialization.data(withJSONObject: initialize), as: UTF8.self)
     let result = try rawRequest(
         port: h.port,
-        headers: ["Host": "evil.example", "Authorization": "Bearer test-token",
-                  "Content-Type": "application/json", "Accept": "application/json, text/event-stream"],
+        headers: [
+            "Host": "evil.example", "Authorization": "Bearer test-token",
+            "Content-Type": "application/json", "Accept": "application/json, text/event-stream",
+        ],
         body: body)
     #expect([403, 421].contains(result.status), "got \(result.status)")
     #expect(result.closed, "the server kept the connection open after `Connection: close`")
@@ -150,11 +154,14 @@ nonisolated(unsafe) private let initialize: [String: Any] = [
     let first = try await McpHarness.start()
     let second = McpHTTPServer(
         router: ToolRouter(
-            docker: { nil }, permissions: PermissionStore(fileURL: FileManager.default.temporaryDirectory
-                .appendingPathComponent("gd-\(UUID().uuidString)/p.json")),
+            docker: { nil },
+            permissions: PermissionStore(
+                fileURL: FileManager.default.temporaryDirectory
+                    .appendingPathComponent("gd-\(UUID().uuidString)/p.json")),
             prompter: ScriptedPrompter(),
-            activity: ActivityLog(fileURL: FileManager.default.temporaryDirectory
-                .appendingPathComponent("gd-\(UUID().uuidString)/a.jsonl"))),
+            activity: ActivityLog(
+                fileURL: FileManager.default.temporaryDirectory
+                    .appendingPathComponent("gd-\(UUID().uuidString)/a.jsonl"))),
         token: { "x" }, requestedPort: first.port)
     await #expect(throws: McpServerError.portInUse(first.port)) { try await second.start() }
     await first.server.stop()

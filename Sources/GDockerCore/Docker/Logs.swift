@@ -9,7 +9,10 @@ public struct LogLine: Identifiable, Sendable, Hashable {
     public let text: String
 
     public init(id: Int, stream: Stream, timestamp: Date?, text: String) {
-        self.id = id; self.stream = stream; self.timestamp = timestamp; self.text = text
+        self.id = id
+        self.stream = stream
+        self.timestamp = timestamp
+        self.text = text
     }
 }
 
@@ -86,7 +89,8 @@ public struct LogDemuxer {
         var text = String(decoding: bytes, as: UTF8.self)
         var date: Date?
         if timestamps, let space = text.firstIndex(of: " "),
-           let parsed = formatter.date(from: String(text[..<space])) {
+            let parsed = formatter.date(from: String(text[..<space]))
+        {
             date = parsed
             text = String(text[text.index(after: space)...])
         }

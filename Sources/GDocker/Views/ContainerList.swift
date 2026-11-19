@@ -76,7 +76,8 @@ struct ContainerList: View {
                                 .padding(.bottom, store.selectedIDs.isEmpty ? 0 : 72)
                             }
                         }
-                        .frame(minWidth: max(geo.size.width, minTableWidth), maxHeight: .infinity, alignment: .topLeading)
+                        .frame(
+                            minWidth: max(geo.size.width, minTableWidth), maxHeight: .infinity, alignment: .topLeading)
                     }
                 }
             }
@@ -114,7 +115,9 @@ struct ContainerList: View {
                     confirmRemoveID = nil
                     Task { await store.perform(.remove, on: id) }
                 }
-            } label: { Text("Remove", bundle: .l10n) }
+            } label: {
+                Text("Remove", bundle: .l10n)
+            }
         } message: {
             Text("The container will be deleted permanently.", bundle: .l10n)
         }
@@ -126,9 +129,14 @@ struct ContainerList: View {
             Button(role: .destructive) {
                 let ids = store.selectedIDs
                 Task { await store.performBulk(.remove, on: ids) }
-            } label: { Text("Remove", bundle: .l10n) }
+            } label: {
+                Text("Remove", bundle: .l10n)
+            }
         } message: {
-            Text(verbatim: String(localized: "\(String(store.selectedIDs.count)) selected containers will be removed permanently.", bundle: .l10n))
+            Text(
+                verbatim: String(
+                    localized: "\(String(store.selectedIDs.count)) selected containers will be removed permanently.",
+                    bundle: .l10n))
         }
         .confirmationDialog(
             Text("Prune stopped containers?", bundle: .l10n),
@@ -137,7 +145,9 @@ struct ContainerList: View {
         ) {
             Button(role: .destructive) {
                 Task { await store.pruneStopped() }
-            } label: { Text("Prune", bundle: .l10n) }
+            } label: {
+                Text("Prune", bundle: .l10n)
+            }
         } message: {
             Text("All stopped containers will be removed permanently.", bundle: .l10n)
         }
@@ -169,7 +179,8 @@ struct ContainerList: View {
                     .foregroundStyle(Color.ctp.text)
                 Spacer()
 
-                TableSearchField(text: $store.searchText, prompt: String(localized: "Search containers", bundle: .l10n), width: 260)
+                TableSearchField(
+                    text: $store.searchText, prompt: String(localized: "Search containers", bundle: .l10n), width: 260)
 
                 IconActionButton(
                     systemImage: "arrow.clockwise",
@@ -190,19 +201,31 @@ struct ContainerList: View {
                     Button {
                         Task { await store.refresh() }
                     } label: {
-                        Label { Text("Refresh", bundle: .l10n) } icon: { Image(systemName: "arrow.clockwise") }
+                        Label {
+                            Text("Refresh", bundle: .l10n)
+                        } icon: {
+                            Image(systemName: "arrow.clockwise")
+                        }
                     }
                     Button(role: .destructive) {
                         confirmPruneStopped = true
                     } label: {
-                        Label { Text("Prune stopped containers", bundle: .l10n) } icon: { Image(systemName: "trash.slash") }
+                        Label {
+                            Text("Prune stopped containers", bundle: .l10n)
+                        } icon: {
+                            Image(systemName: "trash.slash")
+                        }
                     }
                     if !store.selectedIDs.isEmpty {
                         Divider()
                         Button {
                             store.selectedIDs.removeAll()
                         } label: {
-                            Label { Text("Clear", bundle: .l10n) } icon: { Image(systemName: "xmark.circle") }
+                            Label {
+                                Text("Clear", bundle: .l10n)
+                            } icon: {
+                                Image(systemName: "xmark.circle")
+                            }
                         }
                     }
                 }
@@ -219,7 +242,10 @@ struct ContainerList: View {
             }
 
             HStack(spacing: 8) {
-                FilterPill(title: LocalizedStringKey(String(localized: "All", bundle: .l10n)), dotColor: nil, isSelected: store.statusFilter == .all) {
+                FilterPill(
+                    title: LocalizedStringKey(String(localized: "All", bundle: .l10n)), dotColor: nil,
+                    isSelected: store.statusFilter == .all
+                ) {
                     store.statusFilter = .all
                 }
                 FilterPill(title: "Running", dotColor: Color.ctp.ok, isSelected: store.statusFilter == .running) {
@@ -246,7 +272,7 @@ struct ContainerList: View {
                 help: LocalizedStringKey(String(localized: "Select all", bundle: .l10n)),
                 action: toggleSelectAll
             )
-            Spacer().frame(width: 28) // logo(28) alignment
+            Spacer().frame(width: 28)  // logo(28) alignment
 
             Text("Name", bundle: .l10n)
                 .frame(minWidth: nameMinWidth, maxWidth: .infinity, alignment: .leading)
@@ -292,9 +318,13 @@ private struct GroupHeader: View {
                 Text(verbatim: project)
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundStyle(Color.ctp.text)
-                Text(verbatim: String(localized: "Compose · \(String(runningCount)) of \(String(group.containers.count)) running", bundle: .l10n))
-                    .font(.system(size: 11))
-                    .foregroundStyle(Color.ctp.muted)
+                Text(
+                    verbatim: String(
+                        localized: "Compose · \(String(runningCount)) of \(String(group.containers.count)) running",
+                        bundle: .l10n)
+                )
+                .font(.system(size: 11))
+                .foregroundStyle(Color.ctp.muted)
             } else {
                 Text("No group", bundle: .l10n)
                     .font(.system(size: 12, weight: .semibold))
@@ -380,11 +410,51 @@ private struct ContainerRow: View {
                     onAction(.remove)
                 }
                 SectionMenuButton {
-                    Button { onOpenTab(.logs) } label: { Label { Text("Logs", bundle: .l10n) } icon: { Image(systemName: "doc.text") } }
-                    Button { onOpenTab(.stats) } label: { Label { Text("Stats", bundle: .l10n) } icon: { Image(systemName: "waveform.path.ecg") } }
-                    Button { onOpenTab(.inspect) } label: { Label { Text("Inspect", bundle: .l10n) } icon: { Image(systemName: "magnifyingglass") } }
-                    Button { onOpenTab(.env) } label: { Label { Text("Env", bundle: .l10n) } icon: { Image(systemName: "curlybraces") } }
-                    Button { onOpenTab(.terminal) } label: { Label { Text("Terminal", bundle: .l10n) } icon: { Image(systemName: "terminal") } }
+                    Button {
+                        onOpenTab(.logs)
+                    } label: {
+                        Label {
+                            Text("Logs", bundle: .l10n)
+                        } icon: {
+                            Image(systemName: "doc.text")
+                        }
+                    }
+                    Button {
+                        onOpenTab(.stats)
+                    } label: {
+                        Label {
+                            Text("Stats", bundle: .l10n)
+                        } icon: {
+                            Image(systemName: "waveform.path.ecg")
+                        }
+                    }
+                    Button {
+                        onOpenTab(.inspect)
+                    } label: {
+                        Label {
+                            Text("Inspect", bundle: .l10n)
+                        } icon: {
+                            Image(systemName: "magnifyingglass")
+                        }
+                    }
+                    Button {
+                        onOpenTab(.env)
+                    } label: {
+                        Label {
+                            Text("Env", bundle: .l10n)
+                        } icon: {
+                            Image(systemName: "curlybraces")
+                        }
+                    }
+                    Button {
+                        onOpenTab(.terminal)
+                    } label: {
+                        Label {
+                            Text("Terminal", bundle: .l10n)
+                        } icon: {
+                            Image(systemName: "terminal")
+                        }
+                    }
                 }
             }
             .frame(width: actionsWidth, alignment: .leading)
@@ -407,9 +477,11 @@ private struct ContainerRow: View {
     }
 
     private var formattedPorts: String {
-        let mappings = Set(container.ports.compactMap { port in
-            port.publicPort.map { "\($0)→\(port.privatePort)" }
-        }).sorted()
+        let mappings = Set(
+            container.ports.compactMap { port in
+                port.publicPort.map { "\($0)→\(port.privatePort)" }
+            }
+        ).sorted()
         return mappings.isEmpty ? "—" : mappings.joined(separator: ", ")
     }
 

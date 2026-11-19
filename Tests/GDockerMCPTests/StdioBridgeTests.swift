@@ -5,7 +5,8 @@ import Testing
 
 /// Feeds `lines` to a bridge through pipes, waits for it to finish at EOF, and returns what it wrote.
 private func runBridge(
-    _ lines: [String], endpoint: @escaping @Sendable () -> URL?, token: @escaping @Sendable () throws -> String? = { "test-token" }
+    _ lines: [String], endpoint: @escaping @Sendable () -> URL?,
+    token: @escaping @Sendable () throws -> String? = { "test-token" }
 ) async throws -> [[String: Any]] {
     let input = Pipe()
     let output = Pipe()
@@ -21,7 +22,8 @@ private func runBridge(
     }
 }
 
-private let initialize = #"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26","capabilities":{},"clientInfo":{"name":"bridge-test","version":"1"}}}"#
+private let initialize =
+    #"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26","capabilities":{},"clientInfo":{"name":"bridge-test","version":"1"}}}"#
 private let initialized = #"{"jsonrpc":"2.0","method":"notifications/initialized"}"#
 private let toolsList = #"{"jsonrpc":"2.0","id":2,"method":"tools/list"}"#
 

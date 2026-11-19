@@ -58,7 +58,8 @@ public struct StdioBridge: Sendable {
 
     // MARK: - Forwarding
 
-    private func forward(_ text: String, _ writer: LineWriter, _ session: SessionState, _ urlSession: URLSession) async {
+    private func forward(_ text: String, _ writer: LineWriter, _ session: SessionState, _ urlSession: URLSession) async
+    {
         let id = Self.fields(of: text).id
         func fail(_ code: Int, _ message: String) async {
             // A notification has no id, so there is nobody to answer.
@@ -68,7 +69,7 @@ public struct StdioBridge: Sendable {
             await fail(-32000, "gdocker is not running: open the GDocker app")
             return
         }
-        guard let bearer = (try? token()) ?? nil else {
+        guard let bearer = (try? token()) else {
             await fail(-32001, "Authentication failed: copy the config again from GDocker")
             return
         }
@@ -104,7 +105,7 @@ public struct StdioBridge: Sendable {
 
     /// Tells the server this client is gone, so the app's client count goes back down.
     private func endSession(_ session: SessionState, _ urlSession: URLSession) async {
-        guard let sessionID = await session.id, let url = endpoint(), let bearer = (try? token()) ?? nil else { return }
+        guard let sessionID = await session.id, let url = endpoint(), let bearer = (try? token()) else { return }
         var request = URLRequest(url: url)
         request.httpMethod = "DELETE"
         request.timeoutInterval = 3
@@ -132,14 +133,16 @@ public struct StdioBridge: Sendable {
     /// One compact line per JSON message: the body itself, or each `data:` event of an SSE body.
     private static func lines(in data: Data, isEventStream: Bool) -> [String] {
         let text = String(decoding: data, as: UTF8.self)
-        let payloads = isEventStream
+        let payloads =
+            isEventStream
             ? text.split(separator: "\n").compactMap { line -> String? in
-                line.hasPrefix("data:") ? String(line.dropFirst("data:".count)).trimmingCharacters(in: .whitespaces) : nil
+                line.hasPrefix("data:")
+                    ? String(line.dropFirst("data:".count)).trimmingCharacters(in: .whitespaces) : nil
             }
             : [text.trimmingCharacters(in: .whitespacesAndNewlines)]
         return payloads.filter { !$0.isEmpty }.map { payload in
             guard let object = try? JSONSerialization.jsonObject(with: Data(payload.utf8)),
-                  let compact = try? JSONSerialization.data(withJSONObject: object)
+                let compact = try? JSONSerialization.data(withJSONObject: object)
             else { return payload.replacingOccurrences(of: "\n", with: " ") }
             return String(decoding: compact, as: UTF8.self)
         }

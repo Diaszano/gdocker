@@ -35,17 +35,23 @@ public protocol DockerOperations: Sendable {
 extension DockerOperations {
     public func listImages() async throws -> [ImageSummary] { [] }
     public func removeImage(_ id: String, force: Bool = false) async throws {}
-    public func pruneImages(all: Bool = false) async throws -> (deleted: [String], spaceReclaimed: Int64) { (deleted: [], spaceReclaimed: 0) }
+    public func pruneImages(all: Bool = false) async throws -> (deleted: [String], spaceReclaimed: Int64) {
+        (deleted: [], spaceReclaimed: 0)
+    }
 
     public func listVolumes() async throws -> [VolumeSummary] { [] }
     public func removeVolume(_ name: String, force: Bool = false) async throws {}
-    public func pruneVolumes() async throws -> (deleted: [String], spaceReclaimed: Int64) { (deleted: [], spaceReclaimed: 0) }
+    public func pruneVolumes() async throws -> (deleted: [String], spaceReclaimed: Int64) {
+        (deleted: [], spaceReclaimed: 0)
+    }
 
     public func listNetworks() async throws -> [NetworkSummary] { [] }
     public func removeNetwork(_ id: String) async throws {}
     public func pruneNetworks() async throws -> [String] { [] }
 
-    public func pruneContainers() async throws -> (deleted: [String], spaceReclaimed: Int64) { (deleted: [], spaceReclaimed: 0) }
+    public func pruneContainers() async throws -> (deleted: [String], spaceReclaimed: Int64) {
+        (deleted: [], spaceReclaimed: 0)
+    }
 
     public func systemPrune(all: Bool = false, volumes: Bool = false) async throws -> PruneReport {
         let containers = try await pruneContainers()

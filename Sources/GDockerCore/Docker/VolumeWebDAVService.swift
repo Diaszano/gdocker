@@ -1,5 +1,5 @@
-import dnssd
 import Foundation
+import dnssd
 
 public struct VolumeMountInfo: Sendable, Equatable {
     public let volumeName: String
@@ -54,7 +54,8 @@ public final class VolumeWebDAVService: @unchecked Sendable {
         if let baseMountsDirectory {
             self.baseMountsDirectory = baseMountsDirectory
         } else {
-            let caches = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first
+            let caches =
+                FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first
                 ?? URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
             self.baseMountsDirectory = caches.appendingPathComponent("com.gdocker.volume-mounts", isDirectory: true)
         }
@@ -73,7 +74,9 @@ public final class VolumeWebDAVService: @unchecked Sendable {
         return trimmed.isEmpty ? "volume" : String(trimmed.prefix(80))
     }
 
-    public static func containerName(for volumeName: String, suffix: String = String(UUID().uuidString.prefix(8)).lowercased()) -> String {
+    public static func containerName(
+        for volumeName: String, suffix: String = String(UUID().uuidString.prefix(8)).lowercased()
+    ) -> String {
         let safe = sanitizeDirectoryName(volumeName)
             .lowercased()
             .replacingOccurrences(of: "..", with: "_")
@@ -139,9 +142,9 @@ public final class VolumeWebDAVService: @unchecked Sendable {
         guard fm.fileExists(atPath: url.path) else { return false }
         let parent = url.deletingLastPathComponent()
         guard let childAttrs = try? fm.attributesOfItem(atPath: url.path),
-              let parentAttrs = try? fm.attributesOfItem(atPath: parent.path),
-              let childDev = childAttrs[.systemNumber] as? NSNumber,
-              let parentDev = parentAttrs[.systemNumber] as? NSNumber
+            let parentAttrs = try? fm.attributesOfItem(atPath: parent.path),
+            let childDev = childAttrs[.systemNumber] as? NSNumber,
+            let parentDev = parentAttrs[.systemNumber] as? NSNumber
         else {
             return false
         }
@@ -215,22 +218,26 @@ public final class VolumeWebDAVService: @unchecked Sendable {
 
     public func mount(volumeName: String, socketPath: String?) async throws -> VolumeMountInfo {
         if let existing = mountInfo(for: volumeName),
-           Self.isPathMounted(existing.mountPoint) {
+            Self.isPathMounted(existing.mountPoint)
+        {
             return existing
         }
 
         // Clean up any stale record if the mount disappeared (e.g. user ejected it in Finder).
         if let stale = removeMountRecord(for: volumeName) {
-            await cleanupResources(mountPoint: stale.mountPoint, containerName: stale.containerName, socketPath: socketPath)
+            await cleanupResources(
+                mountPoint: stale.mountPoint, containerName: stale.containerName, socketPath: socketPath)
         }
 
-        guard let dockerPath = DockerCLI.resolve(fileExists: { FileManager.default.isExecutableFile(atPath: $0) }) else {
+        guard let dockerPath = DockerCLI.resolve(fileExists: { FileManager.default.isExecutableFile(atPath: $0) })
+        else {
             throw VolumeWebDAVError.dockerCLIMissing
         }
 
         let port = try Self.findFreePort()
         let containerName = Self.containerName(for: volumeName)
-        let mountPoint = baseMountsDirectory.appendingPathComponent(Self.sanitizeDirectoryName(volumeName), isDirectory: true)
+        let mountPoint = baseMountsDirectory.appendingPathComponent(
+            Self.sanitizeDirectoryName(volumeName), isDirectory: true)
 
         try prepareMountDirectory(at: mountPoint)
 
@@ -245,7 +252,8 @@ public final class VolumeWebDAVService: @unchecked Sendable {
         }
 
         do {
-            try await waitForWebDAVServer(port: port, containerName: containerName, dockerPath: dockerPath, environment: dockerEnv)
+            try await waitForWebDAVServer(
+                port: port, containerName: containerName, dockerPath: dockerPath, environment: dockerEnv)
             let mountHost = resolveMountHost()
             var mountArgs = Self.mountWebDAVArguments(
                 volumeName: volumeName,
@@ -253,7 +261,9 @@ public final class VolumeWebDAVService: @unchecked Sendable {
                 mountPoint: mountPoint.path,
                 host: mountHost
             )
-            var mountResult = try await runProcess(executable: "/sbin/mount_webdav", arguments: mountArgs, environment: ProcessInfo.processInfo.environment)
+            var mountResult = try await runProcess(
+                executable: "/sbin/mount_webdav", arguments: mountArgs, environment: ProcessInfo.processInfo.environment
+            )
             if mountResult.exitCode != 0, mountHost != Self.fallbackHost {
                 mountArgs = Self.mountWebDAVArguments(
                     volumeName: volumeName,
@@ -261,7 +271,9 @@ public final class VolumeWebDAVService: @unchecked Sendable {
                     mountPoint: mountPoint.path,
                     host: Self.fallbackHost
                 )
-                mountResult = try await runProcess(executable: "/sbin/mount_webdav", arguments: mountArgs, environment: ProcessInfo.processInfo.environment)
+                mountResult = try await runProcess(
+                    executable: "/sbin/mount_webdav", arguments: mountArgs,
+                    environment: ProcessInfo.processInfo.environment)
             }
             guard mountResult.exitCode == 0 else {
                 let detail = mountResult.stderr.isEmpty ? mountResult.stdout : mountResult.stderr
@@ -272,7 +284,8 @@ public final class VolumeWebDAVService: @unchecked Sendable {
             throw error
         }
 
-        let info = VolumeMountInfo(volumeName: volumeName, containerName: containerName, port: port, mountPoint: mountPoint)
+        let info = VolumeMountInfo(
+            volumeName: volumeName, containerName: containerName, port: port, mountPoint: mountPoint)
         setMount(info)
         return info
     }
@@ -285,7 +298,8 @@ public final class VolumeWebDAVService: @unchecked Sendable {
     public func unmountAll(socketPath: String?) async {
         let mounts = removeAllMountRecords()
         for info in mounts {
-            await cleanupResources(mountPoint: info.mountPoint, containerName: info.containerName, socketPath: socketPath)
+            await cleanupResources(
+                mountPoint: info.mountPoint, containerName: info.containerName, socketPath: socketPath)
         }
     }
 
@@ -297,7 +311,9 @@ public final class VolumeWebDAVService: @unchecked Sendable {
         let dockerEnv = DockerCLI.environment(base: ProcessInfo.processInfo.environment, socketPath: socketPath)
 
         for info in mounts {
-            cleanupResourcesSync(mountPoint: info.mountPoint, containerName: info.containerName, dockerPath: dockerPath, dockerEnv: dockerEnv)
+            cleanupResourcesSync(
+                mountPoint: info.mountPoint, containerName: info.containerName, dockerPath: dockerPath,
+                dockerEnv: dockerEnv)
         }
     }
 
@@ -306,7 +322,9 @@ public final class VolumeWebDAVService: @unchecked Sendable {
     private func prepareMountDirectory(at url: URL) throws {
         let fm = FileManager.default
         if Self.isPathMounted(url) {
-            _ = runProcessSync(executable: "/sbin/umount", arguments: ["-f", url.path], environment: ProcessInfo.processInfo.environment)
+            _ = runProcessSync(
+                executable: "/sbin/umount", arguments: ["-f", url.path],
+                environment: ProcessInfo.processInfo.environment)
         }
         try fm.createDirectory(at: url, withIntermediateDirectories: true)
     }
@@ -331,8 +349,9 @@ public final class VolumeWebDAVService: @unchecked Sendable {
             }
 
             if let (_, response) = try? await URLSession.shared.data(for: request),
-               let http = response as? HTTPURLResponse,
-               (200..<500).contains(http.statusCode) {
+                let http = response as? HTTPURLResponse,
+                (200..<500).contains(http.statusCode)
+            {
                 return
             }
 
@@ -343,8 +362,11 @@ public final class VolumeWebDAVService: @unchecked Sendable {
                     arguments: ["inspect", "-f", "{{.State.Running}}", containerName],
                     environment: environment
                 )
-                if let inspect, inspect.exitCode != 0 || inspect.stdout.trimmingCharacters(in: .whitespacesAndNewlines) == "false" {
-                    let logs = try? await runProcess(executable: dockerPath, arguments: ["logs", containerName], environment: environment)
+                if let inspect,
+                    inspect.exitCode != 0 || inspect.stdout.trimmingCharacters(in: .whitespacesAndNewlines) == "false"
+                {
+                    let logs = try? await runProcess(
+                        executable: dockerPath, arguments: ["logs", containerName], environment: environment)
                     let detail = logs?.stderr.isEmpty == false ? logs!.stderr : (logs?.stdout ?? "")
                     throw VolumeWebDAVError.serverTimedOut(detail.trimmingCharacters(in: .whitespacesAndNewlines))
                 }
@@ -358,7 +380,8 @@ public final class VolumeWebDAVService: @unchecked Sendable {
         let dockerPath = DockerCLI.resolve(fileExists: { FileManager.default.isExecutableFile(atPath: $0) })
         let dockerEnv = DockerCLI.environment(base: ProcessInfo.processInfo.environment, socketPath: socketPath)
         await Task.detached(priority: .utility) {
-            self.cleanupResourcesSync(mountPoint: mountPoint, containerName: containerName, dockerPath: dockerPath, dockerEnv: dockerEnv)
+            self.cleanupResourcesSync(
+                mountPoint: mountPoint, containerName: containerName, dockerPath: dockerPath, dockerEnv: dockerEnv)
         }.value
     }
 
@@ -369,9 +392,13 @@ public final class VolumeWebDAVService: @unchecked Sendable {
         dockerEnv: [String: String]
     ) {
         if Self.isPathMounted(mountPoint) {
-            let result = runProcessSync(executable: "/sbin/umount", arguments: [mountPoint.path], environment: ProcessInfo.processInfo.environment)
+            let result = runProcessSync(
+                executable: "/sbin/umount", arguments: [mountPoint.path],
+                environment: ProcessInfo.processInfo.environment)
             if result.exitCode != 0 {
-                _ = runProcessSync(executable: "/sbin/umount", arguments: ["-f", mountPoint.path], environment: ProcessInfo.processInfo.environment)
+                _ = runProcessSync(
+                    executable: "/sbin/umount", arguments: ["-f", mountPoint.path],
+                    environment: ProcessInfo.processInfo.environment)
             }
         }
         if !Self.isPathMounted(mountPoint) {
@@ -480,13 +507,16 @@ public final class VolumeWebDAVService: @unchecked Sendable {
         let stderr: String
     }
 
-    private func runProcess(executable: String, arguments: [String], environment: [String: String]) async throws -> ProcessResult {
+    private func runProcess(executable: String, arguments: [String], environment: [String: String]) async throws
+        -> ProcessResult
+    {
         try await Task.detached(priority: .userInitiated) {
             self.runProcessSync(executable: executable, arguments: arguments, environment: environment)
         }.value
     }
 
-    private func runProcessSync(executable: String, arguments: [String], environment: [String: String]) -> ProcessResult {
+    private func runProcessSync(executable: String, arguments: [String], environment: [String: String]) -> ProcessResult
+    {
         let process = Process()
         process.executableURL = URL(fileURLWithPath: executable)
         process.arguments = arguments

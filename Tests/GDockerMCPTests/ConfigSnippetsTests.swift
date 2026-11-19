@@ -10,8 +10,10 @@ private func servers(_ json: String) throws -> [String: Any] {
 }
 
 @Test func claudeCodeCommandHasUrlAndBearerHeader() {
-    #expect(McpConfigSnippets.claudeCode(url: url, token: "abc123") ==
-        #"claude mcp add --transport http gdocker http://127.0.0.1:7391/mcp --header "Authorization: Bearer abc123""#)
+    #expect(
+        McpConfigSnippets.claudeCode(url: url, token: "abc123")
+            == #"claude mcp add --transport http gdocker http://127.0.0.1:7391/mcp --header "Authorization: Bearer abc123""#
+    )
 }
 
 @Test func jsonHTTPIsValidAndCarriesUrlAndToken() throws {

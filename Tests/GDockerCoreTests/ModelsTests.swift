@@ -1,5 +1,6 @@
 import Foundation
 import Testing
+
 @testable import GDockerCore
 
 private func summary(
@@ -11,7 +12,8 @@ private func summary(
 }
 
 @Test func decodeFixture() throws {
-    let url = try #require(Bundle.module.url(forResource: "containers", withExtension: "json", subdirectory: "Fixtures"))
+    let url = try #require(
+        Bundle.module.url(forResource: "containers", withExtension: "json", subdirectory: "Fixtures"))
     let list = try JSONDecoder().decode([ContainerSummary].self, from: Data(contentsOf: url))
     #expect(list.count == 2)
     #expect(list[0].name == "myapp-api-1")
@@ -58,13 +60,13 @@ func isActiveDecidesStopVersusStart(state: String, expected: Bool) {
 
 @Test func decodeSizeRwWhenPresentAndAbsent() throws {
     let json = """
-    [
-      { "Id": "a", "Names": ["/a"], "Image": "img", "State": "running", "Status": "Up", "SizeRw": 222298112 },
-      { "Id": "b", "Names": ["/b"], "Image": "img", "State": "exited", "Status": "Exited (0)", "Labels": {} }
-    ]
-    """
+        [
+          { "Id": "a", "Names": ["/a"], "Image": "img", "State": "running", "Status": "Up", "SizeRw": 222298112 },
+          { "Id": "b", "Names": ["/b"], "Image": "img", "State": "exited", "Status": "Exited (0)", "Labels": {} }
+        ]
+        """
     let list = try JSONDecoder().decode([ContainerSummary].self, from: Data(json.utf8))
-    #expect(list[0].sizeRw == 222298112)
+    #expect(list[0].sizeRw == 222_298_112)
     #expect(list[1].sizeRw == nil)
 }
 
