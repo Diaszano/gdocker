@@ -1,9 +1,10 @@
 #!/bin/sh
-# Builds a universal, ad-hoc signed GDocker.app zip and the matching Homebrew cask.
-# Usage: scripts/release.sh <version>    e.g. scripts/release.sh 0.1.0
+# Builds a universal, ad-hoc signed GDocker.app zip, SHA256SUMS, and matching Homebrew 7 Cask.
+# Usage: scripts/release.sh <version>    e.g. scripts/release.sh 0.2.0
 set -eu
 
-version="${1:?usage: scripts/release.sh <version>}"
+raw_version="${1:?usage: scripts/release.sh <version>}"
+version="${raw_version#v}"
 cd "$(dirname "$0")/.."
 
 /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $version" -c "Set :CFBundleVersion $version" scripts/Info.plist
@@ -13,37 +14,16 @@ zip="build/GDocker-$version.zip"
 rm -f "$zip"
 ditto -c -k --keepParent build/GDocker.app "$zip"
 sha=$(shasum -a 256 "$zip" | cut -d' ' -f1)
+printf '%s  %s\n' "$sha" "GDocker-$version.zip" > build/SHA256SUMS
 
-cat > build/gdocker.rb <<EOF
-cask "gdocker" do
-  version "$version"
-  sha256 "$sha"
-
-  url "https://github.com/Diaszano/gdocker/releases/download/v#{version}/GDocker-#{version}.zip"
-  name "GDocker"
-  desc "Native Docker GUI with a built-in MCP server for AI clients"
-  homepage "https://github.com/Diaszano/gdocker"
-
-  depends_on macos: :sonoma
-
-  app "GDocker.app"
-
-  # The app is ad-hoc signed, not notarized, so Gatekeeper would refuse to open it with the quarantine flag set.
-  postflight_steps do
-    run "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "{{appdir}}/GDocker.app"]
-  end
-
-  zap trash: [
-    "~/Library/Application Support/GDocker",
-    "~/Library/Preferences/com.diaszano.gdocker.plist",
-  ]
-end
-EOF
+./scripts/generate-cask.sh "$version" "$sha" build/gdocker.rb
 
 cat <<EOF
-Built $zip (sha256 $sha) and build/gdocker.rb.
-Next:
+Built $zip (sha256 $sha), build/SHA256SUMS, and build/gdocker.rb.
+Next (automated via GitHub Actions on tag push):
   git commit -am "chore: release v$version" && git tag v$version && git push --follow-tags
-  gh release create v$version $zip --title v$version --generate-notes
+
+Or manually:
+  gh release create v$version $zip build/SHA256SUMS --title v$version --generate-notes
   cp build/gdocker.rb <homebrew-tap checkout>/Casks/gdocker.rb, then commit and push the tap
 EOF
