@@ -12,7 +12,7 @@ A native macOS app for Docker, in the spirit of [lazydocker](https://github.com/
 ## Requirements
 
 - macOS 14 (Sonoma) or later
-- Docker Desktop, OrbStack or Colima running locally
+- Docker Desktop, OrbStack, Colima or Rancher Desktop running locally
 - The `docker` CLI on your `PATH` for Compose and the Terminal tab
 
 ## Install

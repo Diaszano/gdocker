@@ -8,6 +8,7 @@ public enum DockerCLI {
             "/usr/local/bin/docker",
             "/opt/homebrew/bin/docker",
             "\(home)/.orbstack/bin/docker",
+            "\(home)/.rd/bin/docker",
             "/Applications/Docker.app/Contents/Resources/bin/docker",
             "/usr/bin/docker",
         ]

@@ -297,6 +297,24 @@ struct ComposeRunnerTests {
         #expect(captured.args.first == "compose")
     }
 
+    @Test func composeFindsRancherDesktopDocker() async throws {
+        final class Captured: @unchecked Sendable { var binary: String?; var args: [String] = [] }
+        let captured = Captured()
+        let rancher = NSHomeDirectory() + "/.rd/bin/docker"
+        let runner = CLIComposeRunner(
+            fileExists: { $0 == rancher || $0 == "/workspace" },
+            processLauncher: { binary, args, _, _ in
+                captured.binary = binary
+                captured.args = args
+                return (0, "")
+            }
+        )
+        #expect(await runner.isComposeAvailable())
+        _ = try await runner.composeUp(project: "p", workingDir: "/workspace", configFiles: [])
+        #expect(captured.binary == rancher)
+        #expect(captured.args.first == "compose")
+    }
+
     @Test func composeErrorDescriptions() {
         let binaryErr = ComposeError.binaryNotFound
         #expect(binaryErr.errorDescription?.contains("not found") == true)

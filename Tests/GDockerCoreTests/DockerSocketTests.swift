@@ -40,6 +40,13 @@ private func tempHome() throws -> URL {
     #expect(path == orb)
 }
 
+@Test func rancherDesktopPathFallback() throws {
+    let home = try tempHome()
+    let rd = home.appendingPathComponent(".rd/docker.sock").path
+    let path = DockerSocket.discover(env: [:], home: home, exists: { $0 == rd })
+    #expect(path == rd)
+}
+
 @Test func nothingFound() throws {
     #expect(DockerSocket.discover(env: [:], home: try tempHome(), exists: { _ in false }) == nil)
 }

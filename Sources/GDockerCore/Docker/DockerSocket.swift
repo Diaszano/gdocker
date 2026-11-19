@@ -15,6 +15,7 @@ public enum DockerSocket {
             home.appendingPathComponent(".docker/run/docker.sock").path,
             home.appendingPathComponent(".orbstack/run/docker.sock").path,
             home.appendingPathComponent(".colima/default/docker.sock").path,
+            home.appendingPathComponent(".rd/docker.sock").path,
         ]
         return known.first(where: exists)
     }

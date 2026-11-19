@@ -9,6 +9,7 @@ struct DockerCLITests {
             "/usr/local/bin/docker",
             "/opt/homebrew/bin/docker",
             "/Users/u/.orbstack/bin/docker",
+            "/Users/u/.rd/bin/docker",
             "/Applications/Docker.app/Contents/Resources/bin/docker",
             "/usr/bin/docker",
         ])
