@@ -35,11 +35,15 @@ jobs:
           manifest-file: .release-please-manifest.json
 
       - name: Enable auto-merge on release PR
-        if: steps.rp.outputs.pr
+        if: steps.rp.outputs.prs_created == 'true'
         env:
           GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
-          PR: ${{ fromJSON(steps.rp.outputs.pr).number }}
-        run: gh pr merge "$PR" --repo "$GITHUB_REPOSITORY" --auto --squash
+          # Parsed in the shell: fromJSON() in the template fails the job when the output is not JSON.
+          PR_JSON: ${{ steps.rp.outputs.pr }}
+        run: |
+          PR="$(jq -r '.number // empty' <<<"$PR_JSON" 2>/dev/null || true)"
+          [ -n "$PR" ] || { echo "No release PR to auto-merge."; exit 0; }
+          gh pr merge "$PR" --repo "$GITHUB_REPOSITORY" --auto --squash
 
   publish:
     name: Build, Upload & Publish Homebrew Cask
