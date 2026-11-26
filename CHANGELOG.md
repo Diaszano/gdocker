@@ -5,6 +5,13 @@ All notable changes to GDocker are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1](https://github.com/Diaszano/gdocker/compare/v0.2.0...v0.2.1) (2026-11-26)
+
+
+### Fixed
+
+* **ci:** parse release-please pr output in shell for auto-merge step ([#7](https://github.com/Diaszano/gdocker/issues/7)) ([c8a2397](https://github.com/Diaszano/gdocker/commit/c8a2397d09b8c54f411abcd9a274a1824a2a95b5))
+
 ## [0.2.0](https://github.com/Diaszano/gdocker/compare/v0.1.0...v0.2.0) (2026-11-26)
 
 
