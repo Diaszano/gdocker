@@ -10,6 +10,10 @@ permissions:
   pull-requests: read
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   lint-pr-title:
     name: Validate PR Title
@@ -35,6 +39,18 @@ jobs:
           requireScope: false
           subjectPattern: ^(?![A-Z]).+$
           subjectPatternError: The subject should not start with an uppercase character.
+
+  lint-branch:
+    name: Validate Branch Name
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify branch name
+        env:
+          BRANCH: ${{ github.head_ref }}
+        run: ./scripts/verify-branch.sh "$BRANCH"
 
   lint-commits:
     name: Validate Commit Messages

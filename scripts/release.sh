@@ -20,8 +20,8 @@ printf '%s  %s\n' "$sha" "GDocker-$version.zip" > build/SHA256SUMS
 
 cat <<EOF
 Built $zip (sha256 $sha), build/SHA256SUMS, and build/gdocker.rb.
-Next (automated via GitHub Actions on tag push):
-  git commit -am "chore: release v$version" && git tag v$version && git push --follow-tags
+Next (automated): merge Conventional Commits into main; release-please opens a
+release PR with auto-merge, and its merge builds, uploads and updates the tap.
 
 Or manually:
   gh release create v$version $zip build/SHA256SUMS --title v$version --generate-notes

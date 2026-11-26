@@ -67,7 +67,8 @@ hooks:
 	else \
 		mkdir -p ~/.config/gdocker/hooks; \
 		printf '#!/bin/sh\nTOPLEVEL=$$(git rev-parse --show-toplevel 2>/dev/null || pwd)\nexec sh "$$TOPLEVEL/.githooks/commit-msg" "$$@"\n' > ~/.config/gdocker/hooks/commit-msg; \
-		chmod +x ~/.config/gdocker/hooks/commit-msg; \
+		printf '#!/bin/sh\nTOPLEVEL=$$(git rev-parse --show-toplevel 2>/dev/null || pwd)\nexec sh "$$TOPLEVEL/.githooks/pre-push" "$$@"\n' > ~/.config/gdocker/hooks/pre-push; \
+		chmod +x ~/.config/gdocker/hooks/commit-msg ~/.config/gdocker/hooks/pre-push; \
 		git config core.hooksPath ~/.config/gdocker/hooks; \
 		echo "Configured git hooks via ~/.config/gdocker/hooks"; \
 	fi

@@ -11,7 +11,7 @@ Gerencie containers, imagens, volumes, redes e projetos Compose com uma UI rápi
 [![CI](https://img.shields.io/github/actions/workflow/status/Diaszano/gdocker/ci.yml?style=flat-square&label=CI)](https://github.com/Diaszano/gdocker/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg?style=flat-square)](https://conventionalcommits.org)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](CONTRIBUTING.md)
+[![Release](https://img.shields.io/github/v/release/Diaszano/gdocker?style=flat-square&label=release)](https://github.com/Diaszano/gdocker/releases/latest)
 
 ---
 
@@ -20,6 +20,9 @@ Gerencie containers, imagens, volumes, redes e projetos Compose com uma UI rápi
 O inglês é o idioma fonte da documentação pública. Traduções em português brasileiro usam o sufixo `.pt-BR.md`.
 
 </div>
+
+<!-- TODO screenshot: adicionar docs/assets/screenshot-light.png e docs/assets/screenshot-dark.png (~1600x1000, aba Containers) e trocar este comentário por:
+<p align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/assets/screenshot-dark.png"><img src="docs/assets/screenshot-light.png" alt="Tela de Containers do GDocker" width="800"></picture></p> -->
 
 ---
 
@@ -107,6 +110,23 @@ O GDocker precisa estar aberto para a IA se conectar. A porta padrão é `7391` 
 
 ## 🔐 Permissões MCP
 
+Toda chamada de ferramenta passa pela verificação do token e pela política da ferramenta antes de chegar ao Docker:
+
+```mermaid
+flowchart LR
+    C["Claude Code / Cursor"] -->|"HTTP + Bearer token"| S
+    D["Claude Desktop"] -->|"stdio"| B["GDocker --stdio<br/>lê o token do Keychain"] --> S
+    S["127.0.0.1:7391/mcp<br/>verificação do token"] -->|"token inválido"| X["401"]
+    S --> R{"política por ferramenta"}
+    R -->|Allow| K["Docker"]
+    R -->|Ask| P["Pedido de aprovação"]
+    P -->|"Aprovar"| K
+    P -->|"Recusar / 2 min sem resposta"| N["Negado"]
+    R -->|Deny| N
+    K --> L["Log AI Activity"]
+    N --> L
+```
+
 | Padrão | Ferramentas |
 | --- | --- |
 | **Permitir** | `list_containers`, `inspect_container`, `get_logs`, `get_stats`, `list_images`, `list_volumes`, `list_networks`, `list_compose_projects`, `start_container`, `restart_container` |
@@ -124,7 +144,7 @@ O GDocker precisa estar aberto para a IA se conectar. A porta padrão é `7391` 
 Requer **Xcode 16.4+** (Swift 6.1+) e **SwiftLint** (`brew install swiftlint`) para verificação completa.
 
 ```sh
-make hooks   # ativa o git hook de Conventional Commits
+make hooks   # ativa os hooks commit-msg e pre-push (Conventional Commits + nome de branch)
 make verify  # executa fmt-check, SwiftLint, check de l10n e swift test
 make app     # compila build/GDocker.app
 make run     # compila e abre GDocker.app
@@ -147,7 +167,9 @@ make run     # compila e abre GDocker.app
 
 ## 🤝 Contribuindo
 
-Contribuições são bem-vindas! Leia [CONTRIBUTING.md](CONTRIBUTING.md) para detalhes sobre setup de desenvolvimento, Conventional Commits, validação de traduções e diretrizes de PR.
+Contribuições são bem-vindas! Leia [CONTRIBUTING.md](CONTRIBUTING.md) para detalhes sobre setup de desenvolvimento, validação de traduções e diretrizes de PR.
+
+Commits seguem [Conventional Commits](https://www.conventionalcommits.org/) e branches seguem [Conventional Branch](https://conventional-branch.github.io/) (`feat/volume-search`, `fix/socket-discovery`); o CI valida os dois. Os releases são automáticos: o [release-please](https://github.com/googleapis/release-please) transforma os commits mergeados em nova versão, entrada no [CHANGELOG](CHANGELOG.md), GitHub Release e atualização do Homebrew Cask.
 
 ---
 
