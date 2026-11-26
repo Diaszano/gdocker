@@ -60,7 +60,7 @@ jobs:
             exit 1
           fi
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ env.TAG }}
 
@@ -102,7 +102,7 @@ jobs:
           fi
 
       - name: Checkout Diaszano/homebrew-tap
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: Diaszano/homebrew-tap
           token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
