@@ -1,0 +1,23 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "packages": {
+    ".": {
+      "release-type": "simple",
+      "package-name": "gdocker",
+      "include-component-in-tag": false,
+      "changelog-sections": [
+        { "type": "feat", "section": "Added" },
+        { "type": "fix", "section": "Fixed" },
+        { "type": "perf", "section": "Changed" },
+        { "type": "refactor", "section": "Changed" },
+        { "type": "revert", "section": "Reverted" },
+        { "type": "docs", "section": "Documentation", "hidden": true },
+        { "type": "chore", "hidden": true },
+        { "type": "ci", "hidden": true },
+        { "type": "build", "hidden": true },
+        { "type": "style", "hidden": true },
+        { "type": "test", "hidden": true }
+      ]
+    }
+  }
+}

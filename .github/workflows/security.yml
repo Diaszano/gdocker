@@ -15,6 +15,7 @@ jobs:
   codeql:
     name: CodeQL (Swift)
     runs-on: macos-latest
+    timeout-minutes: 45
     permissions:
       security-events: write
       packages: read
@@ -22,13 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Select latest Xcode
-        run: |
-          XCODE="$(ls -d /Applications/Xcode*.app | sort -V | tail -n 1)"
-          sudo xcode-select -s "$XCODE/Contents/Developer"
-          echo "DEVELOPER_DIR=$XCODE/Contents/Developer" >> "$GITHUB_ENV"
-          xcodebuild -version
-          swift --version
+      - uses: ./.github/actions/setup-xcode
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
