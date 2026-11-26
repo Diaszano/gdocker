@@ -23,7 +23,7 @@ jobs:
       - uses: ./.github/actions/setup-xcode
 
       - name: Cache SwiftPM dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             .build
