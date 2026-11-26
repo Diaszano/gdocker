@@ -6,9 +6,15 @@ updates:
       interval: weekly
     commit-message:
       prefix: ci
+    groups:
+      github-actions:
+        patterns: ["*"]
   - package-ecosystem: swift
     directory: /
     schedule:
       interval: weekly
     commit-message:
       prefix: build
+    groups:
+      swift:
+        patterns: ["*"]
