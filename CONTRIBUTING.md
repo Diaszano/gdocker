@@ -20,7 +20,7 @@ make hooks
 
 ## Workflow
 
-1. Create a conventional English branch name such as `feat/volume-search`, `fix/socket-discovery`, or `docs/mcp-guide`.
+1. Create a [Conventional Branch](https://conventional-branch.github.io/) name `<type>/<kebab-case-description>` such as `feat/volume-search`, `fix/socket-discovery`, or `docs/mcp-guide` (types: `feat`, `fix`, `hotfix`, `release`, `chore`, `docs`, `refactor`, `test`, `ci`, `build`, `perf`, `style`, `revert`). The `pre-push` hook and CI reject other names; check with `./scripts/verify-branch.sh`.
 2. Write a failing test for each behavior change and confirm it fails for the right reason.
 3. Implement the smallest change that passes the test.
 4. Format and run the full verification suite:
