@@ -1,15 +1,20 @@
 name: Security
 
+# CodeQL takes ~30 min on a macOS runner, so it skips PRs to keep runner slots free for CI.
 on:
-  pull_request:
   push:
     branches: [main]
   schedule:
     - cron: "17 8 * * 1"
+  workflow_dispatch:
 
 permissions:
   contents: read
   security-events: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   codeql:
