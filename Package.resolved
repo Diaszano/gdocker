@@ -1,13 +1,13 @@
 {
-  "originHash" : "9392525252d16869e138861c0e64b2783a1f4b1f863bce05cbafd80e16131df1",
+  "originHash" : "56a19a92f3da6e6d62fb3a2907c634dacde5485c410e7711473506d1b7de8bf1",
   "pins" : [
     {
       "identity" : "async-http-client",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/swift-server/async-http-client.git",
       "state" : {
-        "revision" : "d2dfb39bcb0fafd1834ec6e6334c1755360f856e",
-        "version" : "1.37.0"
+        "revision" : "d60edb0b2dba4d9f39dce0405e109bd613c3f1e3",
+        "version" : "1.37.1"
       }
     },
     {
@@ -150,8 +150,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-nio.git",
       "state" : {
-        "revision" : "2f58d8ef84438d6517fc78bcea2f8527e3c72936",
-        "version" : "2.105.0"
+        "revision" : "b003027fc38b649a43e9aad77c3d4e4a2c5b6997",
+        "version" : "2.105.2"
       }
     },
     {
@@ -249,8 +249,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/migueldeicaza/SwiftTerm.git",
       "state" : {
-        "revision" : "282c3c3a932b55c129628876b70f37d993af1615",
-        "version" : "1.99.3"
+        "revision" : "b30669619244453a66b14a6b10ec859e3016d6fd",
+        "version" : "1.99.4"
       }
     }
   ],
